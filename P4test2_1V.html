@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rosita's Vocabulary Practice</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #4a90e2;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: white;
+            border: 3px solid #b3d4ff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #4a90e2;
+            background-color: #f0f8ff;
+        }
+        .correct {
+            border-color: #4caf50 !important;
+            background-color: #e8f5e9 !important;
+        }
+        .incorrect {
+            border-color: #f44336 !important;
+            background-color: #ffebee !important;
+        }
+        button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .score-display {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff9800;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Rosita's Vocabulary Practice 📝</h1>
+    
+    <h2>Part 1: Places to Visit & Activities</h2>
+    <div class="grid" id="part1-grid">
+        </div>
+
+    <h2>Part 2: Places in the Street</h2>
+    <div class="grid" id="part2-grid">
+        </div>
+
+    <button onclick="checkAnswers()">Check Answers 檢查答案</button>
+    <div id="score" class="score-display"></div>
+</div>
+
+<script>
+    // 題目資料設定
+    const part1Data = [
+        { id: "p1", icon: "🏙️🌆", placeAnswers: ["the peak"], actionAnswers: ["look at the beautiful view"] },
+        { id: "p2", icon: "🗿⛰️", placeAnswers: ["the big buddha"], actionAnswers: ["take photos of the statue"] },
+        { id: "p3", icon: "👨‍🚀🌌", placeAnswers: ["tsim sha tsui space museum"], actionAnswers: ["visit a museum"] },
+        { id: "p4", icon: "🚠⛰️", placeAnswers: ["ngong ping"], actionAnswers: ["ride on the cable car"] },
+        { id: "p5", icon: "🎢🐭", placeAnswers: ["hong kong disneyland"], actionAnswers: ["go on the rides"] },
+        { id: "p6", icon: "🩰🎭", placeAnswers: ["the cultural center"], actionAnswers: ["watch a concert/ ballet", "watch a concert / ballet", "watch a concert/ballet", "watch a concert", "watch a ballet"] },
+        { id: "p7", icon: "🐬🌊", placeAnswers: ["ocean park"], actionAnswers: ["watch a show"] },
+        { id: "p8", icon: "🦆🌳", placeAnswers: ["weltland park", "wetland park"], actionAnswers: ["watch the birds"] },
+        { id: "p9", icon: "🦐🦞", placeAnswers: ["aberdeer", "aberdeen"], actionAnswers: ["eat sea food", "eat seafood"] }
+    ];
+
+    const part2Data = [
+        { id: "s1", icon: "🥖🥐", answers: ["a bakery"] },
+        { id: "s2", icon: "🩺🏥", answers: ["a clinic"] },
+        { id: "s3", icon: "🏪🛒", answers: ["a convenience store"] },
+        { id: "s4", icon: "🚒🔥", answers: ["a fire station"] },
+        { id: "s5", icon: "💄🧴", answers: ["a health and beauty store", "a health & beauty store"] },
+        { id: "s6", icon: "🏥🚑", answers: ["a hospital"] },
+        { id: "s7", icon: "🏫📚", answers: ["a learning centre", "a learning center"] },
+        { id: "s8", icon: "📰🗞️", answers: ["a news - stand", "a news-stand", "a newsstand"] },
+        { id: "s9", icon: "🚓👮", answers: ["a police station"] },
+        { id: "s10", icon: "✉️📮", answers: ["a post office"] },
+        { id: "s11", icon: "🏀🏸", answers: ["a sports centre", "a sports center"] }
+    ];
+
+    // 生成 Part 1 畫面
+    const part1Container = document.getElementById('part1-grid');
+    part1Data.forEach(item => {
+        part1Container.innerHTML += `
+            <div class="card">
+                <div class="icon">${item.icon}</div>
+                <div class="input-group">
+                    <input type="text" id="${item.id}-place" placeholder="Place (地方)">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="${item.id}-action" placeholder="Action (活動)">
+                </div>
+            </div>
+        `;
+    });
+
+    // 生成 Part 2 畫面
+    const part2Container = document.getElementById('part2-grid');
+    part2Data.forEach(item => {
+        part2Container.innerHTML += `
+            <div class="card">
+                <div class="icon">${item.icon}</div>
+                <div class="input-group">
+                    <input type="text" id="${item.id}" placeholder="Place (街道地點)">
+                </div>
+            </div>
+        `;
+    });
+
+    // 檢查答案的邏輯
+    function checkAnswers() {
+        let total = 0;
+        let correctCount = 0;
+
+        // 檢查 Part 1
+        part1Data.forEach(item => {
+            const placeInput = document.getElementById(`${item.id}-place`);
+            const actionInput = document.getElementById(`${item.id}-action`);
+            
+            total += 2; // 每個項目有兩個洞
+
+            if (checkInput(placeInput, item.placeAnswers)) correctCount++;
+            if (checkInput(actionInput, item.actionAnswers)) correctCount++;
+        });
+
+        // 檢查 Part 2
+        part2Data.forEach(item => {
+            const input = document.getElementById(item.id);
+            total += 1; // 每個項目有一個洞
+
+            if (checkInput(input, item.answers)) correctCount++;
+        });
+
+        // 顯示分數
+        const scoreDiv = document.getElementById('score');
+        if (correctCount === total) {
+            scoreDiv.innerHTML = `🎉 Excellent! 滿分！ (${correctCount}/${total}) 🎉`;
+            scoreDiv.style.color = "#4caf50";
+        } else {
+            scoreDiv.innerHTML = `Keep trying! 加油！ (${correctCount}/${total})<br><span style="font-size:16px; color:#666;">(紅框的請檢查拼字是否和講義完全一樣喔)</span>`;
+            scoreDiv.style.color = "#ff9800";
+        }
+    }
+
+    // 比對輸入文字與正確答案
+    function checkInput(element, validAnswers) {
+        const value = element.value.trim().toLowerCase().replace(/\s+/g, ' '); // 轉小寫並清除多餘空白
+        element.classList.remove('correct', 'incorrect');
+        
+        if (value === "") {
+            return false;
+        }
+
+        if (validAnswers.includes(value)) {
+            element.classList.add('correct');
+            return true;
+        } else {
+            element.classList.add('incorrect');
+            return false;
+        }
+    }
+</script>
+
+</body>
+</html>
