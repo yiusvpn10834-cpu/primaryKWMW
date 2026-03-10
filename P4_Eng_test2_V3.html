@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P4 Spelling Game: Places & Activities</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #e67e22;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --background: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+        body {
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text);
+        }
+        .game-container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 18px;
+            color: #555;
+            font-weight: bold;
+        }
+        .image-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background-color: #eee;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .clue-text {
+            font-size: 20px;
+            color: var(--text);
+            margin-bottom: 30px;
+            line-height: 1.5;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 6px solid var(--primary);
+            font-weight: bold;
+        }
+        .input-area {
+            margin-bottom: 25px;
+        }
+        input[type="text"] {
+            width: 85%;
+            padding: 18px;
+            font-size: 26px;
+            text-align: center;
+            border: 4px solid #ced6e0;
+            border-radius: 15px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: inherit;
+            color: var(--text);
+            letter-spacing: 1px;
+        }
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.3);
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            font-size: 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+            font-family: inherit;
+        }
+        .btn:hover {
+            background-color: #357abd;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        #feedback {
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 35px;
+            margin-bottom: 25px;
+        }
+        .correct-text { color: var(--success); }
+        .wrong-text { color: var(--danger); }
+        
+        #end-screen {
+            display: none;
+            padding: 30px 0;
+        }
+        .score-text {
+            font-size: 60px;
+            color: var(--primary);
+            margin: 25px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="game-box">
+    <div id="play-screen">
+        <div class="header">
+            <span id="progress">Question 1 / 10</span>
+            <span id="score-display">🌟 Score: 0</span>
+        </div>
+        
+        <div class="image-container">
+            <img id="question-img" src="" alt="Place Image">
+        </div>
+        
+        <div class="clue-text" id="clue">
+            Clue will appear here.
+        </div>
+        
+        <div id="feedback"></div>
+
+        <div class="input-area">
+            <input type="text" id="answer-input" placeholder="Type the place here..." autocomplete="off">
+        </div>
+        
+        <button class="btn" id="submit-btn" onclick="checkAnswer()">Submit</button>
+    </div>
+
+    <div id="end-screen">
+        <h1>🎉 Challenge Completed! 🎉</h1>
+        <p style="font-size: 20px; color: #555;">Awesome job! Here is your final score:</p>
+        <div class="score-text" id="final-score">10 / 10</div>
+        <p id="evaluation-msg" style="font-size: 22px; color: var(--text); margin-bottom: 40px; font-weight: bold;"></p>
+        <button class="btn" onclick="restartGame()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    // 這次使用的是真實且有效的網路圖片連結
+    const questions = [
+        {
+            img: "https://images.unsplash.com/photo-1599706155985-056e9c1db177?w=600&q=80",
+            clue: "Big red fire engines are parked here.",
+            answers: ["fire station", "a fire station"]
+        },
+        {
+            img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80",
+            clue: "People go here to play badminton, basketball, and exercise.",
+            answers: ["sports centre", "a sports centre", "sports center", "a sports center"]
+        },
+        {
+            img: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&q=80",
+            clue: "You can buy skin care, medicine, and cosmetics here.",
+            answers: ["health and beauty store", "a health and beauty store", "health & beauty store"]
+        },
+        {
+            img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Hong_Kong_Cultural_Centre_201911.jpg/600px-Hong_Kong_Cultural_Centre_201911.jpg",
+            clue: "Activity: watch a concert / ballet",
+            answers: ["cultural center", "the cultural center", "cultural centre", "the cultural centre"]
+        },
+        {
+            img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Aberdeen_Typhoon_Shelter_2012.jpg/600px-Aberdeen_Typhoon_Shelter_2012.jpg",
+            clue: "Activity: eat seafood",
+            answers: ["aberdeen"]
+        },
+        {
+            img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Hong_Kong_Wetland_Park_201108.jpg/600px-Hong_Kong_Wetland_Park_201108.jpg",
+            clue: "Activity: watch the birds",
+            answers: ["wetland park", "the wetland park"]
+        },
+        {
+            img: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80",
+            clue: "Doctors and nurses take care of sick people here.",
+            answers: ["hospital", "a hospital"]
+        },
+        {
+            img: "https://images.unsplash.com/photo-1427504494785-3a9a2753a50b?w=600&q=80",
+            clue: "Students go here to read books and study.",
+            answers: ["learning centre", "a learning centre", "learning center", "a learning center"]
+        },
+        {
+            img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
+            clue: "We can buy fresh bread and cakes here.",
+            answers: ["bakery", "a bakery"]
+        },
+        {
+            img: "https://images.unsplash.com/photo-1589088331908-16e5306354b3?w=600&q=80",
+            clue: "Police officers work here to catch bad guys.",
+            answers: ["police station", "a police station"]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const imgElement = document.getElementById("question-img");
+    const clueElement = document.getElementById("clue");
+    const inputElement = document.getElementById("answer-input");
+    const progressElement = document.getElementById("progress");
+    const scoreElement = document.getElementById("score-display");
+    const feedbackElement = document.getElementById("feedback");
+    const submitBtn = document.getElementById("submit-btn");
+
+    function loadQuestion() {
+        const q = questions[currentQuestionIndex];
+        imgElement.src = q.img;
+        clueElement.innerHTML = `<strong>Clue:</strong> ${q.clue}`;
+        inputElement.value = "";
+        inputElement.focus();
+        feedbackElement.innerHTML = "";
+        progressElement.innerText = `Question ${currentQuestionIndex + 1} / ${questions.length}`;
+        submitBtn.innerText = "Check Answer";
+        inputElement.disabled = false;
+        inputElement.style.borderColor = "#ced6e0";
+    }
+
+    function checkAnswer() {
+        if (submitBtn.innerText === "Next Question") {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showEndScreen();
+            }
+            return;
+        }
+
+        const userAnswer = inputElement.value.trim().toLowerCase();
+        if (userAnswer === "") return;
+
+        const correctAnswers = questions[currentQuestionIndex].answers;
+        
+        if (correctAnswers.includes(userAnswer)) {
+            score++;
+            scoreElement.innerText = `🌟 Score: ${score}`;
+            feedbackElement.innerHTML = `<span class="correct-text">✅ Excellent! Correct spelling!</span>`;
+            inputElement.style.borderColor = "var(--success)";
+        } else {
+            const mainAnswer = correctAnswers[0];
+            feedbackElement.innerHTML = `<span class="wrong-text">❌ Oops! The correct spelling is: <strong>${mainAnswer}</strong></span>`;
+            inputElement.style.borderColor = "var(--danger)";
+        }
+
+        inputElement.disabled = true;
+        submitBtn.innerText = "Next Question";
+    }
+
+    function showEndScreen() {
+        document.getElementById("play-screen").style.display = "none";
+        document.getElementById("end-screen").style.display = "block";
+        document.getElementById("final-score").innerText = `${score} / ${questions.length}`;
+        
+        let msg = "";
+        if (score === 10) msg = "Perfect score! You are a spelling champion! 🌟";
+        else if (score >= 8) msg = "Great job! Keep practicing and you will be perfect! 👍";
+        else msg = "Good effort! Let's play again to remember all the words! 💪";
+        
+        document.getElementById("evaluation-msg").innerText = msg;
+    }
+
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreElement.innerText = `🌟 Score: 0`;
+        document.getElementById("play-screen").style.display = "block";
+        document.getElementById("end-screen").style.display = "none";
+        loadQuestion();
+    }
+
+    inputElement.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    // 預載圖片以防延遲
+    window.onload = function() {
+        questions.forEach(q => {
+            const img = new Image();
+            img.src = q.img;
+        });
+        loadQuestion();
+    };
+</script>
+
+</body>
+</html>
