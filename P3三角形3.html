@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roselle 的圖形挑戰測驗 📐 (含解析版)</title>
+<style>
+    body {
+        font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+        background-color: #f0f8ff;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+    }
+    .container {
+        max-width: 850px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+        border-bottom: 3px dashed #3498db;
+        padding-bottom: 15px;
+    }
+    h2 {
+        color: #e67e22;
+        margin-top: 30px;
+        border-left: 5px solid #e67e22;
+        padding-left: 10px;
+    }
+    .question-block {
+        margin-bottom: 25px;
+        padding: 15px;
+        background-color: #fafafa;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+    .question-text {
+        font-size: 1.15em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .options label {
+        display: block;
+        margin-bottom: 8px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+        border: 1px solid transparent;
+    }
+    .options label:hover {
+        background-color: #e8f8f5;
+        border: 1px solid #1abc9c;
+    }
+    input[type="radio"] {
+        margin-right: 10px;
+        transform: scale(1.2);
+    }
+    .svg-container {
+        text-align: center;
+        margin: 15px 0;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+    }
+    .submit-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2em;
+        font-weight: bold;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 30px;
+        transition: background-color 0.3s;
+    }
+    .submit-btn:hover {
+        background-color: #2980b9;
+    }
+    #result-box {
+        display: none;
+        margin-top: 30px;
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    .feedback { font-size: 1em; margin-top: 10px; display: none; padding: 12px; border-radius: 5px; line-height: 1.5;}
+    .correct { background-color: #d5f5e3; color: #1e8449; border-left: 4px solid #27ae60;}
+    .wrong { background-color: #fadbd8; color: #c0392b; border-left: 4px solid #e74c3c;}
+    .explanation { display: block; margin-top: 8px; font-size: 0.95em; color: #2c3e50; font-weight: normal;}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📐 Roselle 的圖形挑戰測驗 (看圖回答) 📐</h1>
+    <p style="text-align: center; color: #7f8c8d;">請仔細觀察圖片，選出最正確的答案！交卷後可以看解析喔！</p>
+
+    <form id="quizForm">
+
+        <h2>第一部分：幾何扣條能做成什麼三角形？</h2>
+        <div id="part1"></div>
+
+        <h2>第二部分：看方格紙回答問題</h2>
+        <div class="svg-container">
+            <svg width="400" height="260" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e0e0e0" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+                
+                <polygon points="40,40 40,100 100,100" fill="#aed6f1" stroke="#2980b9" stroke-width="2"/>
+                <text x="50" y="90" font-weight="bold" font-size="16">A</text>
+
+                <polygon points="160,40 240,100 120,100" fill="#f9e79f" stroke="#f39c12" stroke-width="2"/>
+                <text x="170" y="85" font-weight="bold" font-size="16">B</text>
+
+                <polygon points="320,40 360,120 280,120" fill="#abebc6" stroke="#27ae60" stroke-width="2"/>
+                <text x="315" y="100" font-weight="bold" font-size="16">C</text>
+
+                <polygon points="40,140 120,140 100,220 60,220" fill="#f5b041" stroke="#d35400" stroke-width="2"/>
+                <text x="75" y="185" font-weight="bold" font-size="16">D</text>
+
+                <polygon points="180,140 180,220 280,220" fill="#e8daef" stroke="#8e44ad" stroke-width="2"/>
+                <text x="210" y="200" font-weight="bold" font-size="16">E</text>
+            </svg>
+        </div>
+        <div id="part2"></div>
+
+        <h2>第三部分：三角形觀念是非題</h2>
+        <div id="part3"></div>
+
+        <button type="button" class="submit-btn" onclick="calculateScore()">交卷看成績與解析！💯</button>
+    </form>
+
+    <div id="result-box"></div>
+</div>
+
+<script>
+    function drawSticks(l1, l2, l3) {
+        const drawStick = (y, len) => `<rect x="20" y="${y}" width="${len}" height="10" rx="5" fill="#bdc3c7" stroke="#7f8c8d" stroke-width="2"/><circle cx="25" cy="${y+5}" r="2" fill="#fff"/><circle cx="${15+len}" cy="${y+5}" r="2" fill="#fff"/>`;
+        return `<div class="svg-container"><svg width="300" height="70">` + drawStick(10, l1) + drawStick(30, l2) + drawStick(50, l3) + `</svg></div>`;
+    }
+
+    const questions = [
+        // Part 1
+        { q: "1. 這組扣條可以組成什麼三角形？", img: drawSticks(150, 150, 150), options: ["等邊三角形", "等腰三角形", "不等邊三角形", "直角三角形"], ans: 0, exp: "三根扣條長度完全一樣，所以組成的是等邊三角形喔！" },
+        { q: "2. 這組扣條可以組成什麼三角形？", img: drawSticks(200, 200, 100), options: ["等邊三角形", "等腰三角形", "不等邊三角形", "不能組成三角形"], ans: 1, exp: "有兩根長度一樣的扣條，和一根比較短的，符合「有兩條邊一樣長」的特徵，是等腰三角形。" },
+        { q: "3. 這組扣條可以組成什麼三角形？", img: drawSticks(80, 150, 220), options: ["等邊三角形", "等腰三角形", "不等邊三角形", "直角三角形"], ans: 2, exp: "三根扣條的長度都不一樣，所以是不等邊三角形。" },
+        { q: "4. 這組扣條有兩根比較短的，一根長度不同，它可以組成什麼三角形？", img: drawSticks(120, 120, 180), options: ["直角三角形", "等腰三角形", "不等邊三角形", "等邊三角形"], ans: 1, exp: "只要有「兩條邊」長度相同，就是等腰三角形。" },
+        { q: "5. 看看這三根扣條，它們能組成什麼形狀？", img: drawSticks(90, 140, 190), options: ["等邊三角形", "等腰三角形", "不等邊三角形", "四邊形"], ans: 2, exp: "三根長度明顯都不相同，所以是不等邊三角形。" },
+
+        // Part 2
+        { q: "6. 請看上方的方格紙，哪些圖形是「直角三角形」？", img: "", options: ["圖形 A 和 圖形 C", "圖形 A 和 圖形 E", "只有圖形 A", "圖形 B 和 圖形 E"], ans: 1, exp: "圖形 A 左下角有一個直角，圖形 E 左下角也有一個直角（剛好對齊方格的十字線）。" },
+        { q: "7. 在方格紙中，哪些圖形是「等腰三角形」？", img: "", options: ["圖形 A 和 圖形 C", "圖形 B 和 圖形 E", "圖形 C 和 圖形 E", "只有圖形 C"], ans: 0, exp: "圖形 A 的直角兩邊佔據一樣的格數（等長），圖形 C 左右兩邊斜度一樣（等長），所以都是等腰三角形。" },
+        { q: "8. 圖形 D 是不是三角形？為什麼？", img: "", options: ["是，因為它看起來尖尖的", "不是，因為它有四條邊和四個角", "是，因為它畫在方格紙上", "不是，因為它沒有直角"], ans: 1, exp: "三角形顧名思義只能有三個角和三條邊，圖形 D 數一數有四個角，所以它是四邊形。" },
+        { q: "9. 仔細看圖形 A，它既有直角，又有兩條邊一樣長，所以我們叫它什麼？", img: "", options: ["不等邊三角形", "一般的等邊三角形", "等腰直角三角形", "四邊形"], ans: 2, exp: "同時具備「等腰」和「直角」兩個特徵，就稱為等腰直角三角形喔！" },
+        { q: "10. 圖形 B 的三條邊都不一樣長，它屬於哪一種三角形？", img: "", options: ["等邊三角形", "等腰三角形", "不等邊三角形", "直角三角形"], ans: 2, exp: "三條邊都不一樣長，就是不等邊三角形。" },
+        { q: "11. 圖形 E 有一個直角，但它的三條邊長度都不一樣，這句話是對的嗎？", img: "", options: ["對，它是直角不等邊三角形", "錯，它是等邊三角形", "錯，它是等腰三角形", "錯，它不是三角形"], ans: 0, exp: "沒錯！圖形 E 的底部、左邊和斜邊長度都不一樣，但它有一個直角。" },
+        { q: "12. 哪一個圖形有三個角都是「銳角」，而且只有兩條邊一樣長？", img: "", options: ["圖形 A", "圖形 B", "圖形 C", "圖形 D"], ans: 2, exp: "圖形 C 左右等長（等腰），且三個角看起來都比 90 度小（銳角）。" },
+        { q: "13. 圖形 A 裡面，最多有幾個直角？", img: "", options: ["0個", "1個", "2個", "3個"], ans: 1, exp: "任何三角形裡面，最多都只能存在 1 個直角喔！" },
+        { q: "14. 下列哪一個圖形「沒有」直角，而且「三邊都不一樣長」？", img: "", options: ["圖形 B", "圖形 C", "圖形 E", "圖形 A"], ans: 0, exp: "圖形 B 是一個沒有直角的不等邊三角形。" },
+        { q: "15. 綜合來看，圖形 C 是什麼三角形？", img: "", options: ["等邊三角形", "等腰三角形", "直角三角形", "不等邊三角形"], ans: 1, exp: "圖形 C 的左右兩側邊長一樣，所以是等腰三角形。" },
+
+        // Part 3
+        { q: "16. 等腰三角形「不可能」有直角。", img: "", options: ["對", "錯"], ans: 1, exp: "錯喔！等腰三角形「可以」有直角，就像方格紙上的圖形 A，它就是『等腰直角三角形』。" },
+        { q: "17. 一個三角形裡面，最多只能有 1 個直角。", img: "", options: ["對", "錯"], ans: 0, exp: "對的！如果一個圖形有兩個直角，線條就會變成平行的，沒辦法關起來變成三角形了。" },
+        { q: "18. 等邊三角形的三條邊長度一定都一模一樣。", img: "", options: ["對", "錯"], ans: 0, exp: "對的！這是等邊三角形的規則，三邊一定要一樣長。" },
+        { q: "19. 只要圖形有四個角，就絕對不可能是三角形，這個圖形叫做四邊形。", img: "", options: ["對", "錯"], ans: 0, exp: "對的！三角形只能有三個角喔！" },
+        { q: "20. 直角三角形的另外兩個角，一定都是銳角。", img: "", options: ["對", "錯"], ans: 0, exp: "對的！因為三角形有一個 90 度的直角後，剩下的空間不夠再容納直角或鈍角了，只能是兩個比較小的銳角。" }
+    ];
+
+    function renderQuestions() {
+        let p1="", p2="", p3="";
+        questions.forEach((item, index) => {
+            let html = `<div class="question-block" id="q-block-${index}">
+                            <div class="question-text">${item.q}</div>
+                            ${item.img}
+                            <div class="options">`;
+            item.options.forEach((opt, optIndex) => {
+                html += `<label><input type="radio" name="q${index}" value="${optIndex}"> ${opt}</label>`;
+            });
+            html += `</div><div class="feedback" id="feedback-${index}"></div></div>`;
+            
+            if(index < 5) p1 += html;
+            else if(index < 15) p2 += html;
+            else p3 += html;
+        });
+        document.getElementById('part1').innerHTML = p1;
+        document.getElementById('part2').innerHTML = p2;
+        document.getElementById('part3').innerHTML = p3;
+    }
+
+    renderQuestions();
+
+    function calculateScore() {
+        let score = 0;
+        let answeredAll = true;
+
+        questions.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const feedbackBox = document.getElementById(`feedback-${index}`);
+            
+            feedbackBox.style.display = "block";
+
+            if (selected) {
+                if (parseInt(selected.value) === item.ans) {
+                    score += 5;
+                    feedbackBox.className = "feedback correct";
+                    feedbackBox.innerHTML = `<strong>✔ 答對了！</strong><span class="explanation">💡 <strong>解析：</strong>${item.exp}</span>`;
+                } else {
+                    feedbackBox.className = "feedback wrong";
+                    feedbackBox.innerHTML = `<strong>✘ 答錯了。正確答案是：${item.options[item.ans]}</strong><span class="explanation">💡 <strong>解析：</strong>${item.exp}</span>`;
+                }
+            } else {
+                answeredAll = false;
+                feedbackBox.className = "feedback wrong";
+                feedbackBox.innerHTML = "<strong>⚠ 這題還沒作答喔！請選一個答案。</strong>";
+            }
+        });
+
+        const resultBox = document.getElementById("result-box");
+        resultBox.style.display = "block";
+
+        if (!answeredAll) {
+            resultBox.innerHTML = "📝 還有題目沒有寫完喔！請檢查一下。";
+            resultBox.style.backgroundColor = "#fcf3cf";
+            resultBox.style.color = "#d35400";
+        } else {
+            resultBox.style.backgroundColor = score >= 80 ? "#d4efdf" : "#fadbd8";
+            resultBox.style.color = score >= 80 ? "#1e8449" : "#c0392b";
+            
+            let message = "";
+            if(score === 100) message = "太完美了！圖形跟扣條都難不倒你！🏆";
+            else if(score >= 80) message = "很棒喔！記得看看做錯的題目解析，下次一定全對！🌟";
+            else if(score >= 60) message = "不錯喔！趕快看下面的「💡解析」把不懂的地方補起來吧！💪";
+            else message = "沒關係，看著下面的「💡解析」慢慢學，圖形看久了就會越來越熟練！加油！🌱";
+
+            resultBox.innerHTML = `Roselle 的總分是：<br><span style="font-size: 2em;">${score} 分</span><br>${message}`;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    }
+</script>
+
+</body>
+</html>
