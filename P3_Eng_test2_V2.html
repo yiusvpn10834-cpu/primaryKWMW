@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Roselle's Vocabulary Test</title>
+<style>
+    body {
+        font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        background-color: #f0f8ff;
+        color: #333;
+        padding: 20px;
+        max-width: 950px;
+        margin: 0 auto;
+    }
+    h1 { text-align: center; color: #ff69b4; font-size: 36px; margin-bottom: 10px; }
+    .header-info {
+        display: flex; justify-content: space-around; font-size: 18px;
+        margin-bottom: 30px; background: #fff; border-radius: 50px;
+        padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .section {
+        background: white; border-radius: 15px; padding: 25px;
+        margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border: 2px solid #e6e6e6;
+    }
+    h2 { color: #4682b4; border-bottom: 2px dashed #4682b4; padding-bottom: 10px; margin-top: 0; }
+    h3 { color: #555; margin-top: 25px; text-align: center; }
+    .grid-container {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px; margin-top: 20px;
+    }
+    .card {
+        border: 2px solid #f0f0f0; border-radius: 10px; padding: 15px;
+        text-align: center; background-color: #fafafa; transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-3px); }
+    
+    /* 真實圖片的樣式設定 */
+    .real-img {
+        width: 140px;
+        height: 140px;
+        object-fit: contain; /* 確保圖片不變形 */
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+    
+    .input-group { margin: 10px 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; }
+    .label { font-weight: bold; color: #555; margin-right: 5px; font-size: 16px; }
+    input[type="text"] {
+        border: none; border-bottom: 2px solid #333; background: transparent;
+        font-size: 19px; font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        text-align: center; padding: 5px; outline: none; transition: all 0.3s ease;
+    }
+    input[type="text"]:focus { border-bottom: 2px solid #ff69b4; }
+    .word-1 { width: 95px; } .word-2 { width: 70px; }
+    
+    .btn-container { text-align: center; margin: 40px 0; }
+    button {
+        background-color: #ff69b4; color: white; border: none; padding: 15px 40px;
+        font-size: 26px; border-radius: 50px; cursor: pointer; font-family: 'Comic Sans MS', cursive;
+        box-shadow: 0 6px 8px rgba(0,0,0,0.1); transition: transform 0.2s, background-color 0.2s;
+    }
+    button:hover { background-color: #ff1493; transform: scale(1.03); }
+    #result { text-align: center; font-size: 30px; font-weight: bold; margin-top: 20px; min-height: 50px; background: #fff; padding: 15px; border-radius: 20px; }
+</style>
+</head>
+<body>
+
+    <h1>✨ Roselle's Vocabulary Test ✨</h1>
+    <div class="header-info">
+        <div><strong>Name:</strong> <input type="text" style="width: 200px;"></div>
+        <div><strong>Date:</strong> <input type="text" style="width: 200px;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Part A: How do they feel?</h2>
+        <div class="grid-container">
+            <div class="card"><img src="excited.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><br><input type="text" class="word-1 answer-input" data-answer="excited"></div>
+            <div class="card"><img src="surprised.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><br><input type="text" class="word-1 answer-input" data-answer="surprised"></div>
+            <div class="card"><img src="worried.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><br><input type="text" class="word-1 answer-input" data-answer="worried"></div>
+            <div class="card"><img src="scared.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><br><input type="text" class="word-1 answer-input" data-answer="scared"></div>
+            <div class="card"><img src="sad.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><br><input type="text" class="word-1 answer-input" data-answer="sad"></div>
+            <div class="card"><img src="angry.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><br><input type="text" class="word-1 answer-input" data-answer="angry"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Part B: Places & Activities</h2>
+        <div class="grid-container">
+            <div class="card">
+                <img src="paint.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="home"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="paint"> <input type="text" class="word-1 answer-input" data-answer="pictures"></div>
+            </div>
+            <div class="card">
+                <img src="piano.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="home"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="practise|practice"> <input type="text" class="word-2 answer-input" data-answer="the"> <input type="text" class="word-1 answer-input" data-answer="piano"></div>
+            </div>
+            <div class="card">
+                <img src="study.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="home"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="study"> <input type="text" class="word-2 answer-input" data-answer="for"> <input type="text" class="word-2 answer-input" data-answer="my"> <input type="text" class="word-1 answer-input" data-answer="exam"></div>
+            </div>
+            <div class="card">
+                <img src="nap.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="home"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="take"> <input type="text" class="word-2 answer-input" data-answer="a"> <input type="text" class="word-1 answer-input" data-answer="nap"></div>
+            </div>
+            <div class="card">
+                <img src="tea.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="cafe"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="have"> <input type="text" class="word-1 answer-input" data-answer="afternoon"> <input type="text" class="word-1 answer-input" data-answer="tea"></div>
+            </div>
+            <div class="card">
+                <img src="rides.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="theme"> <input type="text" class="word-1 answer-input" data-answer="park"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-2 answer-input" data-answer="go"> <input type="text" class="word-2 answer-input" data-answer="on"> <input type="text" class="word-1 answer-input" data-answer="rides"></div>
+            </div>
+            <div class="card">
+                <img src="film.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="cinema"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="watch"> <input type="text" class="word-2 answer-input" data-answer="a"> <input type="text" class="word-1 answer-input" data-answer="film"></div>
+            </div>
+            <div class="card">
+                <img src="buffet.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'">
+                <div class="input-group"><span class="label">Place:</span> <input type="text" class="word-1 answer-input" data-answer="hotel"></div>
+                <div class="input-group"><span class="label">Activity:</span> <input type="text" class="word-1 answer-input" data-answer="have"> <input type="text" class="word-2 answer-input" data-answer="a"> <input type="text" class="word-1 answer-input" data-answer="buffet"> <input type="text" class="word-1 answer-input" data-answer="meal"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Part C: Festivals & Activities</h2>
+        
+        <h3>🏮 Chinese New Year</h3>
+        <div class="grid-container">
+            <div class="card"><img src="flower.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-2 answer-input" data-answer="go"><input type="text" class="word-2 answer-input" data-answer="to"><input type="text" class="word-2 answer-input" data-answer="a"><input type="text" class="word-1 answer-input" data-answer="flower"><input type="text" class="word-1 answer-input" data-answer="market"></div></div>
+            <div class="card"><img src="red-packet.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="get"><input type="text" class="word-1 answer-input" data-answer="red"><input type="text" class="word-1 answer-input" data-answer="packets"></div></div>
+            <div class="card"><img src="relatives.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="visit"><input type="text" class="word-1 answer-input" data-answer="relatives"></div></div>
+            <div class="card"><img src="fireworks.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="watch"><input type="text" class="word-1 answer-input" data-answer="fireworks"></div></div>
+        </div>
+
+        <h3>🐰 Easter & 🐉 Dragon Boat Festival</h3>
+        <div class="grid-container">
+            <div class="card"><img src="easter.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="eat"><input type="text" class="word-1 answer-input" data-answer="chocolate"><input type="text" class="word-1 answer-input" data-answer="eggs"></div></div>
+            <div class="card"><img src="dragon.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="watch"><input type="text" class="word-1 answer-input" data-answer="dragon|dragan"><input type="text" class="word-1 answer-input" data-answer="boat"><input type="text" class="word-1 answer-input" data-answer="races"></div></div>
+            <div class="card"><img src="dumplings.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="eat"><input type="text" class="word-1 answer-input" data-answer="rice"><input type="text" class="word-1 answer-input" data-answer="dumplings"></div></div>
+        </div>
+
+        <h3>🌕 Mid-Autumn Festival</h3>
+        <div class="grid-container">
+            <div class="card"><img src="moon.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="look"><input type="text" class="word-2 answer-input" data-answer="at"><input type="text" class="word-2 answer-input" data-answer="the"><input type="text" class="word-1 answer-input" data-answer="moon"></div></div>
+            <div class="card"><img src="lanterns.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="play"><input type="text" class="word-1 answer-input" data-answer="with"><input type="text" class="word-1 answer-input" data-answer="lanterns"></div></div>
+            <div class="card"><img src="moon-cakes.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="eat"><input type="text" class="word-1 answer-input" data-answer="moon"><input type="text" class="word-1 answer-input" data-answer="cakes"></div></div>
+        </div>
+
+        <h3>🎄 Christmas</h3>
+        <div class="grid-container">
+            <div class="card"><img src="presents.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="get"><input type="text" class="word-1 answer-input" data-answer="presents"></div></div>
+            <div class="card"><img src="lights.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="look"><input type="text" class="word-2 answer-input" data-answer="at"><input type="text" class="word-2 answer-input" data-answer="the"><input type="text" class="word-1 answer-input" data-answer="christmas"><input type="text" class="word-1 answer-input" data-answer="lights"></div></div>
+            <div class="card"><img src="carols.png" alt="圖片" class="real-img" onerror="this.src='https://placehold.co/140x140/ffebee/ff69b4?text=Missing+Image'"><div class="input-group"><input type="text" class="word-1 answer-input" data-answer="sing"><input type="text" class="word-1 answer-input" data-answer="carols"></div></div>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button onclick="checkAnswers()">Check Answers! ✅</button>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        function checkAnswers() {
+            let score = 0; let totalWords = 0;
+            const inputs = document.querySelectorAll('.answer-input');
+            
+            inputs.forEach(input => {
+                totalWords++;
+                const correctAnswers = input.getAttribute('data-answer').split('|');
+                const userAnswer = input.value.trim().toLowerCase();
+                
+                if (userAnswer !== "" && correctAnswers.includes(userAnswer)) {
+                    input.style.backgroundColor = "#e8f5e9"; input.style.borderBottomColor = "#4caf50"; score++;
+                } else {
+                    input.style.backgroundColor = "#ffebee"; input.style.borderBottomColor = "#f44336";
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            if (score === totalWords) {
+                resultDiv.innerHTML = `🏆 Perfect, Roselle! You got ${score} / ${totalWords}! You are a superstar! ⭐🏆`;
+                resultDiv.style.color = "#4caf50"; 
+            } else {
+                resultDiv.innerHTML = `Great effort, Roselle! You got ${score} out of ${totalWords} words right. Keep going! 💪`;
+                resultDiv.style.color = "#ff1493"; 
+            }
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
