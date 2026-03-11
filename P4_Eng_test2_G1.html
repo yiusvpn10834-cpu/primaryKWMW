@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart kids' English Adventure!</title>
+<style>
+    body {
+        font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        background-color: #e0f7e9; /* Pochacco light green */
+        color: #333;
+        margin: 0;
+        padding: 20px;
+    }
+    .header {
+        text-align: center;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: 3px solid #82d19b;
+        margin-bottom: 20px;
+    }
+    h1 { color: #2e8b57; margin: 0; padding-bottom: 10px;}
+    .subtitle { color: #555; font-size: 1.1em; }
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: 3px solid #82d19b;
+    }
+    .section-title {
+        background-color: #82d19b;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 30px;
+    }
+    .question {
+        margin: 15px 0;
+        font-size: 1.1em;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        border-left: 5px solid #82d19b;
+    }
+    .options { margin-top: 10px; }
+    label {
+        display: inline-block;
+        margin-right: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        background: #eefbee;
+        padding: 8px 12px;
+        border-radius: 5px;
+        border: 1px solid #c3e8cd;
+        transition: background 0.2s;
+    }
+    label:hover { background: #d0f0d9; }
+    input[type="radio"] { transform: scale(1.2); margin-right: 8px; }
+    button {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2em;
+        color: white;
+        background-color: #ff9aa2; 
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 30px;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+    button:hover { background-color: #ff7a85; }
+    
+    /* Result Area Styles */
+    #result-area { display: none; }
+    .score-board {
+        text-align: center;
+        font-size: 1.5em;
+        color: #2e8b57;
+        padding: 20px;
+        background: #eefbee;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .wrong-item {
+        background: #fff0f0;
+        border-left: 5px solid #ff9aa2;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+    .wrong-q { font-weight: bold; font-size: 1.1em; }
+    .wrong-ans { color: #d9534f; margin: 5px 0;}
+    .correct-ans { color: #5cb85c; font-weight: bold; margin: 5px 0;}
+    .explanation {
+        background: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px dashed #ff9aa2;
+        margin-top: 10px;
+        color: #555;
+    }
+    .perfect-score {
+        text-align: center;
+        color: #ff7a85;
+        font-size: 1.2em;
+        padding: 20px;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🐶 Smart kids' English Adventure 🐾</h1>
+    <p class="subtitle">Hi Smart kids! You have 60 questions to challenge. Let's get a Perfect Score!</p>
+</div>
+
+<div class="quiz-container" id="quiz-form">
+    </div>
+
+<div class="quiz-container" id="result-area">
+    <div class="score-board" id="final-score"></div>
+    <div id="correction-list"></div>
+    <button onclick="location.reload()">再玩一次 (Play Again)</button>
+</div>
+
+<script>
+const quizData = [
+    // Part 1: Grammar (Simple Future Tense)
+    { q: "1. I ___ (visit) Macau tomorrow.", opts: ["will visit", "visit", "will visits"], ans: 0, sec: "Part 1: Simple Future Tense", exp: "看到 tomorrow (明天)，要用將來時 will + 原形動詞 (visit)。" },
+    { q: "2. She ___ (not go) to the beach next week.", opts: ["don't go", "won't go", "won't goes"], ans: 1, exp: "將來時的否定是 will not，縮寫成 won't，後面一樣加原形動詞 go。" },
+    { q: "3. ___ you watch a ballet later?", opts: ["Do", "Are", "Will"], ans: 2, exp: "看到 later (稍後)，表示將來，問句要用 Will 開頭。" },
+    { q: "4. Will you eat seafood? Yes, I ___.", opts: ["do", "will", "am"], ans: 1, exp: "別人用 Will 問，我們就要用 will 回答 (Yes, I will.)。" },
+    { q: "5. They ___ (eat) seafood tonight.", opts: ["will eat", "will ate", "eats"], ans: 0, exp: "tonight 是今晚，will 後面一定要接原形動詞 eat，不可以加 s 也不可以變過去式。" },
+    { q: "6. We will ___ (ride) on the cable car.", opts: ["rides", "riding", "ride"], ans: 2, exp: "will 後面一定要跟原形動詞 (ride)。" },
+    { q: "7. Uncle Tom ___ (buy) a model car soon.", opts: ["will buys", "will buy", "buy"], ans: 1, exp: "soon 意思是「很快/不久」，要用 will + buy。即使是 Uncle Tom (第三人稱)，will 後面的動詞也不加 s。" },
+    { q: "8. Will he have a picnic? No, he ___.", opts: ["don't", "will not have", "won't"], ans: 2, exp: "簡短回答 No 時，用 he won't 就可以了，不用把動作 have 寫出來。" },
+    { q: "9. I ___ (go) to Hong Kong Wetland Park tomorrow.", opts: ["go", "will go", "will going"], ans: 1, exp: "tomorrow 是明天，用 will + 原形動詞 go。" },
+    { q: "10. My sister and I ___ (make) a cake next Sunday.", opts: ["will make", "make", "will makes"], ans: 0, exp: "next Sunday 是下個星期天，用 will make。" },
+    { q: "11. What ___ we do there?", opts: ["will", "do", "are"], ans: 0, exp: "詢問「我們將會在那邊做什麼？」，問句結構是 Wh-詞 + will + 主角 + 動詞。" },
+    { q: "12. We ___ (take) photos of the Big Buddha.", opts: ["take", "will take", "took"], ans: 1, exp: "根據課本行程計畫的語境，我們將會拍照，用 will take。" },
+    { q: "13. I ___ (stay) here for two more weeks.", opts: ["staying", "stay", "will stay"], ans: 2, exp: "for two more weeks (再多留兩星期)，表示將來的計畫，用 will stay。" },
+    { q: "14. My father ___ (bring) me home later.", opts: ["brings", "will bring", "will brings"], ans: 1, exp: "later 表示稍後，用 will bring。再次提醒 will 後面動詞不加 s！" },
+    { q: "15. I ___ (send) you some photos when I get home.", opts: ["will send", "send", "sends"], ans: 0, exp: "當我到家時「將會」寄照片給你，用 will send。" },
+
+    // Part 2: Prepositional Phrases
+    { q: "16. The bakery is ___ the clinic.", opts: ["next to", "opposite to", "at"], ans: 0, sec: "Part 2: Prepositional Phrases (位置)", exp: "「在旁邊」是 next to。opposite 後面不需要加 to 喔！" },
+    { q: "17. The hospital is ___ the police station.", opts: ["next", "opposite", "corner"], ans: 1, exp: "「在對面」是 opposite，如果是 next 必須要有 to。" },
+    { q: "18. The convenience store is ___ the end of the road.", opts: ["in", "on", "at"], ans: 2, exp: "「在道路的盡頭」固定用法是 at the end of..." },
+    { q: "19. The shop is on your ___.", opts: ["left", "straight", "across"], ans: 0, exp: "「在你的左/右邊」是 on your left / right。" },
+    { q: "20. The post office is at the ___ of Green Road and Orange Road.", opts: ["end", "corner", "next"], ans: 1, exp: "提到兩條街的交界，通常是「轉角」，用法是 at the corner of A and B。" },
+    { q: "21. There is a news-stand ___ Sunny Road.", opts: ["on", "at", "in"], ans: 0, exp: "「在某條路上」介詞要用 on (例如 on Sunny Road)。" },
+    { q: "22. The health and beauty store is next ___ the learning centre.", opts: ["of", "to", "(nothing)"], ans: 1, exp: "「在...旁邊」的完整片語是 next to。" },
+    { q: "23. The sports centre is ___ your right.", opts: ["at", "in", "on"], ans: 2, exp: "「在你的右手邊」介詞要用 on (on your right)。" },
+    { q: "24. Walk ___ the road.", opts: ["across", "straight", "into"], ans: 0, exp: "「橫過馬路」用 walk across the road。" },
+    { q: "25. Turn right ___ Apple Street.", opts: ["in", "to", "into"], ans: 2, exp: "「轉彎進入某條街」一定要用 into (turn right into)。" },
+    { q: "26. The clinic is ___ the corner.", opts: ["on", "at", "in"], ans: 1, exp: "「在轉角處」固定用法是 at the corner。" },
+    { q: "27. The fire station is opposite ___ the hospital.", opts: ["to", "of", "(nothing)"], ans: 2, exp: "opposite 本身就是介詞，後面直接接地點，不需要加 to。" },
+    { q: "28. The cinema is at the end ___ the street.", opts: ["of", "to", "in"], ans: 0, exp: "「...的盡頭」是 at the end of。" },
+    { q: "29. The park is ___ to the bakery.", opts: ["next", "opposite", "on"], ans: 0, exp: "因為後面有 to，所以前面配 next (next to)。" },
+    { q: "30. I am waiting ___ the corner of the street.", opts: ["in", "on", "at"], ans: 2, exp: "「在街角」用 at (at the corner of)。" },
+
+    // Part 3: Giving Directions
+    { q: "31. ___ out of the MTR station.", opts: ["Go", "Walks", "Turn"], ans: 0, sec: "Part 3: Giving Directions (指路)", exp: "給予指示時，動詞放在句首不加s。「走出車站」是 Go out of。" },
+    { q: "32. Walk straight ___.", opts: ["head", "ahead", "across"], ans: 1, exp: "「向前直走」是 walk / go straight ahead。" },
+    { q: "33. Turn ___ into Blue Road.", opts: ["left", "straight", "across"], ans: 0, exp: "Turn (轉彎) 後面配方向，所以是 turn left / right。" },
+    { q: "34. ___ across the road.", opts: ["Walk", "Turn", "Goes"], ans: 0, exp: "「橫過」是 Walk across 或 Go across。句首動詞用原形 Walk。" },
+    { q: "35. ___ right into Star Street.", opts: ["Go", "Walk", "Turn"], ans: 2, exp: "進入街道要「轉彎」，用 Turn right into。" },
+    { q: "36. How do I ___ to the nearest clinic?", opts: ["go", "get", "walk"], ans: 1, exp: "問路標準句型：「我要怎麼去...？」用 How do I get to...？" },
+    { q: "37. Go ___ of the building.", opts: ["out", "into", "straight"], ans: 0, exp: "「走出建築物」是 Go out of。" },
+    { q: "38. ___ straight ahead.", opts: ["Turn", "Across", "Go"], ans: 2, exp: "「直走」用 Go straight ahead。" },
+    { q: "39. Walk across the ___.", opts: ["road", "left", "ahead"], ans: 0, exp: "Walk across 後面要接跨越的東西，所以是 the road (馬路)。" },
+    { q: "40. Turn left ___ Music Road.", opts: ["to", "into", "on"], ans: 1, exp: "再次複習！轉彎進入街道用 turn left into。" },
+    { q: "41. It is ___ your left.", opts: ["in", "on", "at"], ans: 1, exp: "「在你的左邊」用 on (on your left)。" },
+    { q: "42. The sports centre is at the ___ of the road.", opts: ["end", "right", "corner"], ans: 0, exp: "後面接了 of the road，所以是 at the end of (在路的盡頭)。" },
+    { q: "43. Go straight ___. The bakery is there.", opts: ["across", "ahead", "into"], ans: 1, exp: "「直走」完整片語是 Go straight ahead。" },
+    { q: "44. ___ across Prince Road.", opts: ["Walk", "Turn", "Goes"], ans: 0, exp: "跨越馬路用 Walk across，指令句首用原形動詞 Walk。" },
+    { q: "45. Turn right ___ walk across Queen Street.", opts: ["but", "and", "so"], ans: 1, exp: "連接兩個連續的動作（右轉然後過馬路），用 and。" },
+
+    // Part 4: Question Words
+    { q: "46. ___ will you go on Monday morning?", opts: ["What", "Where", "When"], ans: 1, sec: "Part 4: Question Words (疑問詞)", exp: "回答通常是地點 (如 Wan Chai)，所以用 Where (哪裡) 問。" },
+    { q: "47. ___ will we do there?", opts: ["What", "Where", "How"], ans: 0, exp: "問「我們要做『什麼』？」用 What。" },
+    { q: "48. ___ do I get to the bakery?", opts: ["Where", "How", "What"], ans: 1, exp: "問路「如何到達」用 How (How do I get to...?)。" },
+    { q: "49. ___ will you go on a trip? In July.", opts: ["When", "Where", "What"], ans: 0, exp: "答句是 In July (七月，表示時間)，所以用 When (何時) 問。" },
+    { q: "50. ___ can I find a convenience store?", opts: ["How", "Where", "What"], ans: 1, exp: "問「我可以在『哪裡』找到便利店」，用 Where。" },
+    { q: "51. ___ is Mum? She is at the clinic.", opts: ["Who", "Where", "How"], ans: 1, exp: "答句是 at the clinic (地點)，所以用 Where 問媽媽在哪裡。" },
+    { q: "52. ___ will Penny have her piano exam? Next week.", opts: ["When", "Where", "What"], ans: 0, exp: "答句是 Next week (時間)，所以用 When (何時) 問。" },
+    { q: "53. ___ will we eat for dinner? Seafood in Sai Kung.", opts: ["Where", "What", "When"], ans: 1, exp: "答句是 Seafood (食物/事物)，所以問吃「什麼」用 What。" },
+    { q: "54. ___ are you from? I am from England.", opts: ["How", "What", "Where"], ans: 2, exp: "問來自哪裡，用 Where are you from?" },
+    { q: "55. ___ do you get to school? By bus.", opts: ["How", "Where", "When"], ans: 0, exp: "答句是 By bus (搭巴士，表示方法)，用 How (如何) 問。" },
+    { q: "56. ___ will Uncle Ivan buy tomorrow? Model cars.", opts: ["Where", "What", "When"], ans: 1, exp: "答句是 Model cars (事物)，所以問買「什麼」用 What。" },
+    { q: "57. ___ will the boys look at birds? On Saturday morning.", opts: ["When", "Where", "What"], ans: 0, exp: "答句是 On Saturday morning (時間)，所以用 When 問。" },
+    { q: "58. ___ is the new cafe? It's opposite the cinema.", opts: ["Where", "What", "How"], ans: 0, exp: "答句是 opposite the cinema (地點/位置)，用 Where 問。" },
+    { q: "59. ___ will you leave Hong Kong? In two days.", opts: ["When", "Where", "What"], ans: 0, exp: "答句是 In two days (兩天後，表示時間)，用 When 問。" },
+    { q: "60. ___ is the convenience store? It's on your right.", opts: ["How", "Where", "What"], ans: 1, exp: "答句是 on your right (位置)，問店在「哪裡」用 Where。" }
+];
+
+const container = document.getElementById('quiz-form');
+let htmlContent = '';
+
+quizData.forEach((item, index) => {
+    if (item.sec) {
+        htmlContent += `<h2 class="section-title">${item.sec}</h2>`;
+    }
+    htmlContent += `<div class="question" id="q${index}">
+        <p><strong>${item.q}</strong></p>
+        <div class="options">`;
+    
+    item.opts.forEach((opt, optIndex) => {
+        htmlContent += `<label>
+            <input type="radio" name="ans${index}" value="${optIndex}"> ${opt}
+        </label>`;
+    });
+    
+    htmlContent += `</div></div>`;
+});
+
+htmlContent += `<button onclick="submitQuiz()">交卷看成績！ (Submit)</button>`;
+container.innerHTML = htmlContent;
+
+function submitQuiz() {
+    let score = 0;
+    let wrongLog = [];
+    let allAnswered = true;
+    let firstUnanswered = -1;
+
+    for (let i = 0; i < 60; i++) {
+        let selected = document.querySelector(`input[name="ans${i}"]:checked`);
+        if (!selected) {
+            allAnswered = false;
+            if (firstUnanswered === -1) firstUnanswered = i;
+            continue;
+        }
+        if (parseInt(selected.value) === quizData[i].ans) {
+            score++;
+        } else {
+            wrongLog.push({
+                qNum: i + 1,
+                question: quizData[i].q,
+                userAns: quizData[i].opts[selected.value],
+                correctAns: quizData[i].opts[quizData[i].ans],
+                explanation: quizData[i].exp
+            });
+        }
+    }
+
+    if (!allAnswered) {
+        alert("Oops! 還有題目沒選到喔，請檢查一下！ (Please answer all questions!)");
+        // Scroll to the first unanswered question
+        document.getElementById(`q${firstUnanswered}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
+    // Process Result Screen
+    document.getElementById('quiz-form').style.display = 'none';
+    const resultArea = document.getElementById('result-area');
+    resultArea.style.display = 'block';
+    
+    // Smooth scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const scoreBoard = document.getElementById('final-score');
+    scoreBoard.innerHTML = `Your Score: <strong>${score} / 60</strong>`;
+
+    const correctionList = document.getElementById('correction-list');
+    if (score === 60) {
+        correctionList.innerHTML = `<div class="perfect-score">
+            <h2>🏆 Perfect! 太厲害了！🏆</h2>
+            <p>Smart kids 你的英文已經準備得很完美囉！測驗一定沒問題！</p>
+            </div>`;
+    } else {
+        let correctionHTML = `<h3>💡 讓我們一起把錯的地方學起來 (Review)：</h3>`;
+        wrongLog.forEach(w => {
+            correctionHTML += `
+            <div class="wrong-item">
+                <div class="wrong-q">${w.question}</div>
+                <div class="wrong-ans">❌ 你選了：${w.userAns}</div>
+                <div class="correct-ans">✅ 正確答案：${w.correctAns}</div>
+                <div class="explanation">🐶 <strong>Pochacco 提示：</strong> ${w.explanation}</div>
+            </div>`;
+        });
+        correctionList.innerHTML = correctionHTML;
+    }
+}
+</script>
+
+</body>
+</html>
