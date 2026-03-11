@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart kids' English Exam Center</title>
+<style>
+    body {
+        font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        background-color: #eefbee; /* 可愛淺綠色背景 */
+        color: #333;
+        margin: 0;
+        padding: 0;
+        /* 避免在 iPad 上長按選取文字 */
+        -webkit-user-select: none;
+        user-select: none; 
+    }
+    .container {
+        max-width: 1024px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .header {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 20px;
+        border: 4px solid #82d19b;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+    h1 { color: #2e8b57; margin: 10px 0; font-size: 2em;}
+    
+    /* Menu Styles */
+    #menu-screen { display: block; margin-top: 50px; }
+    .menu-btn {
+        display: block;
+        width: 80%;
+        max-width: 400px;
+        margin: 20px auto;
+        padding: 25px;
+        font-size: 1.5em;
+        font-weight: bold;
+        color: white;
+        background-color: #82d19b;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 6px 0 #5eab77;
+        cursor: pointer;
+    }
+    .menu-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #5eab77; }
+    .menu-btn.pink { background-color: #ff9aa2; box-shadow: 0 6px 0 #e67e85; }
+    .menu-btn.pink:active { box-shadow: 0 0 0 #e67e85; }
+    .menu-btn.blue { background-color: #82caff; box-shadow: 0 6px 0 #5daae8; }
+    .menu-btn.blue:active { box-shadow: 0 0 0 #5daae8; }
+    
+    /* Game Screens */
+    .game-screen { display: none; }
+    .back-btn {
+        background-color: #ccc;
+        color: #333;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    /* Game 1: Map Styles (image_6.png 邏輯) */
+    .map-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        background-color: #d0f0d9;
+        padding: 20px;
+        border-radius: 20px;
+        margin: 20px auto;
+        max-width: 600px;
+        border: 4px solid #82d19b;
+    }
+    .building {
+        background-color: white;
+        border-radius: 15px;
+        padding: 20px 10px;
+        font-size: 1.3em;
+        font-weight: bold;
+        border: 3px solid #ccc;
+        box-shadow: 0 4px 0 #aaa;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100px;
+    }
+    .building:active { transform: translateY(4px); box-shadow: 0 0 0 #aaa; }
+    .building.road {
+        background-color: #7f8c8d;
+        color: white;
+        border: none;
+        box-shadow: none;
+        cursor: default;
+    }
+    .building.road:active { transform: none; }
+    .emoji { font-size: 2em; margin-bottom: 5px; }
+    .instruction-box {
+        background-color: #fff;
+        padding: 20px;
+        font-size: 1.4em;
+        border-radius: 15px;
+        border: 3px dashed #ff9aa2;
+        margin-bottom: 20px;
+        color: #d9534f;
+        font-weight: bold;
+    }
+
+    /* Game 2: Slot Machine Styles (image_2.png 邏輯) */
+    .slot-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+    .slot {
+        background-color: white;
+        border: 4px solid #82d19b;
+        border-radius: 15px;
+        flex: 1;
+        padding: 30px 10px;
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #2e8b57;
+        box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .spin-btn {
+        background-color: #ff9aa2;
+        color: white;
+        border: none;
+        padding: 20px 40px;
+        font-size: 1.5em;
+        border-radius: 15px;
+        font-weight: bold;
+        box-shadow: 0 6px 0 #e67e85;
+        margin: 20px 0;
+    }
+    .spin-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #e67e85; }
+    
+    .mc-options { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .mc-btn {
+        background-color: #fff;
+        border: 3px solid #82d19b;
+        padding: 15px;
+        font-size: 1.3em;
+        border-radius: 15px;
+        color: #333;
+        font-weight: bold;
+    }
+    .mc-btn:active { background-color: #d0f0d9; }
+    
+    /* Game 3: Sentence Challenge Styles (image_8.png 邏輯) */
+    .sentence-container { display: none; }
+    .sentence-btn {
+        background-color: #82d19b;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #5eab77;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .sentence-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #5eab77;
+    }
+    
+    /* Game 4: Letter Structure Challenge Styles (新遊戲) */
+    .structure-container { display: none; margin-top: 20px; }
+    .structure-dropzone {
+        min-height: 80px;
+        background-color: #f0fdf4;
+        border: 3px dashed #82d19b;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .structure-item {
+        background-color: #82d19b;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.3em;
+        font-weight: bold;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #5eab77;
+        margin-bottom: 15px;
+    }
+    .structure-target {
+        background-color: #fff;
+        color: #333;
+        border: 3px dashed #ff9aa2;
+        padding: 15px 30px;
+        font-size: 1.3em;
+        font-weight: bold;
+        border-radius: 10px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+
+    #message-area {
+        font-size: 1.5em;
+        font-weight: bold;
+        min-height: 40px;
+        margin-top: 15px;
+    }
+    .correct { color: #2e8b57; }
+    .wrong { color: #d9534f; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🐶 Smart kids' English Exam Center 🐾</h1>
+    </div>
+
+    <div id="menu-screen">
+        <button class="menu-btn" onclick="showGame('game1')">🗺️ 城市導航員<br><span style="font-size:0.6em">看指引，找地點</span></button>
+        <button class="menu-btn pink" onclick="showGame('game2')">🎰 時光造句機<br><span style="font-size:0.6em">抽卡片，組句子</span></button>
+        <button class="menu-btn blue" onclick="showGame('game3')">🧩 句子重組大挑戰<br><span style="font-size:0.6em">排單字，拼長句</span></button>
+        <button class="menu-btn blue" onclick="showGame('game4')">🎰 書信結構挑戰<br><span style="font-size:0.6em">拖動各部分，完成信</span></button>
+    </div>
+
+    <div id="game1" class="game-screen">
+        <button class="back-btn" onclick="showMenu()">🔙 Back to Menu</button>
+        <h2>Where am I going? 📍</h2>
+        <div class="instruction-box" id="map-instruction">
+            </div>
+        <div class="map-grid">
+            <div class="building" onclick="checkMap('Bakery')"><div class="emoji">🍞</div>Bakery</div>
+            <div class="building road">Apple St. ⬇️</div>
+            <div class="building" onclick="checkMap('Clinic')"><div class="emoji">🏥</div>Clinic</div>
+            
+            <div class="building road">Sunny Rd. ➡️</div>
+            <div class="building road">🚦</div>
+            <div class="building road">Sunny Rd. ➡️</div>
+            
+            <div class="building" onclick="checkMap('Cinema')"><div class="emoji">🎬</div>Cinema</div>
+            <div class="building road">Apple St. ⬆️</div>
+            <div class="building" onclick="checkMap('Sports Centre')"><div class="emoji">🏀</div>Sports Centre</div>
+        </div>
+        <div id="map-message" id="message-area"></div>
+    </div>
+
+    <div id="game2" class="game-screen">
+        <button class="back-btn" onclick="showMenu()">🔙 Back to Menu</button>
+        <h2>Make a Sentence! 🪄</h2>
+        <div class="slot-container">
+            <div class="slot" id="slot-who">Who?</div>
+            <div class="slot" id="slot-action">Action?</div>
+            <div class="slot" id="slot-time">Time?</div>
+        </div>
+        <button class="spin-btn" id="spin-btn" onclick="spinSlots()">抽卡 (Draw!)</button>
+        
+        <div id="quiz-area" style="display:none;">
+            <h3 id="quiz-task" style="color:#d9534f;"></h3>
+            <div class="mc-options" id="mc-options">
+                </div>
+        </div>
+        <div id="slot-message" id="message-area"></div>
+    </div>
+
+    <div id="game3" class="game-screen">
+        <button class="back-btn" onclick="showMenu()">🔙 Back to Menu</button>
+        <h2>Unscramble the Sentence! 🧩</h2>
+        <div class="sentence-container" id="sentence-container" style="display:block;">
+            <div class="slot" id="sentence-who" style="margin-bottom:10px;">Who?</div>
+            <div class="mc-options" id="sentence-options">
+                </div>
+        </div>
+        <div id="sentence-message" id="message-area"></div>
+    </div>
+
+    <div id="game4" class="game-screen">
+        <button class="back-btn" onclick="showMenu()">🔙 Back to Menu</button>
+        <h2>Complete the Letter! 🪄</h2>
+        <div class="structure-dropzone" id="structure-options">
+            </div>
+        <div class="structure-dropzone" id="structure-targets">
+            </div>
+        <div id="structure-message" id="message-area"></div>
+    </div>
+
+    <div class="header" id="letter-notes" style="display:none; text-align: left; background-color: white; padding: 20px; border-radius: 20px; border: 4px solid #ff9aa2; margin-top: 30px;">
+        <h1 style="color:#d9534f; font-size: 1.5em; text-align: center;">🎰 Chiikawa 風格英文作文筆記 (Letter Writing)</h1>
+        <p style="font-size:1.1em; color:#555; text-align: center;">作文測驗範圍 (Writing Exam Scope)・Usagi yelled "YAH!" Chiikawa cheers.</p>
+        <p>「這份筆記將之前的測驗範圍（Simple Future Tense, Locations & Spots, Giving Directions）都整合進了書信範例中，圖文並茂，非常適合考前複習。筆記分為三個部分：</p>
+        
+        <h3 style="color:#ff9aa2;">🎰 書信結構 (Letter Structure)</h3>
+        <p>書信的各部分用Chiikawa角色標註：`Date`, `Address`, `Greeting`, `Body`, `Closing`, `Signature`。</p>
+        
+        <h3 style="color:#ff9aa2;">🎰 範例書信 (Example Letter)</h3>
+        <p>這封完整的信中，我用 bold 和粉色/淺藍色突出了關鍵詞，展示如何將 Simple Future Tense (will/won't), Hong Kong Spots, directions (Go out of MTR, turn right), position prepositions (opposite) 等測驗範圍完美融合到書信作文中。</p>
+        <p style="font-style:italic;">範例信片段："...I will visit **The Peak** to **look at the beautiful view**. We won't watch a ballet. Then, we will visit **Ocean Park** to **ride on the cable car**. ... After that, we will **eat seafood** in **Sai Kung**."</p>
+        
+        <h3 style="color:#ff9aa2;">🎰 作文小貼士 (Writing Tips)</h3>
+        <p>Usagi給出建議：`Sequence Words` (First, Next, Then, After that) 和 `Common Mistakes` (`watch view` vs `look at view`, `Turn into street`)。</p>
+        
+        <div style="text-align: center;">
+            <img src="https://i.imgur.com/82D19b.png" alt="Chiikawa 書信筆記範例" style="max-width: 80%; border-radius: 10px; border: 3px solid #ff9aa2; margin-top: 15px;">
+        </div>
+        
+        <h3 style="color:#d9534f; margin-top:20px;">🏆 高分關鍵小提醒：復習之前糾正過的內容 (image_8.png)</h3>
+        <p>筆記特別列出了之前功課的小失誤，提醒她：`Watch show` vs `Look at view`, 要用 `Turn into street`, 要寫 `Go straight ahead`。</p>
+        
+        <div style="text-align: center; margin-top:15px;">
+            <img src="https://i.imgur.com/e87E85.png" alt="之前修正過的內容範例" style="max-width: 80%; border-radius: 10px; border: 3px solid #ff9aa2;">
+        </div>
+        
+    </div>
+
+</div>
+
+<script>
+// --- Navigation ---
+function showMenu() {
+    document.getElementById('menu-screen').style.display = 'block';
+    document.getElementById('game1').style.display = 'none';
+    document.getElementById('game2').style.display = 'none';
+    document.getElementById('game3').style.display = 'none';
+    document.getElementById('game4').style.display = 'none';
+    document.getElementById('letter-notes').style.display = 'none';
+    // Reset states
+    document.getElementById('map-message').innerText = "";
+    document.getElementById('slot-message').innerText = "";
+    document.getElementById('quiz-area').style.display = 'none';
+}
+
+function showGame(gameId) {
+    document.getElementById('menu-screen').style.display = 'none';
+    document.getElementById(gameId).style.display = 'block';
+    if(gameId === 'game1') loadMapQuestion();
+    if(gameId === 'game3') loadSentenceQuestion();
+    if(gameId === 'game4') loadStructureQuestion();
+}
+
+// --- Game 1: Map Navigator Logic (image_6.png) ---
+const mapQuestions = [
+    { text: "Go straight ahead. Turn right into Sunny Road. It is next to the Clinic.", ans: "Sports Centre" },
+    { text: "It is opposite the Cinema. It is at the corner of Apple Street and Sunny Road.", ans: "Bakery" },
+    { text: "Walk across Sunny Road. It is on your right, next to the Sports Centre.", ans: "Cinema" },
+    { text: "It is opposite the Bakery. It is on Apple Street.", ans: "Clinic" }
+];
+let currentMapQ = 0;
+
+function loadMapQuestion() {
+    document.getElementById('map-message').innerText = "";
+    document.getElementById('map-instruction').innerText = mapQuestions[currentMapQ].text;
+}
+
+function checkMap(buildingName) {
+    if(buildingName === mapQuestions[currentMapQ].ans) {
+        document.getElementById('map-message').innerHTML = "<span class='correct'>🎉 Correct! You found it!</span>";
+        setTimeout(() => {
+            currentMapQ = (currentMapQ + 1) % mapQuestions.length;
+            loadMapQuestion();
+        }, 2000);
+    } else {
+        document.getElementById('map-message').innerHTML = "<span class='wrong'>Oops! 找錯地方囉，再看一次指示！</span>";
+    }
+}
+
+// --- Game 2: Slot Machine Logic (image_2.png) ---
+const subjects = ["We", "I", "Uncle Tom", "The boys"];
+const actions = ["visit a museum", "eat seafood", "watch a ballet", "go to Ocean Park"];
+const times = ["tomorrow", "next Sunday", "later"];
+let currentDraw = {};
+
+function spinSlots() {
+    document.getElementById('slot-message').innerText = "";
+    document.getElementById('quiz-area').style.display = 'none';
+    
+    // Randomly pick
+    currentDraw.who = subjects[Math.floor(Math.random() * subjects.length)];
+    currentDraw.action = actions[Math.floor(Math.random() * actions.length)];
+    currentDraw.time = times[Math.floor(Math.random() * times.length)];
+    
+    document.getElementById('slot-who').innerText = currentDraw.who;
+    document.getElementById('slot-action').innerText = currentDraw.action;
+    document.getElementById('slot-time').innerText = currentDraw.time;
+    
+    setTimeout(generateQuiz, 500);
+}
+
+function generateQuiz() {
+    document.getElementById('quiz-area').style.display = 'block';
+    const tasks = ["positive", "negative", "question"];
+    const taskType = tasks[Math.floor(Math.random() * tasks.length)];
+    
+    let promptText = "";
+    let correctAns = "";
+    let wrong1 = "";
+    let wrong2 = "";
+    
+    let subjectLower = currentDraw.who === "I" ? "I" : currentDraw.who.toLowerCase();
+
+    if (taskType === "positive") {
+        promptText = "請選出正確的【肯定句】 (Positive)";
+        correctAns = `${currentDraw.who} will ${currentDraw.action} ${currentDraw.time}.`;
+        wrong1 = `${currentDraw.who} will ${currentDraw.action}s ${currentDraw.time}.`;
+        wrong2 = `${currentDraw.who} are ${currentDraw.action} ${currentDraw.time}.`;
+    } else if (taskType === "negative") {
+        promptText = "請選出正確的【否定句】 (Negative)";
+        correctAns = `${currentDraw.who} won't ${currentDraw.action} ${currentDraw.time}.`;
+        wrong1 = `${currentDraw.who} don't ${currentDraw.action} ${currentDraw.time}.`;
+        wrong2 = `${currentDraw.who} won't ${currentDraw.action}s ${currentDraw.time}.`;
+    } else {
+        promptText = "請選出正確的【問句】 (Question)";
+        correctAns = `Where will ${subjectLower} go ${currentDraw.time}?`;
+        wrong1 = `Where do ${subjectLower} go ${currentDraw.time}?`;
+        wrong2 = `Where will ${subjectLower} goes ${currentDraw.time}?`;
+    }
+    
+    document.getElementById('quiz-task').innerText = promptText;
+    
+    let options = [correctAns, wrong1, wrong2];
+    options.sort(() => Math.random() - 0.5); // Shuffle
+    
+    let optionsHtml = "";
+    options.forEach(opt => {
+        let escapedOpt = opt.replace(/'/g, "\\'");
+        let escapedAns = correctAns.replace(/'/g, "\\'");
+        optionsHtml += `<button class="mc-btn" onclick="checkSlotAns('${escapedOpt}', '${escapedAns}')">${opt}</button>`;
+    });
+    
+    document.getElementById('mc-options').innerHTML = optionsHtml;
+}
+
+function checkSlotAns(selected, correct) {
+    if(selected === correct) {
+        document.getElementById('slot-message').innerHTML = "<span class='correct'>🎉 Bingo! 句子造對了！</span>";
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('spin-btn').innerText = "再抽一次！ (Play Again)";
+    } else {
+        document.getElementById('slot-message').innerHTML = "<span class='wrong'>Oops! 文法有點小錯，再選一次！</span>";
+    }
+}
+
+// --- Game 3: Sentence Challenge Logic (image_8.png) ---
+const subjectsSentence = ["How", "Walk", "The post office", "Where", "We will watch a dolphin show", "Will you have a picnic tomorrow?", "I won't go to the beach", "The sports centre", "Go out of the MTR station", "She will make a cake"];
+const actionsSentence = ["do I get to the nearest clinic?", "across the road and turn right.", "next to the bakery.", "will we go on Monday morning?", "at Ocean Park.", "", "next week.", "on your left.", "", "next weekend."];
+let currentSentenceDraw = {};
+
+function loadSentenceQuestion() {
+    document.getElementById('sentence-message').innerText = "";
+    
+    // Randomly pick
+    const index = Math.floor(Math.random() * subjectsSentence.length);
+    currentSentenceDraw.who = subjectsSentence[index];
+    currentSentenceDraw.action = actionsSentence[index];
+    
+    document.getElementById('sentence-who').innerText = currentSentenceDraw.who;
+    
+    let options = [currentSentenceDraw.action, "across the road and turn left.", "next to the clinic.", "will we watch birds tomorrow?", "at Space Museum.", "at Wetland Park.", "tomorrow.", "later.", "opposite the clinic.", "in two days."];
+    // Remove duplicate action (if any)
+    options = options.filter((item, pos) => options.indexOf(item) === pos);
+    // Remove the current correct answer
+    options = options.filter(item => item !== currentSentenceDraw.action);
+    // Take 2 random wrong answers
+    let wrongOptions = options.sort(() => Math.random() - 0.5).slice(0, 2);
+    // Combine with the correct action
+    let finalOptions = [currentSentenceDraw.action, wrongOptions[0], wrongOptions[1]];
+    // Shuffle
+    finalOptions.sort(() => Math.random() - 0.5); 
+    
+    let optionsHtml = "";
+    finalOptions.forEach(opt => {
+        if(opt === "") return; // Skip if action is empty
+        let escapedOpt = opt.replace(/'/g, "\\'");
+        let escapedAns = currentSentenceDraw.action.replace(/'/g, "\\'");
+        optionsHtml += `<button class="sentence-btn" style="margin-bottom:10px; padding:10px 20px; font-size:1.1em;" onclick="checkSentenceAns('${escapedOpt}', '${escapedAns}')">${opt}</button>`;
+    });
+    
+    document.getElementById('sentence-options').innerHTML = optionsHtml;
+}
+
+function checkSentenceAns(selected, correct) {
+    if(selected === correct) {
+        document.getElementById('sentence-message').innerHTML = "<span class='correct'>🎉 Bingo! 句子排對了！</span>";
+        setTimeout(loadSentenceQuestion, 2000);
+    } else {
+        document.getElementById('sentence-message').innerHTML = "<span class='wrong'>Oops! 句子有點不對喔，再選一次！</span>";
+    }
+}
+
+// --- Game 4: Letter Structure Challenge Logic (新遊戲) ---
+const letterParts = [
+    { name: "Date", pos: "top right" },
+    { name: "Recipient's Address", pos: "top right" },
+    { name: "Greeting / Salutation", pos: "middle left" },
+    { name: "Body", pos: "middle" },
+    { name: "Closing", pos: "bottom left" },
+    { name: "Signature", pos: "bottom left" }
+];
+let shuffledParts = [];
+
+function loadStructureQuestion() {
+    document.getElementById('structure-message').innerText = "";
+    shuffledParts = letterParts.sort(() => Math.random() - 0.5);
+    
+    let optionsHtml = "";
+    shuffledParts.forEach(part => {
+        optionsHtml += `<button class="structure-item" onclick="selectStructureItem('${part.name}')">${part.name}</button>`;
+    });
+    document.getElementById('structure-options').innerHTML = optionsHtml;
+    
+    let targetsHtml = "";
+    letterParts.forEach(part => {
+        targetsHtml += `<div class="structure-target" onclick="placeStructureItem('${part.name}')">${part.pos}</div>`;
+    });
+    document.getElementById('structure-targets').innerHTML = targetsHtml;
+}
+
+let selectedItemName = "";
+
+function selectStructureItem(itemName) {
+    selectedItemName = itemName;
+    document.getElementById('structure-message').innerHTML = `<span class='pink'>正在選擇：${itemName}... (Select a target position)</span>`;
+}
+
+function placeStructureItem(targetName) {
+    if(selectedItemName === "") {
+        document.getElementById('structure-message').innerHTML = "<span class='wrong'>Oops! 請先選擇一個書信部分！</span>";
+        return;
+    }
+    
+    // Check if the selected item matches the target
+    let target = letterParts.find(p => p.name === targetName);
+    let selected = letterParts.find(p => p.name === selectedItemName);
+
+    if(targetName === selectedItemName) {
+        document.getElementById('structure-message').innerHTML = "<span class='correct'>🎉 Correct! ${selectedItemName} 放到正確位置了！</span>";
+        // Remove the correctly placed item from options
+        shuffledParts = shuffledParts.filter(part => part.name !== selectedItemName);
+        let optionsHtml = "";
+        shuffledParts.forEach(part => {
+            optionsHtml += `<button class="structure-item" onclick="selectStructureItem('${part.name}')">${part.name}</button>`;
+        });
+        document.getElementById('structure-options').innerHTML = optionsHtml;
+        
+        // Mark target as complete
+        const targets = document.getElementById('structure-targets').children;
+        for (let i = 0; i < targets.length; i++) {
+            if(targets[i].innerText === targetName) {
+                targets[i].innerText = `${targetName} ✅`;
+                targets[i].style.background = "#d0f0d9";
+                targets[i].style.cursor = "default";
+                targets[i].onclick = null; // Prevent re-placing
+            }
+        }
+        
+        if(shuffledParts.length === 0) {
+            document.getElementById('structure-message').innerHTML = "<span class='correct'>🏆 恭喜 Smart kids 完成所有挑戰！測驗一定拿滿分！ 🏆</span>";
+        }
+    } else {
+        document.getElementById('structure-message').innerHTML = "<span class='wrong'>Oops! 位置不對喔，再試一次！</span>";
+    }
+    
+    selectedItemName = ""; // Reset selection
+}
+
+// 整合作文筆記 (Letter Writing) 的顯示
+function checkLetterNotes() {
+    document.getElementById('letter-notes').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
