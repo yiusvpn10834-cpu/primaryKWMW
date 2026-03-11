@@ -3,217 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roselle Chiikawa 語法冒險</title>
+    <title>小勇士英語語法大冒險</title>
     <style>
         :root {
-            --chiikawa-pink: #ffdae9;
+            --warrior-pink: #ffdae9;
             --hachiware-blue: #bde0fe;
             --usagi-yellow: #fefae0;
-            --text-color: #5a4a42;
+            --text-brown: #5a4a42;
+            --warrior-gold: #ffd700;
         }
 
         body {
             font-family: 'Arial', "Microsoft JhengHei", sans-serif;
-            background-color: var(--chiikawa-pink);
-            color: var(--text-color);
+            background-color: var(--warrior-pink);
+            color: var(--text-brown);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         #game-container {
             width: 95vw;
             max-width: 700px;
-            background: white;
-            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
             border-radius: 40px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             text-align: center;
-            border: 8px solid #fff;
+            border: 10px solid #fff;
             position: relative;
         }
 
-        .header { font-size: 26px; font-weight: bold; margin-bottom: 10px; color: #ff85a1; }
+        .warrior-title { font-size: 32px; font-weight: bold; color: #ff6b81; margin-bottom: 5px; text-shadow: 2px 2px #fff; }
+        .sub-title { font-size: 18px; color: #888; margin-bottom: 20px; }
         
-        #progress-bar { width: 100%; height: 18px; background: #f0f0f0; border-radius: 20px; margin: 15px 0; overflow: hidden; }
-        #progress-fill { height: 100%; background: linear-gradient(90deg, #ffb7c5, #ff85a1); width: 0%; transition: width 0.4s ease; }
+        #progress-bar { width: 100%; height: 20px; background: #f0f0f0; border-radius: 20px; margin: 15px 0; overflow: hidden; border: 2px solid #eee; }
+        #progress-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #ff85a1); width: 0%; transition: width 0.4s ease; }
 
         #question-box {
-            font-size: 22px;
-            min-height: 100px;
-            padding: 20px;
+            font-size: 24px;
+            min-height: 120px;
+            padding: 25px;
             background: var(--hachiware-blue);
-            border-radius: 25px;
-            margin-bottom: 25px;
+            border-radius: 30px;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            line-height: 1.5;
+            line-height: 1.6;
+            border: 4px dashed #fff;
         }
 
-        .time-hint { font-size: 16px; color: #666; margin-top: 10px; font-style: italic; }
+        .hint-text { font-size: 16px; color: #d63384; margin-top: 15px; font-weight: bold; }
 
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
         button {
-            padding: 18px;
-            font-size: 20px;
+            padding: 20px;
+            font-size: 22px;
             border: none;
             border-radius: 25px;
             background: #fff;
-            box-shadow: 0 5px 0 #e0e0e0;
+            box-shadow: 0 6px 0 #ddd;
             cursor: pointer;
-            border: 2px solid #f0f0f0;
+            border: 3px solid #f0f0f0;
             transition: all 0.2s;
         }
 
-        button:active { transform: translateY(3px); box-shadow: none; }
-        button:hover { background: var(--usagi-yellow); border-color: #ffd60a; }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        button:hover { background: var(--usagi-yellow); border-color: var(--warrior-gold); }
 
-        #feedback { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 50px; }
+        #feedback { margin-top: 25px; font-size: 20px; font-weight: bold; min-height: 60px; }
 
         .hidden { display: none; }
-        .success { color: #4caf50; }
-        .fail { color: #f44336; }
-
-        .score-badge { position: absolute; top: -15px; right: 20px; background: #ff85a1; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+        .score-box { position: absolute; top: 15px; right: 25px; background: #ff85a1; color: white; padding: 8px 20px; border-radius: 25px; font-size: 16px; font-weight: bold; }
+        
+        .chiikawa-emoji { font-size: 40px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="score-badge">得分: <span id="current-score">0</span></div>
+    <div class="score-box">⚔️ 勇者積分: <span id="current-score">0</span></div>
 
     <div id="start-screen">
-        <h1 style="color: #ff85a1;">💖 Roselle 的時態冒險 💖</h1>
-        <p>這次有 40 關！要注意「時間關鍵字」喔！</p>
-        <button onclick="startGame()" style="width: 100%; background: #ffb7c5;">出發！冒險開始！</button>
+        <div class="chiikawa-emoji">🛡️✨</div>
+        <h1 class="warrior-title">小勇士語法大考驗</h1>
+        <p class="sub-title">40 關特訓，混合現在式與過去式！</p>
+        <button onclick="startGame()" style="width: 100%; background: #ffb7c5; color: white;">進入冒險地圖</button>
     </div>
 
     <div id="game-play" class="hidden">
-        <div class="header">第 <span id="level-num">1</span> / 40 關</div>
+        <div class="header">🛡️ 關卡 <span id="level-num">1</span> / 40</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
         <div id="question-box">
             <div id="q-text"></div>
-            <div id="q-hint" class="time-hint"></div>
+            <div id="q-hint" class="hint-text"></div>
         </div>
         <div class="options-grid" id="options"></div>
         <div id="feedback"></div>
     </div>
 
     <div id="result-screen" class="hidden">
-        <h1 style="color: #ff85a1;">🎊 冒險完成！ 🎊</h1>
-        <p id="final-stats"></p>
-        <button onclick="location.reload()" style="width: 100%; background: var(--hachiware-blue);">再玩一次</button>
+        <h1 class="warrior-title">🏆 冒險達成！ 🏆</h1>
+        <p id="final-stats" style="font-size: 20px;"></p>
+        <p>你已經是具備最強語法的小勇士了！</p>
+        <button onclick="location.reload()" style="width: 100%; background: var(--hachiware-blue);">重新特訓</button>
     </div>
 </div>
 
 <script>
-    const quizData = [
-        // 過去式 (Past Tense)
-        { q: "Yesterday, I ________ vegetables.", opt: ["planted", "plant"], ans: 0, hint: "昨天 (Yesterday) 已經發生了！", tip: "加 -ed！" },
-        { q: "Last week, she ________ the piano.", opt: ["practised", "practise"], ans: 0, hint: "上星期 (Last week) 已經發生了！", tip: "加 -d！" },
-        { q: "Two days ago, my cat ________ sick.", opt: ["was", "is"], ans: 0, hint: "兩天前 (Two days ago) 已經發生了！", tip: "單數用 was！" },
-        { q: "I ________ a buffet meal last Sunday.", opt: ["had", "have"], ans: 0, hint: "上個星期日已經過去囉！", tip: "have 的過去式是 had！" },
-        { q: "We ________ to the cinema yesterday.", opt: ["went", "go"], ans: 0, hint: "昨天的動作！", tip: "go 的過去式是 went！" },
-        { q: "On my first day of school, I ________ sad.", opt: ["was", "am"], ans: 0, hint: "第一天入學是很久以前的事了！", tip: "I 搭配 was！" },
-        { q: "My sister ________ her room last night.", opt: ["tidied", "tidy"], ans: 0, hint: "昨晚 (Last night) 的事！", tip: "去 y 改 ied！" },
-        { q: "I didn't ________ computer games yesterday.", opt: ["play", "played"], ans: 0, hint: "⚠️ 魔王陷阱！有 didn't 喔！", tip: "didn't 後面動詞要原形！" },
-        { q: "Did you ________ afternoon tea just now?", opt: ["have", "had"], ans: 0, hint: "⚠️ 魔王陷阱！有 Did 開頭喔！", tip: "Did 開頭動詞要原形！" },
-        { q: "When I was young, I ________ football.", opt: ["played", "play"], ans: 0, hint: "以前 (When I was young) 的事！", tip: "加 -ed！" },
+    const questions = [
+        // 過去式 (Past) - 20 題
+        { q: "Last Monday, it ________ sunny.", opt: ["was", "is"], ans: 0, tip: "上星期一是『過去』喔！" },
+        { q: "I ________ vegetables three years ago.", opt: ["planted", "plant"], ans: 0, tip: "看到 ago 要加 -ed！" },
+        { q: "She ________ the floor yesterday.", opt: ["mopped", "mop"], ans: 0, tip: "重複字尾加 ed！" },
+        { q: "They ________ sick last night.", opt: ["were", "was"], ans: 0, tip: "They 是複數要用 were！" },
+        { q: "I ________ to Australia in December.", opt: ["went", "go"], ans: 0, tip: "go 的過去式是 went！" },
+        { q: "We ________ a film last weekend.", opt: ["watched", "watch"], ans: 0, tip: "週末看過了，加 -ed！" },
+        { q: "I ________ my room two days ago.", opt: ["tidied", "tidy"], ans: 0, tip: "去 y 改 ied！" },
+        { q: "My sister ________ cupcakes for me yesterday.", opt: ["made", "make"], ans: 0, tip: "make 的過去式是 made！" },
+        { q: "I didn't ________ computer games yesterday.", opt: ["play", "played"], ans: 0, tip: "⚠️ 有 didn't 動詞要原形！" },
+        { q: "What did you ________ last night?", opt: ["do", "did"], ans: 0, tip: "⚠️ 有 did 開頭動詞要原形！" },
+        { q: "He ________ excited about the trip.", opt: ["was", "is"], ans: 0, tip: "描述過去的旅程用 was！" },
+        { q: "They ________ afternoon tea last Saturday.", opt: ["had", "have"], ans: 0, tip: "have 的過去式是 had！" },
+        { q: "I was bored, ________ I read comics.", opt: ["so", "but"], ans: 0, tip: "因為無聊『所以』看書！" },
+        { q: "My baby brother ________ last night.", opt: ["cried", "cry"], ans: 0, tip: "去 y 改 ied！" },
+        { q: "I ________ my exams last week.", opt: ["studied", "study"], ans: 0, tip: "上星期的事，去 y 改 ied！" },
+        { q: "Did she ________ on rides yesterday?", opt: ["go", "went"], ans: 0, tip: "⚠️ 有 Did 動詞要原形！" },
+        { q: "I ________ a nap at home yesterday.", opt: ["took", "take"], ans: 0, tip: "take 的過去式是 took！" },
+        { q: "We ________ help with the cleaning.", opt: ["helped", "help"], ans: 0, tip: "過去的事加 -ed！" },
+        { q: "The boys ________ football in the park.", opt: ["played", "play"], ans: 0, tip: "過去的事加 -ed！" },
+        { q: "I ________ some photos just now.", opt: ["took", "take"], ans: 0, tip: "剛才(just now)也是過去喔！" },
 
-        // 現在式 (Present Tense)
-        { q: "I ________ to school every day.", opt: ["go", "went"], ans: 0, hint: "每天 (Every day) 都要做的事！", tip: "習慣動作要用現在式喔！" },
-        { q: "She ________ comics every night.", opt: ["reads", "readed"], ans: 0, hint: "每晚 (Every night) 的習慣！", tip: "第三人稱單數 She 動詞要加 s！" },
-        { q: "The sun ________ in the east.", opt: ["rises", "rose"], ans: 0, hint: "事實 (Fact)！", tip: "事實要用現在式 + s！" },
-        { q: "Roselle ________ milk every morning.", opt: ["drinks", "drank"], ans: 0, hint: "每天早上的習慣！", tip: "單數人名動詞要加 s！" },
-        { q: "I still ________ dancing now.", opt: ["like", "liked"], ans: 0, hint: "現在 (now) 的感覺！", tip: "現在的愛好用現在式！" },
-        { q: "Do you ________ your homework every day?", opt: ["do", "did"], ans: 0, hint: "詢問每天的習慣！", tip: "Do 開頭用現在式原形！" },
-        { q: "My parents ________ happy now.", opt: ["are", "were"], ans: 0, hint: "現在 (now) 的心情！", tip: "現在式複數用 are！" },
-        { q: "It ________ rainy today.", opt: ["is", "was"], ans: 0, hint: "今天 (today) 的天氣！", tip: "現在式單數用 is！" },
-        { q: "We often ________ on rides at the theme park.", opt: ["go", "went"], ans: 0, hint: "常做 (often) 的事！", tip: "經常做的事用現在式！" },
-        { q: "She doesn't ________ late for school.", opt: ["walk", "walks"], ans: 0, hint: "否定現在的習慣！", tip: "doesn't 後面動詞要原形！" },
-
-        // 混合與連接詞 (Mixed & "so")
-        { q: "I was sick ________ I didn't go out.", opt: ["so", "because"], ans: 0, hint: "生病是原因，不出門是結果！", tip: "所以 = so！" },
-        { q: "Yesterday, I ________ pictures at home.", opt: ["painted", "paint"], ans: 0, hint: "昨天 (Yesterday)！", tip: "加 -ed！" },
-        { q: "I ________ my exams now, so I'm busy.", opt: ["study", "studied"], ans: 0, hint: "現在 (now) 很忙！", tip: "現在式！" },
-        { q: "Last Monday, it ________ sunny.", opt: ["was", "is"], ans: 0, hint: "上個星期一 (Last Monday)！", tip: "過去式用 was！" },
-        { q: "They ________ a buffet meal last night.", opt: ["had", "have"], ans: 0, hint: "昨晚 (Last night)！", tip: "have 變 had！" },
-        { q: "I ________ some comics last night.", opt: ["read", "reads"], ans: 0, hint: "昨晚 (Last night)！", tip: "read 過去式拼寫不變但讀音變 'red'！" },
-        { q: "He ________ my classmate yesterday.", opt: ["pushed", "push"], ans: 0, hint: "昨天 (Yesterday)！", tip: "加 -ed！" },
-        { q: "My teacher ________ angry now.", opt: ["is", "was"], ans: 0, hint: "現在 (now)！", tip: "現在式用 is！" },
-        { q: "I ________ tired now, so I take a nap.", opt: ["am", "was"], ans: 0, hint: "現在 (now) 的感覺！", tip: "I 搭配 am！" },
-        { q: "Yesterday, we ________ on rides.", opt: ["went", "go"], ans: 0, hint: "昨天 (Yesterday)！", tip: "go 變 went！" },
-
-        // 難題挑戰 (Spelling & Irregular)
-        { q: "I ________ my sister last night.", opt: ["hugged", "huged"], ans: 0, hint: "昨晚的擁抱！", tip: "重複字尾加 ed (hugged)！" },
-        { q: "She ________ the floor yesterday.", opt: ["mopped", "moped"], ans: 0, hint: "昨天的拖地！", tip: "重複字尾加 ed (mopped)！" },
-        { q: "They ________ for the first time in 2024.", opt: ["skated", "skate"], ans: 0, hint: "2024 是過去的事了！", tip: "字尾 e 只加 d！" },
-        { q: "We ________ afternoon tea last Saturday.", opt: ["had", "have"], ans: 0, hint: "上星期六！", tip: "have 變 had！" },
-        { q: "I didn't ________ for my test.", opt: ["study", "studied"], ans: 0, hint: "⚠️ 魔王陷阱！有 didn't！", tip: "原形動詞才是王道！" },
-        { q: "Does she ________ the piano every day?", opt: ["practise", "practises"], ans: 0, hint: "⚠️ 魔王陷阱！有 Does 開頭！", tip: "Does 後面要打回原形！" },
-        { q: "We ________ pictures in the cafe last week.", opt: ["painted", "paints"], ans: 0, hint: "上星期 (Last week)！", tip: "加 -ed！" },
-        { q: "I was bored, ________ I watched a film.", opt: ["so", "but"], ans: 0, hint: "因為悶，結果看電影！", tip: "連接結果用 so！" },
-        { q: "My baby brother ________ last night.", opt: ["cried", "cryed"], ans: 0, hint: "昨晚的哭哭！", tip: "去 y 改 ied (cried)！" },
-        { q: "You ________ very brave yesterday!", opt: ["were", "are"], ans: 0, hint: "昨天 (Yesterday)！", tip: "You 搭配 were！" }
+        // 現在式 (Present) - 20 題
+        { q: "I ________ to school every day.", opt: ["go", "went"], ans: 0, tip: "每天的習慣用原形！" },
+        { q: "Roselle ________ milk every morning.", opt: ["drinks", "drank"], ans: 0, tip: "單數人名動詞要加 s！" },
+        { q: "She ________ the piano on Sundays.", opt: ["practises", "practise"], ans: 0, tip: "She 是單數，動詞加 s！" },
+        { q: "We often ________ buffet meals.", opt: ["have", "had"], ans: 0, tip: "經常做的事用現在式！" },
+        { q: "It ________ often rainy in summer.", opt: ["is", "was"], ans: 0, tip: "事實描述用 is！" },
+        { q: "I still ________ dancing now.", opt: ["like", "liked"], ans: 0, tip: "現在的感覺用 like！" },
+        { q: "Do you ________ pictures every day?", opt: ["paint", "painted"], ans: 0, tip: "問習慣用現在式！" },
+        { q: "My parents ________ happy today.", opt: ["are", "were"], ans: 0, tip: "今天(today)用 are！" },
+        { q: "He doesn't ________ for his exams.", opt: ["study", "studies"], ans: 0, tip: "⚠️ 有 doesn't 動詞原形！" },
+        { q: "They ________ dinner at 7 PM every day.", opt: ["eat", "ate"], ans: 0, tip: "每天的習慣！" },
+        { q: "I ________ bored now.", opt: ["am", "was"], ans: 0, tip: "現在(now)用 am！" },
+        { q: "Does your dog ________ with you?", opt: ["skip", "skips"], ans: 0, tip: "⚠️ 有 Does 動詞原形！" },
+        { q: "The sun ________ every morning.", opt: ["shines", "shined"], ans: 0, tip: "自然事實動詞加 s！" },
+        { q: "We ________ in Hong Kong.", opt: ["live", "lived"], ans: 0, tip: "現在住的地方用現在式！" },
+        { q: "She always ________ her teacher.", opt: ["hugs", "hugged"], ans: 0, tip: "總是(always)做的事加 s！" },
+        { q: "Do they ________ a film now?", opt: ["watch", "watched"], ans: 0, tip: "現在問句用原形！" },
+        { q: "I ________ tired because I study hard.", opt: ["am", "was"], ans: 0, tip: "現在的狀態！" },
+        { q: "The cafe ________ nice tea.", opt: ["serves", "served"], ans: 0, tip: "咖啡店的日常！" },
+        { q: "I ________ my toys at home every day.", opt: ["play", "played"], ans: 0, tip: "每日習慣！" },
+        { q: "We ________ happy together now.", opt: ["are", "were"], ans: 0, tip: "現在的狀態用 are！" }
     ];
 
-    // Shuffle Quiz
-    let currentQ = 0;
+    let current = 0;
     let score = 0;
-    let shuffledQuiz = [];
+    let shuffled;
 
     function startGame() {
-        shuffledQuiz = quizData.sort(() => Math.random() - 0.5);
+        shuffled = questions.sort(() => Math.random() - 0.5);
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-play').classList.remove('hidden');
-        showQ();
+        show();
     }
 
-    function showQ() {
-        const data = shuffledQuiz[currentQ];
-        document.getElementById('level-num').innerText = currentQ + 1;
-        document.getElementById('q-text').innerText = data.q;
-        document.getElementById('q-hint').innerText = "提示：" + data.hint;
-        document.getElementById('progress-fill').style.width = ((currentQ / 40) * 100) + "%";
+    function show() {
+        const d = shuffled[current];
+        document.getElementById('level-num').innerText = current + 1;
+        document.getElementById('q-text').innerText = d.q;
+        document.getElementById('q-hint').innerText = "";
+        document.getElementById('progress-fill').style.width = ((current / 40) * 100) + "%";
         
-        const optDiv = document.getElementById('options');
-        optDiv.innerHTML = '';
-        data.opt.forEach((o, i) => {
+        const opts = document.getElementById('options');
+        opts.innerHTML = '';
+        d.opt.forEach((o, i) => {
             const b = document.createElement('button');
             b.innerText = o;
             b.onclick = () => check(i);
-            optDiv.appendChild(b);
+            opts.appendChild(b);
         });
         document.getElementById('feedback').innerText = '';
     }
 
-    function check(idx) {
-        const data = shuffledQuiz[currentQ];
+    function check(i) {
+        const d = shuffled[current];
         const f = document.getElementById('feedback');
-        if (idx === data.ans) {
-            f.innerHTML = "<span class='success'>✅ 超厲害！Chiikawa 為你跳舞！</span>";
+        if (i === d.ans) {
+            f.innerHTML = "<span style='color:#4caf50'>✨ 勇者成功擊敗魔王！</span>";
             score++;
             document.getElementById('current-score').innerText = score;
-            setTimeout(next, 1000);
+            setTimeout(next, 800);
         } else {
-            f.innerHTML = `<span class='fail'>❌ 哎呀！再想一下：${data.tip}</span>`;
+            f.innerHTML = `<span style='color:#f44336'>🛡️ 防禦！提示：${d.tip}</span>`;
         }
     }
 
     function next() {
-        currentQ++;
-        if (currentQ < 40) showQ();
+        current++;
+        if (current < 40) show();
         else end();
     }
 
     function end() {
         document.getElementById('game-play').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        document.getElementById('final-stats').innerText = `Roselle 勇者獲得了 ${score} / 40 分！`;
+        document.getElementById('final-stats').innerText = `小勇士最終積分：${score} / 40`;
     }
 </script>
 
