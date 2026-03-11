@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Roselle 小勇者大冒險</title>
+    <style>
+        :root {
+            --primary-pink: #ffdae9;
+            --secondary-blue: #e0f2ff;
+            --text-color: #5a4a42;
+            --correct-green: #c8e6c9;
+            --wrong-red: #ffcdd2;
+        }
+
+        body {
+            font-family: 'Arial', "Microsoft JhengHei", sans-serif;
+            background-color: var(--primary-pink);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 90vw;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 5px solid #fff;
+        }
+
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff85a1;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 15px;
+            background: #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: #ffb7c5;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        #question-area {
+            font-size: 20px;
+            margin-bottom: 30px;
+            min-height: 80px;
+            padding: 10px;
+            background: var(--secondary-blue);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 20px;
+            background: #fdfdfd;
+            box-shadow: 0 4px 0 #ddd;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.3s;
+            border: 2px solid #eee;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            height: 25px;
+        }
+
+        .hidden { display: none; }
+
+        .character-img {
+            width: 80px;
+            margin-bottom: 10px;
+        }
+
+        #start-screen, #result-screen {
+            padding: 20px;
+        }
+
+        .title { font-size: 30px; color: #ff85a1; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen">
+        <div class="title">✨ Roselle 小勇者大冒險 ✨</div>
+        <p>準備好挑戰過去式大魔王了嗎？</p>
+        <button onclick="startGame()" style="background: #ffb7c5; color: white; width: 100%;">開始冒險！</button>
+    </div>
+
+    <div id="game-play" class="hidden">
+        <div class="header">關卡 <span id="level-num">1</span></div>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <div id="question-area"></div>
+        <div class="options-grid" id="options"></div>
+        <div id="feedback"></div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <div class="title">🎉 冒險成功！ 🎉</div>
+        <p>Roselle 勇者，你已經掌握了過去式！</p>
+        <p id="final-score"></p>
+        <button onclick="location.reload()" style="background: #b2e2f2; width: 100%;">重新挑戰</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "Yesterday, I ________ my room.", options: ["tidied", "tidy"], correct: 0, tip: "記得要去 y 改 ied 喔！" },
+        { q: "Last night, the baby ________.", options: ["cried", "cryed"], correct: 0, tip: "去 y 改 ied，中間是 i 不是 y！" },
+        { q: "I ________ to the theme park last Sunday.", options: ["went", "go"], correct: 0, tip: "go 的過去式是不規則的！" },
+        { q: "Mom ________ a buffet meal with us yesterday.", options: ["had", "have"], correct: 0, tip: "have 的過去式是 had！" },
+        { q: "I was sick ________ I didn't study.", options: ["so", "because"], correct: 0, tip: "生病是原因，沒讀書是結果，用 so！" },
+        { q: "It was rainy, so I ________ at home.", options: ["stayed", "stay"], correct: 0, tip: "描述昨天的事，要加 ed！" },
+        { q: "I didn't ________ computer games last night.", options: ["play", "played"], correct: 0, tip: "⚠️ 魔王陷阱！有 didn't 動詞要打回原形！" },
+        { q: "What did you ________ yesterday?", options: ["do", "did"], correct: 0, tip: "⚠️ 魔王陷阱！有 did 動詞要打回原形！" },
+        { q: "My parents ________ surprised.", options: ["were", "was"], correct: 0, tip: "Parents 是複數，要用 were 喔！" },
+        { q: "I ________ a film at the cinema last night.", options: ["watched", "watch"], correct: 0, tip: "昨晚看電影，要加 ed！" }
+    ];
+
+    let currentLevel = 0;
+    let score = 0;
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-play').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = questions[currentLevel];
+        document.getElementById('level-num').innerText = currentLevel + 1;
+        document.getElementById('question-area').innerText = q.q;
+        document.getElementById('progress-fill').style.width = ((currentLevel) / questions.length * 100) + "%";
+        
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index);
+            optionsDiv.appendChild(btn);
+        });
+        document.getElementById('feedback').innerText = '';
+    }
+
+    function checkAnswer(index) {
+        const q = questions[currentLevel];
+        const feedback = document.getElementById('feedback');
+        
+        if (index === q.correct) {
+            feedback.innerText = "⭐ 太棒了！答對了！";
+            feedback.style.color = "#4caf50";
+            score++;
+            setTimeout(nextLevel, 1000);
+        } else {
+            feedback.innerText = "💡 提示：" + q.tip;
+            feedback.style.color = "#f44336";
+        }
+    }
+
+    function nextLevel() {
+        currentLevel++;
+        if (currentLevel < questions.length) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('game-play').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = `你的得分：${score} / ${questions.length}`;
+    }
+</script>
+
+</body>
+</html>
