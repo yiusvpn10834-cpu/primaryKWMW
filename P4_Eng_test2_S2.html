@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart kids' Sentence Challenge!</title>
+<style>
+    body {
+        font-family: 'Comic Sans MS', 'Arial', sans-serif;
+        background-color: #e0f7e9; 
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
+    .header {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 15px;
+        border: 3px solid #82d19b;
+        max-width: 800px;
+        margin: 0 auto 20px auto;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #2e8b57; margin: 0; }
+    .game-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        border: 3px solid #82d19b;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .level-title { font-size: 1.5em; color: #ff9aa2; font-weight: bold; margin-bottom: 20px; }
+    
+    .drop-zone {
+        min-height: 60px;
+        background-color: #f0fdf4;
+        border: 2px dashed #82d19b;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+    .word-bank {
+        min-height: 60px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    .word-btn {
+        background-color: #82d19b;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #5eab77;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .word-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #5eab77;
+    }
+    .controls { margin-top: 30px; }
+    button.action-btn {
+        background-color: #ff9aa2;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 4px 0 #e67e85;
+    }
+    button.action-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #e67e85;
+    }
+    #message { margin-top: 20px; font-size: 1.3em; font-weight: bold; min-height: 30px; }
+    .correct { color: #2e8b57; }
+    .wrong { color: #d9534f; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🧩 Smart kids' Sentence Challenge 🧩</h1>
+    <p>點擊單字，把它們排成正確的句子吧！(Click the words to make a sentence)</p>
+</div>
+
+<div class="game-container">
+    <div class="level-title" id="level-indicator">Question 1 / 10</div>
+    
+    <div class="drop-zone" id="answer-area">
+        </div>
+    
+    <div class="word-bank" id="words-area">
+        </div>
+    
+    <div id="message"></div>
+
+    <div class="controls">
+        <button class="action-btn" onclick="checkAnswer()" id="check-btn">檢查答案 (Check!)</button>
+        <button class="action-btn" onclick="nextQuestion()" id="next-btn" style="display:none; background-color: #82d19b; box-shadow: 0 4px 0 #5eab77;">下一題 (Next)</button>
+    </div>
+</div>
+
+<script>
+// 10 條測驗核心精華句型
+const questions = [
+    { sentence: "How do I get to the nearest clinic?" },
+    { sentence: "Walk across the road and turn right." },
+    { sentence: "The post office is next to the bakery." },
+    { sentence: "Where will we go on Monday morning?" },
+    { sentence: "We will watch a dolphin show at Ocean Park." },
+    { sentence: "Will you have a picnic tomorrow?" },
+    { sentence: "I won't go to the beach next week." },
+    { sentence: "The sports centre is on your left." },
+    { sentence: "Go out of the MTR station." },
+    { sentence: "She will make a cake next weekend." }
+];
+
+let currentLevel = 0;
+let answerArray = [];
+let wordsArray = [];
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function loadQuestion() {
+    answerArray = [];
+    document.getElementById('message').innerText = "";
+    document.getElementById('check-btn').style.display = "inline-block";
+    document.getElementById('next-btn').style.display = "none";
+    document.getElementById('level-indicator').innerText = `Question ${currentLevel + 1} / ${questions.length}`;
+    
+    let rawSentence = questions[currentLevel].sentence;
+    // 將句子拆成單字，但保留標點符號跟著字走
+    let words = rawSentence.split(" ");
+    wordsArray = shuffle([...words]);
+    
+    renderWords();
+}
+
+function renderWords() {
+    const wordBank = document.getElementById('words-area');
+    const answerZone = document.getElementById('answer-area');
+    
+    wordBank.innerHTML = "";
+    answerZone.innerHTML = "";
+    
+    // 渲染上方答案區的單字
+    answerArray.forEach((word, index) => {
+        let btn = document.createElement('button');
+        btn.className = 'word-btn';
+        btn.innerText = word;
+        btn.onclick = () => moveToBank(index);
+        answerZone.appendChild(btn);
+    });
+    
+    // 渲染下方單字庫的單字
+    wordsArray.forEach((word, index) => {
+        let btn = document.createElement('button');
+        btn.className = 'word-btn';
+        btn.innerText = word;
+        btn.onclick = () => moveToAnswer(index);
+        wordBank.appendChild(btn);
+    });
+}
+
+function moveToAnswer(index) {
+    let word = wordsArray.splice(index, 1)[0];
+    answerArray.push(word);
+    renderWords();
+}
+
+function moveToBank(index) {
+    let word = answerArray.splice(index, 1)[0];
+    wordsArray.push(word);
+    renderWords();
+}
+
+function checkAnswer() {
+    if (wordsArray.length > 0) {
+        document.getElementById('message').innerHTML = "<span class='wrong'>還有單字沒排進去喔！(Use all words!)</span>";
+        return;
+    }
+    
+    let userSentence = answerArray.join(" ");
+    if (userSentence === questions[currentLevel].sentence) {
+        document.getElementById('message').innerHTML = "<span class='correct'>🎉 Perfect! 答對了！ 🎉</span>";
+        document.getElementById('check-btn').style.display = "none";
+        
+        if (currentLevel < questions.length - 1) {
+            document.getElementById('next-btn').style.display = "inline-block";
+        } else {
+            document.getElementById('message').innerHTML = "<span class='correct'>🏆 恭喜 Smart kids 完成所有挑戰！測驗一定拿滿分！ 🏆</span>";
+        }
+    } else {
+        document.getElementById('message').innerHTML = "<span class='wrong'>Oops! 順序有點不對喔，再試一次！(Try again)</span>";
+    }
+}
+
+function nextQuestion() {
+    currentLevel++;
+    loadQuestion();
+}
+
+// 遊戲啟動
+window.onload = loadQuestion;
+</script>
+
+</body>
+</html>
