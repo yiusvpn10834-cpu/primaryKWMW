@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Pokémon 數學大冒險：目標是數學大師！ ⚡</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Microsoft JhengHei', sans-serif;
+            background-color: #f0f9ff; /* 淺藍色天空 */
+            color: #334155;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+            padding: 30px;
+            border: 4px solid #facc15; /* 寶可夢黃色邊框 */
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #1e40af; /* 寶可夢藍色 */
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #facc15;
+        }
+
+        .subtitle {
+            color: #475569;
+            font-size: 1em;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        /* 冒險開始畫面 */
+        #start-area {
+            display: block;
+        }
+
+        .poke-ball {
+            font-size: 100px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 20px 0;
+            display: inline-block;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+        }
+
+        .poke-ball:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        .shake {
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-5px, 0) rotate(-10deg); }
+            40% { transform: translate(5px, 0) rotate(10deg); }
+            60% { transform: translate(-5px, 0) rotate(-10deg); }
+            80% { transform: translate(5px, 0) rotate(10deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        .start-btn {
+            background-color: #ef4444; /* 精靈球紅色 */
+            color: white;
+            border: 2px solid #b91c1c;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover {
+            background-color: #dc2626;
+            transform: translateY(-3px);
+        }
+
+        /* 題目畫面 */
+        #question-area {
+            display: none;
+            animation: popIn 0.4s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .q-tag {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 2px solid #bfdbfe;
+        }
+
+        .question-text {
+            font-size: 1.25em;
+            line-height: 1.6;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #1f2937;
+            text-align: left;
+            padding: 0 15px;
+        }
+
+        .input-group {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 50%;
+            padding: 12px;
+            font-size: 1.3em;
+            background-color: #ffffff;
+            border: 3px solid #facc15;
+            border-radius: 10px;
+            text-align: center;
+            color: #1e40af;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #eab308;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.2);
+        }
+
+        /* 單位選擇按鈕 */
+        .unit-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .unit-btn {
+            background-color: #ffffff;
+            color: #64748b;
+            border: 2px solid #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .unit-btn:hover {
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .unit-btn.selected {
+            background-color: #bfdbfe;
+            color: #1e40af;
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+            transform: scale(1.05);
+        }
+
+        .submit-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #059669;
+        }
+
+        /* 解答與回饋區 */
+        #feedback-area {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            text-align: left;
+            animation: fadeIn 0.4s;
+        }
+
+        .correct-box {
+            background-color: #ecfdf5;
+            border: 3px dashed #34d399;
+            color: #065f46;
+        }
+
+        .wrong-box {
+            background-color: #fef2f2;
+            border: 3px dashed #fca5a5;
+            color: #991b1b;
+        }
+
+        .next-btn {
+            background-color: #facc15;
+            color: #1e40af;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #eab308;
+        }
+
+        .stats {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-weight: bold;
+            color: #1e40af;
+            background: #dbeafe;
+            padding: 6px 12px;
+            border-radius: 15px;
+            border: 2px solid #bfdbfe;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="stats">已收服: <span id="box-count">0</span>/20</div>
+    <h1>⚡ Pokémon 數學大冒險 ⚡</h1>
+    <div class="subtitle">訓練家！輸入數字答案後，記得點選正確【單位】喔！</div>
+
+    <div id="start-area">
+        <div class="poke-ball" id="ball-icon">🔴</div><br>
+        <button class="start-btn" onclick="openBox()">✨ 尋找野生寶可夢 ✨</button>
+    </div>
+
+    <div id="question-area">
+        <div class="q-tag" id="q-tag">載入中...</div>
+        <div class="question-text" id="q-text">載入中...</div>
+        
+        <div class="input-group">
+            <input type="text" id="user-answer" placeholder="輸入數字..." onkeypress="handleEnter(event)">
+            <div style="color: #64748b; font-size: 0.9em; margin-bottom: 8px;">▼ 點選單位 ▼</div>
+            <div id="unit-options" class="unit-options">
+                </div>
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">🔴 投擲精靈球！</button>
+        </div>
+
+        <div id="feedback-area">
+            <div id="feedback-message"></div>
+            <div id="feedback-exp" style="margin-top: 12px; font-size: 0.95em; color: #475569;"></div>
+            <button class="next-btn" id="next-action-btn" onclick="resetToBox()">✨ 繼續冒險</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 寶可夢主題題庫 (20題，完全符合測驗二範圍)
+    const originalQuestions = [
+        // 第一部分：四則混合與樹果、道具
+        { c: "收服皮卡丘", q: "野生的皮卡丘出現了！牠有 45 點體力，你使用了「好傷藥」回復了 15 點體力後，平均分配能量給 5 個電力槽，每個電力槽有多少點體力？", ans: "12", unit: "點", unitOpts: ["點", "隻", "元", "米"], exp: "先算回復後的總體力！(45 + 15) ÷ 5 = 60 ÷ 5 = 12 點。" },
+        { c: "道具商店", q: "半打「超級球」共售 48 元。買 1 瓶「精靈球」需要多少元？", ans: "8", unit: "元", unitOpts: ["元", "瓶", "打", "米"], exp: "小心陷阱！半打是 6 瓶。48 ÷ 6 = 8 元。" },
+        { c: "樹果分配", q: "你有 120 顆「藍橘果」，平分給 8 隻寶可夢，每隻可以吃到幾顆？", ans: "15", unit: "顆", unitOpts: ["顆", "元", "隻", "米"], exp: "120 ÷ 8 = 15 顆。" },
+        { c: "代數魔法", q: "伊布的謎題：★ × (48 ÷ 12) = 100，請問 ★ 是多少？", ans: "25", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "先算括號：48 ÷ 12 = 4。 ★ × 4 = 100，所以 ★ 是 25！" },
+        { c: "火箭隊的挑戰", q: "火箭隊有 216 塊能量晶體，平分給 8 支小隊。幹部喵喵又有 216 塊能量晶體，平分給 24 支小隊。火箭隊小隊比喵喵小隊多拿幾塊？", ans: "18", unit: "塊", unitOpts: ["塊", "隻", "元", "cm"], exp: "火箭隊: 216÷8=27。喵喵: 216÷24=9。相差 27 - 9 = 18 塊。" },
+        { c: "道具商店", q: "買 3 罐「噴霧傷藥」送 1 罐，每罐 16 元。想拿 4 罐，平均每罐要花多少元？", ans: "12", unit: "元", unitOpts: ["元", "罐", "cm", "米"], exp: "買3送1代表拿4罐只要付3罐的錢。16 × 3 = 48 元。平均一罐 48 ÷ 4 = 12 元。" },
+        { c: "樹果分配", q: "大木博士有 120 個大師球，壞了 20 個。剩下的平分到 4 個校區，每個校區放幾個？", ans: "25", unit: "個", unitOpts: ["個", "元", "校", "米"], exp: "有括號先算喔！(120 - 20) ÷ 4 = 100 ÷ 4 = 25 個。" },
+        { c: "收服伊布", q: "買了 2 套「伊布特別裝飾」，每件上衣 120 元，褲子 80 元。共需多少元？", ans: "400", unit: "元", unitOpts: ["元", "套", "件", "米"], exp: "一套是 120 + 80 = 200。兩套是 200 × 2 = 400 元。" },
+        { c: "道具商店", q: "買 5 包寶可夢餅乾送 1 包，每包 15 元。樂園總共需要 12 包，最少要付多少元？", ans: "150", unit: "元", unitOpts: ["元", "包", "米", "cm"], exp: "買5送1代表每6包是一組。12包剛好是2組。只需付 10 包的錢：15 × 10 = 150 元。" },
+        { c: "道具商店", q: "原本有 320 元，買了 5 把貓梳子後剩下 20 元。每把梳子多少元？", ans: "60", unit: "元", unitOpts: ["元", "把", "cm", "米"], exp: "梳子總共花了 320 - 20 = 300 元。300 ÷ 5 = 60 元。" },
+
+        // 第二部分：周界與道館設計
+        { c: "道館設計 (周界)", q: "正方形對戰場地的周界是 96 米，它的邊長是多少米？", ans: "24", unit: "米", unitOpts: ["米", "cm", "元", "個"], exp: "邊長 = 周界 ÷ 4。96 ÷ 4 = 24 米。" },
+        { c: "道館設計 (周界)", q: "長方形水系道館長 12 米，闊 8 米。周界是多少米？", ans: "40", unit: "米", unitOpts: ["米", "cm", "分鐘", "元"], exp: "長方形周界 = (長 + 闊) × 2。 (12 + 8) × 2 = 40 米。" },
+        { c: "道館設計 (周界)", q: "長方形飛行系道館的長是闊的 3 倍，周界是 32 米。求它的闊是多少米？", ans: "4", unit: "米", unitOpts: ["米", "cm", "元", "間"], exp: "代數魔法：長+長+闊+闊 = 8個闊。32 ÷ 8 = 4 米。" },
+        { c: "道館設計 (周界)", q: "草系道館闊 6 米，【長是闊的 3 倍】，周界是多少米？", ans: "48", unit: "米", unitOpts: ["米", "cm", "元", "個"], exp: "長 = 6 × 3 = 18。周界 = (18 + 6) × 2 = 48 米。" },
+        { c: "精靈球防護貼 (剪裁)", q: "從長 18 cm、闊 12 cm 的長方形精靈球貼紙上，剪下一個【最大的正方形】防護貼。這正方形周界多少 cm？", ans: "48", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "最大正方形的邊長受限於【短邊】12 cm。周界 = 12 × 4 = 48 cm。" },
+        { c: "精靈球防護貼 (剪裁)", q: "把一張邊長 10 cm 的正方形能量網對摺一次變成長方形。這長方形周界多少 cm？", ans: "30", unit: "cm", unitOpts: ["cm", "米", "張", "元"], exp: "對摺後，長不變(10)，闊變成一半(5)。周界 = (10 + 5) × 2 = 30 cm。" },
+        { c: "對戰場地", q: "把兩個邊長 8 米的正方形拼成長方形，這長方形周界多少米？", ans: "48", unit: "米", unitOpts: ["米", "cm", "塊", "元"], exp: "拼起來後長變成 16，闊是 8。周界 = (16 + 8) × 2 = 48 米。" },
+        { c: "訓練家運動", q: "小智繞正方形運動場跑一圈要 12 分鐘。運動場周界 480 米，他每分鐘跑多少米？", ans: "40", unit: "米", unitOpts: ["米", "分鐘", "cm", "元"], exp: "不用除以4！一圈就是周界，直接算：480 ÷ 12 = 40 米。" },
+        { c: "綜合挑戰", q: "買 1 盒「精靈球」售 120 元，單買 1 顆 15 元。買 1 盒比單買 12 顆便宜多少元？", ans: "60", unit: "元", unitOpts: ["元", "顆", "盒", "米"], exp: "單買 12 顆要 15 × 12 = 180 元。180 - 120 = 60 元。" },
+        { c: "綜合挑戰", q: "你有貓狗共 48 隻，【狗的數量是貓的 3 倍】，請問貓有幾隻？", ans: "12", unit: "隻", unitOpts: ["隻", "元", "cm", "米"], exp: "代數魔法！狗是3份，貓是1份，總共4份=48隻。所以1份(貓) = 48 ÷ 4 = 12 隻。" }
+    ];
+
+    let questionPool = [...originalQuestions];
+    let currentQ = null;
+    let boxCount = 0;
+    let selectedUnit = "";
+
+    function openBox() {
+        if(questionPool.length === 0) {
+            document.getElementById('start-area').innerHTML = '<div class="poke-ball">🏆</div><h2 style="color:#1e40af;">恭喜完成大冒險！</h2><p style="color:#475569;">你已經收服了所有數學寶可夢，成為數學大師了！YAH！🐰</p>';
+            return;
+        }
+
+        const ball = document.getElementById('ball-icon');
+        ball.classList.add('shake');
+        
+        setTimeout(() => {
+            ball.classList.remove('shake');
+            
+            const randomIndex = Math.floor(Math.random() * questionPool.length);
+            currentQ = questionPool[randomIndex];
+            questionPool.splice(randomIndex, 1); 
+
+            // 重置 UI
+            selectedUnit = "";
+            document.getElementById('start-area').style.display = 'none';
+            document.getElementById('question-area').style.display = 'block';
+            document.getElementById('feedback-area').style.display = 'none';
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('user-answer').focus();
+            
+            document.getElementById('q-tag').innerText = `[ ${currentQ.c} ]`;
+            document.getElementById('q-text').innerText = currentQ.q;
+
+            // 隨機打亂單位按鈕
+            const shuffledUnits = currentQ.unitOpts.sort(() => Math.random() - 0.5);
+            const unitContainer = document.getElementById('unit-options');
+            unitContainer.innerHTML = ''; 
+            
+            shuffledUnits.forEach(unit => {
+                const btn = document.createElement('button');
+                btn.className = 'unit-btn';
+                btn.innerText = unit;
+                btn.onclick = () => selectUnit(unit, btn);
+                unitContainer.appendChild(btn);
+            });
+            
+        }, 600);
+    }
+
+    // 處理單位選擇
+    function selectUnit(unit, btnElement) {
+        if (document.getElementById('user-answer').disabled) return;
+        
+        selectedUnit = unit;
+        const allBtns = document.querySelectorAll('.unit-btn');
+        allBtns.forEach(b => b.classList.remove('selected'));
+        btnElement.classList.add('selected');
+    }
+
+    function checkAnswer() {
+        const rawInput = document.getElementById('user-answer').value;
+        const cleanInput = rawInput.replace(/\D/g, ''); 
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackMsg = document.getElementById('feedback-message');
+        const feedbackExp = document.getElementById('feedback-exp');
+        const nextBtn = document.getElementById('next-action-btn');
+
+        if (cleanInput === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 訓練家！忘記輸入數字啦！</strong>';
+            feedbackExp.innerText = '精靈球需要數據才能投擲喔！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        if (selectedUnit === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 訓練家！忘記選擇單位了！</strong>';
+            feedbackExp.innerText = '請在下方點選正確的單位，才能成功收服！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+
+        const isNumCorrect = (cleanInput === currentQ.ans);
+        const isUnitCorrect = (selectedUnit === currentQ.unit);
+
+        if (isNumCorrect && isUnitCorrect) {
+            feedbackArea.className = 'correct-box';
+            feedbackMsg.innerHTML = '<strong>🟢 答對了！精靈球成功收服寶可夢！</strong>';
+            feedbackExp.innerText = `【大師解析】${currentQ.exp}`;
+            
+            nextBtn.innerText = '✨ 繼續尋找寶可夢';
+            nextBtn.style.backgroundColor = '#10b981';
+            nextBtn.style.color = 'white';
+            nextBtn.onclick = resetToBox;
+            
+            if(document.getElementById('user-answer').disabled === false){
+                 boxCount++;
+                 document.getElementById('box-count').innerText = boxCount;
+            }
+            document.getElementById('user-answer').disabled = true;
+            document.getElementById('submit-btn').style.display = 'none';
+
+        } else if (isNumCorrect && !isUnitCorrect) {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🟡 數字對了，但是「單位」選錯囉！</strong>`;
+            feedbackExp.innerText = '差一點點！重新點選正確的單位再試一次吧！';
+            nextBtn.style.display = 'none'; 
+
+        } else if (!isNumCorrect && isUnitCorrect) {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 單位正確，但數字計算有誤！</strong> (妳輸入的數字: ${cleanInput})`;
+            feedbackExp.innerText = '可以在計算紙上重新算一次，或者請求大師公佈答案！';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '💡 大師公佈答案';
+            nextBtn.style.backgroundColor = '#fca5a5';
+            nextBtn.style.color = '#7f1d1d';
+            nextBtn.onclick = showExplanation;
+            
+        } else {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 哎呀，數字和單位都需要再檢查喔！</strong> (妳輸入: ${cleanInput})`;
+            feedbackExp.innerText = '沒關係，深呼吸再想一下，或者請求大師公佈答案！';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '💡 大師公佈答案';
+            nextBtn.style.backgroundColor = '#fca5a5';
+            nextBtn.style.color = '#7f1d1d';
+            nextBtn.onclick = showExplanation;
+        }
+    }
+
+    function showExplanation() {
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.className = 'wrong-box';
+        document.getElementById('feedback-message').innerHTML = `<strong>正確答案是：${currentQ.ans} ${currentQ.unit}</strong>`;
+        document.getElementById('feedback-exp').innerText = `【大師解析】${currentQ.exp}`;
+        
+        const nextBtn = document.getElementById('next-action-btn');
+        nextBtn.innerText = '✨ 學會了！繼續冒險';
+        nextBtn.style.backgroundColor = '#facc15';
+        nextBtn.style.color = '#1e40af';
+        nextBtn.onclick = resetToBox;
+        
+        document.getElementById('user-answer').disabled = true;
+        document.getElementById('submit-btn').style.display = 'none';
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            checkAnswer();
+        }
+    }
+
+    function resetToBox() {
+        document.getElementById('start-area').style.display = 'block';
+        document.getElementById('question-area').style.display = 'none';
+        
+        // 換一個精靈球或寶可夢表情
+        const emojis = ['🔴', '🔵', '🟡', '⚫', '✨', '⚡', '🐾'];
+        document.getElementById('ball-icon').innerText = emojis[Math.floor(Math.random() * emojis.length)];
+    }
+</script>
+
+</body>
+</html>
