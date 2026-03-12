@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 勇敢公主的星空魔法盲盒 👑</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "PingFang HK", sans-serif;
+            background: linear-gradient(135deg, #1a0b2e 0%, #4a148c 50%, #311b92 100%);
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 { 
+            color: #ffd54f; 
+            text-shadow: 0 0 10px #ffb300, 0 0 20px #ff8f00;
+            font-size: 36px;
+        }
+        p {
+            color: #e0f7fa;
+            font-size: 18px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 12px;
+            max-width: 900px;
+            margin: 20px auto;
+        }
+        .box {
+            background: linear-gradient(145deg, #ce93d8, #ab47bc);
+            border: 2px solid #ea80fc;
+            border-radius: 12px;
+            padding: 15px 5px;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(234, 128, 252, 0.4);
+            transition: all 0.3s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .box:hover::before { opacity: 1; }
+        .box:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 213, 79, 0.6);
+            border-color: #ffd54f;
+        }
+        .box.opened {
+            background: #00838f;
+            border-color: #00bcd4;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: linear-gradient(to bottom, #ffffff, #f3e5f5);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px #ea80fc inset;
+            position: relative;
+            color: #4a148c;
+            border: 4px solid #ffd54f;
+        }
+        .question-text {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background-color: #f8bbd0;
+            border: 2px solid #f06292;
+            color: #880e4f;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .option-btn:hover { 
+            background-color: #f06292; 
+            color: white;
+            transform: scale(1.02);
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #9c27b0;
+            font-weight: bold;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 24px;
+            min-height: 35px;
+            text-align: center;
+        }
+        .status-bar {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ffd54f;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>👑 勇敢公主的星空魔法盲盒 👑</h1>
+    <p>✨ 點擊魔法寶石解開謎題，為公主收集華麗的裝備與飾物吧！ ✨</p>
+    <div class="status-bar">已收集魔法裝備：<span id="score">0</span> / 45</div>
+    
+    <div class="grid" id="boxGrid"></div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="question-text" id="qText">魔法卷軸展開中...</div>
+            <div class="options" id="optionsContainer"></div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        // 公主專屬裝備與飾物
+        const prizes = ["👑", "💎", "👗", "👠", "🪄", "💍", "🎀", "🪞", "🛡️", "🗡️", "🌸", "✨"];
+        
+        const questions = [
+            // 第一單元：加減混合 (1-15) - 包含多/少邏輯、括號陷阱
+            { q: "1. 公主買了一件星空斗篷 450 元，一雙水晶鞋 280 元。付 1000 元，應找回多少元？", options: ["1000 - 450 + 280", "270 元", "370 元", "470 元"], a: 1 },
+            { q: "2. 魔法盾牌售 850 元，比魔法劍貴 120 元。買一把魔法劍要多少元？", options: ["970 元", "730 元", "850 元", "120 元"], a: 1 },
+            { q: "3. 皇冠上原有 145 顆鑽石，工匠加了 85 顆後，公主又取下 30 顆做項鍊。現在皇冠上有幾顆鑽石？", options: ["200 顆", "230 顆", "260 顆", "190 顆"], a: 0 },
+            { q: "4. (錯題針對) 計算：627 - (336 + 124) = ?", options: ["167", "415", "839", "715"], a: 0 },
+            { q: "5. (錯題針對) 哪一個算式與 500 - 150 - 50 的結果相同？", options: ["500 - (150 - 50)", "500 - (150 + 50)", "500 + 150 - 50", "(500 - 150) + 50"], a: 1 },
+            { q: "6. 公主的衣櫥裡有 216 件禮服，比便服少 84 件。便服有幾件？", options: ["132 件", "300 件", "184 件", "290 件"], a: 1 },
+            { q: "7. 買一條絲帶 25 元，一個髮夾 18 元。付 50 元找回多少元？", options: ["50 - 25 + 18", "17 元", "7 元", "15 元"], a: 2 },
+            { q: "8. 裁縫店有 350 米絲綢，昨天用了 125 米，今天進貨 200 米，現在有幾米？", options: ["425 米", "25 米", "275 米", "550 米"], a: 0 },
+            { q: "9. 計算：4089 - 1435 + 2546 = ?", options: ["5200", "5100", "5300", "5000"], a: 0 },
+            { q: "10. 騎士團有 1250 人，精靈弓箭手有 890 人。精靈弓箭手比騎士團少幾人？", options: ["360 人", "460 人", "2140 人", "340 人"], a: 0 },
+            { q: "11. (錯題針對) 森林原有樹 879 棵，大火燒掉 667 棵，又種了 126 棵。現在有幾棵？", options: ["212 棵", "338 棵", "438 棵", "86 棵"], a: 1 },
+            { q: "12. 公主有 5000 枚金幣，買獨角獸坐騎用了 3386 枚，買馬鞍用了 1608 枚。還剩多少枚金幣？", options: ["1494 枚", "1006 枚", "6 枚", "16 枚"], a: 2 },
+            { q: "13. 計算：8748 - (3518 + 4182) = ?", options: ["1048", "948", "1148", "1058"], a: 0 },
+            { q: "14. 魔法店上午有 2504 人參觀，下午比上午少 928 人。全日共有多少人參觀？", options: ["1576 人", "4080 人", "3432 人", "5008 人"], a: 1 },
+            { q: "15. 第一款魔法卡有 3134 張，比第二款多 458 張。兩款共有多少張？", options: ["3592 張", "5810 張", "6726 張", "2676 張"], a: 1 },
+
+            // 第二單元：乘加乘減與優惠邏輯 (16-30)
+            { q: "16. 魔法藥水每瓶 48 元，公主買了 4 瓶，加一個 36 元的袋子，共需付多少元？", options: ["192 元", "228 元", "336 元", "156 元"], a: 1 },
+            { q: "17. (錯題針對) 買 5 份蘋果（每份 27 元），付 150 元，應找回多少元？", options: ["15 元", "135 元", "25 元", "165 元"], a: 0 },
+            { q: "18. 每盒魔法糖果 9 粒，公主買了 5 盒，分給精靈 20 粒後，還剩幾粒？", options: ["15 粒", "25 粒", "35 粒", "45 粒"], a: 1 },
+            { q: "19. 寶石工匠每小時打磨 77 顆寶石。4 小時後，他們打了多少顆？", options: ["288 顆", "308 顆", "318 顆", "298 顆"], a: 1 },
+            { q: "20. (錯題針對) 承上題，如果他們一共要打磨 350 顆寶石，還欠多少顆？", options: ["32 顆", "42 顆", "52 顆", "48 顆"], a: 1 },
+            { q: "21. 大盒裝珍珠有 48 粒，小盒裝有 9 粒。1 盒大盒比 5 盒小盒多幾粒？", options: ["3 粒", "45 粒", "93 粒", "13 粒"], a: 0 },
+            { q: "22. 魔法快餐店營業時間：10時至19時。這家店每天營業幾小時？", options: ["8 小時", "9 小時", "10 小時", "11 小時"], a: 1 },
+            { q: "23. 計算：90 - 6 × 9 = ?", options: ["36", "756", "54", "24"], a: 0 },
+            { q: "24. 買 3 件長裙，每件 108 元，結帳時可減 10 元優惠。共付多少元？", options: ["314 元", "294 元", "324 元", "304 元"], a: 1 }, // 3x(108)-10? Wait. The prompt image shows 3 x (108 - 10). Let's fix wording: "每件108元，每件減10元優惠"
+            { q: "25. 修正題意：買 3 件長裙，原價每件 108 元，現在每件減 10 元。共付多少元？", options: ["294 元", "314 元", "324 元", "284 元"], a: 0 },
+            { q: "26. (錯題針對) 買一張 50 元現金券，去買 6 張特價 40 元的電影票，還要付現金多少元？", options: ["190 元", "240 元", "160 元", "210 元"], a: 2 },
+            { q: "27. 魔法項鍊原價 180 元，買一條項鍊和一盒 73 元的曲奇，比單買一條項鍊便宜多少？(邏輯題)", options: ["107 元", "這題不合理，買兩樣不會比買一樣便宜", "253 元", "20 元"], a: 1 },
+            { q: "28. 城堡有 8 輛南瓜車，每加上層座位 57 個，下層 42 個。共有座位多少個？", options: ["792 個", "99 個", "800 個", "456 個"], a: 0 },
+            { q: "29. 承上題，4 輛車的上層座位與下層座位，相差多少個？", options: ["15 個", "60 個", "228 個", "168 個"], a: 1 },
+            { q: "30. 計算：(157 + 64) × 6 = ?", options: ["1326", "1226", "541", "1426"], a: 0 },
+
+            // 第三單元：三角形 (31-40) - 特徵、分類與包含關係
+            { q: "31. 公主的魔法盾牌有三條長度相等的邊，這叫什麼三角形？", options: ["直角三角形", "等腰三角形", "等邊三角形", "不等邊三角形"], a: 2 },
+            { q: "32. (錯題針對) 關於等邊三角形，哪一個描述是正確的？", options: ["它一定有直角", "它是等腰三角形的一種", "它的三個角不一定相等", "它可能有兩條邊不相等"], a: 1 },
+            { q: "33. (錯題針對) 一個三角形最多可以有幾個直角？", options: ["0 個", "1 個", "2 個", "3 個"], a: 1 },
+            { q: "34. 寶石是一個等腰三角形，其中一個角是直角。它叫什麼？", options: ["等腰直角三角形", "直角等邊三角形", "不等邊直角", "純直角三角形"], a: 0 },
+            { q: "35. 剪裁披風需要一個三條邊都不一樣長的三角形，這叫什麼？", options: ["等邊三角形", "等腰三角形", "不等邊三角形", "直角三角形"], a: 2 },
+            { q: "36. 魔法鏡子有四隻角，它是什麼三角形？", options: ["等腰三角形", "直角三角形", "不等邊三角形", "它根本不是三角形"], a: 3 },
+            { q: "37. 用 5cm, 5cm, 8cm 的幾何條，可以拼成什麼三角形？", options: ["等邊三角形", "等腰三角形", "直角三角形", "不等邊三角形"], a: 1 },
+            { q: "38. 把一張正方形的星空紙沿對角線對摺，會變成什麼三角形？", options: ["等腰直角三角形", "等邊三角形", "不等邊三角形", "銳角三角形"], a: 0 },
+            { q: "39. 所有的直角三角形，三條邊的長度都不一樣。這句話對嗎？", options: ["對", "錯，有等腰直角三角形", "錯，有等邊直角三角形", "對，因為有直角"], a: 1 },
+            { q: "40. 如果一個三角形有兩條邊一樣長，它「一定」是等邊三角形嗎？", options: ["一定", "不一定，只能確認是等腰", "一定不是", "不一定，可能是四邊形"], a: 1 },
+
+            // 第四單元：文字題純列式 (41-45)
+            { q: "41. 公主有 5000 元，買了 3 個魔法寶箱（每個 1200 元）和一個手袋 400 元。找回多少元？(請選擇正確算式)", options: ["5000 - 1200 × 3 + 400", "5000 - (1200 × 3 + 400)", "(5000 - 1200) × 3 + 400", "5000 - 1200 + 400 × 3"], a: 1 },
+            { q: "42. 一件星光長袍售 3386 元，魔法手杖比長袍便宜 1608 元。買一枝魔法手杖和一件長袍共需付多少元？", options: ["3386 - 1608", "3386 + 1608", "3386 + (3386 - 1608)", "3386 + (3386 + 1608)"], a: 2 },
+            { q: "43. 國王買了 7 箱魔藥，每箱 24 瓶。上午派了 3 箱，下午派了 9 瓶。今天共派了多少瓶魔藥？", options: ["3 × 24 + 9", "(7 - 3) × 24 + 9", "7 × 24 - 9", "3 + 9 × 24"], a: 0 },
+            { q: "44. 魔法學校有學生 32 人，老師比學生少 23 人。每位老師獲發 50 個寶石，老師共獲發多少個寶石？", options: ["32 - 23 × 50", "(32 - 23) × 50", "32 × 50 - 23", "50 × (32 + 23)"], a: 1 },
+            { q: "45. 買 4 頂皇冠（每頂 45 元）和 4 對耳環（每對 20 元）。共需多少元？", options: ["45 × 4 + 20 × 4", "(45 + 20) × 4", "選項 A 和 B 都正確", "45 × 20 × 4"], a: 2 }
+        ];
+
+        let currentBoxIndex = -1;
+        let score = 0;
+
+        // 初始化盲盒網格
+        const grid = document.getElementById("boxGrid");
+        questions.forEach((q, index) => {
+            const box = document.createElement("div");
+            box.className = "box";
+            box.innerHTML = "🎁";
+            box.onclick = () => openBox(index, box);
+            grid.appendChild(box);
+        });
+
+        const modalOverlay = document.getElementById("modalOverlay");
+        const qText = document.getElementById("qText");
+        const optionsContainer = document.getElementById("optionsContainer");
+        const feedback = document.getElementById("feedback");
+        const scoreDisplay = document.getElementById("score");
+
+        function openBox(index, boxElement) {
+            if (boxElement.classList.contains("opened")) return;
+            currentBoxIndex = index;
+            const qData = questions[index];
+            qText.innerText = qData.q;
+            optionsContainer.innerHTML = "";
+            feedback.innerText = "";
+            feedback.style.color = "#4a148c";
+
+            qData.options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = String.fromCharCode(65 + i) + ". " + opt; // A, B, C, D
+                btn.onclick = () => checkAnswer(i, btn, boxElement);
+                optionsContainer.appendChild(btn);
+            });
+
+            modalOverlay.style.display = "flex";
+        }
+
+        function checkAnswer(selectedIndex, btnElement, boxElement) {
+            const qData = questions[currentBoxIndex];
+            const buttons = optionsContainer.querySelectorAll(".option-btn");
+            
+            // 停用所有按鈕
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === qData.a) {
+                btnElement.style.backgroundColor = "#81c784";
+                btnElement.style.color = "white";
+                feedback.innerText = "✨ 答對了！魔法裝備解鎖！ ✨";
+                feedback.style.color = "#2e7d32";
+                
+                // 更換盲盒圖標為隨機公主獎品
+                const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                boxElement.innerHTML = randomPrize;
+                boxElement.classList.add("opened");
+                
+                score++;
+                scoreDisplay.innerText = score;
+                
+                setTimeout(() => { closeModal(); }, 1500);
+            } else {
+                btnElement.style.backgroundColor = "#e57373";
+                btnElement.style.color = "white";
+                buttons[qData.a].style.backgroundColor = "#81c784"; // 顯示正確答案
+                buttons[qData.a].style.color = "white";
+                feedback.innerText = "💨 哎呀，魔法失效了！看看正確答案吧！";
+                feedback.style.color = "#c62828";
+                
+                setTimeout(() => { closeModal(); }, 2500);
+            }
+        }
+
+        function closeModal() {
+            modalOverlay.style.display = "none";
+        }
+    </script>
+</body>
+</html>
