@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Pokémon 數學大師挑戰賽 ⚡</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Microsoft JhengHei', sans-serif;
+            background-color: #f0f9ff;
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .container {
+            max-width: 800px; width: 100%;
+            background: white; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px; border: 5px solid #ffcb05;
+            text-align: center; position: relative;
+        }
+
+        h1 { color: #3b4cca; text-shadow: 2px 2px #ffcb05; font-size: 2.2em; }
+
+        /* 任務清單首頁 */
+        #task-list-page { display: block; }
+        
+        .task-grid {
+            display: grid; grid-template-columns: repeat(5, 1x);
+            gap: 15px; margin-top: 30px;
+            display: flex; flex-wrap: wrap; justify-content: center;
+        }
+
+        .task-node {
+            width: 80px; height: 80px;
+            background: #ffde00; border: 3px solid #3b4cca;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            font-weight: 900; cursor: pointer;
+            transition: 0.2s; position: relative;
+            box-shadow: 0 4px 0 #ccaa00;
+        }
+
+        .task-node:hover { transform: scale(1.1); background: #3b4cca; color: white; }
+        .task-node.completed { background: #4caf50; border-color: #2e7d32; color: white; box-shadow: 0 4px 0 #1b5e20; }
+
+        /* 任務詳細頁面 */
+        #game-page { display: none; animation: slideIn 0.3s ease-out; }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+
+        .quest-box {
+            background: #f8fafc; border: 3px dashed #3b4cca;
+            padding: 20px; border-radius: 15px;
+            font-size: 1.3em; font-weight: bold; margin: 20px 0;
+            text-align: left; line-height: 1.6;
+        }
+
+        .input-group { background: #f1f5f9; padding: 25px; border-radius: 15px; margin-bottom: 20px; }
+
+        input[type="text"] {
+            width: 60%; padding: 15px; font-size: 1.5em;
+            border: 3px solid #ffcb05; border-radius: 12px;
+            text-align: center; margin-bottom: 15px; outline: none;
+        }
+
+        .unit-options { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+        .unit-btn {
+            background: white; border: 2px solid #cbd5e1;
+            padding: 10px 20px; border-radius: 20px;
+            cursor: pointer; font-weight: bold; font-size: 1.1em;
+        }
+
+        .unit-btn.selected { background: #3b4cca; color: white; border-color: #3b4cca; box-shadow: 0 4px 10px rgba(59,76,202,0.3); }
+
+        .submit-btn {
+            background: #ef4444; color: white; border: none;
+            padding: 15px 40px; border-radius: 30px;
+            font-size: 1.2em; font-weight: bold; margin-top: 25px;
+            width: 100%; cursor: pointer; box-shadow: 0 5px 0 #b91c1c;
+        }
+
+        #feedback-area { display: none; margin-top: 20px; padding: 20px; border-radius: 10px; text-align: left; }
+        .correct { background: #dcfce7; color: #166534; border: 2px solid #86efac; }
+        .wrong { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
+
+        .nav-btn {
+            background: #3b4cca; color: white; border: none;
+            padding: 10px 20px; border-radius: 10px;
+            margin-top: 20px; cursor: pointer; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="task-list-page">
+        <h1>🐾 Pokémon 任務地圖 🐾</h1>
+        <p style="font-weight: bold; color: #64748b;">挑戰 35 個關卡，成為最強訓練家！</p>
+        <div class="task-grid" id="task-grid"></div>
+    </div>
+
+    <div id="game-page">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="nav-btn" onclick="goHome()">⬅️ 返回地圖</button>
+            <span id="task-title" style="font-weight: 900; color: #3b4cca; font-size: 1.2em;">Task #1</span>
+        </div>
+        
+        <div class="quest-box" id="q-text"></div>
+        
+        <div class="input-group">
+            <input type="text" id="user-answer" placeholder="輸入數字..." onkeypress="handleEnter(event)">
+            <div style="color: #64748b; font-size: 0.9em; margin-bottom: 10px;">▼ 選擇正確單位 ▼</div>
+            <div id="unit-options" class="unit-options"></div>
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">🔴 投擲精靈球 (送出答案)</button>
+        </div>
+
+        <div id="feedback-area">
+            <div id="feedback-message" style="font-weight: 900; font-size: 1.1em;"></div>
+            <div id="feedback-exp" style="margin-top: 10px; font-size: 0.95em;"></div>
+            <button class="nav-btn" style="width: 100%; background: #64748b;" onclick="goHome()">下一個任務 ➡️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const taskData = [
+        // --- 四則運算系列 (15題) ---
+        { q: "小智有 45 點能量，噴火龍幫他補充了 15 點後，平均分配給 5 個招式槽，每個槽有多少能量？", a: "12", u: "點", opts: ["點", "個", "元", "米"], exp: "(45 + 15) ÷ 5 = 12 點。" },
+        { q: "半打精靈球賣 48 元，請問買 1 顆精靈球要幾元？", a: "8", u: "元", opts: ["元", "顆", "打", "米"], exp: "半打是 6 顆。48 ÷ 6 = 8 元。" },
+        { q: "火箭隊有 120 點生命值，被皮卡丘電擊 4 次，每次扣 20 點。他們還剩多少生命值？", a: "40", u: "點", opts: ["點", "次", "元", "米"], exp: "120 - 20 × 4 = 40 點。" },
+        { q: "★ ÷ (16 ÷ 4) = 25，請問 ★ 是多少？", a: "100", u: "無單位", opts: ["無單位", "元", "cm", "米"], exp: "16 ÷ 4 = 4。 25 × 4 = 100。" },
+        { q: "買 3 個超級球送 1 個，每個 64 元。想拿 4 個，平均每個花幾元？", a: "48", u: "元", opts: ["元", "個", "打", "米"], exp: "付 3 個錢拿 4 個：(64 × 3) ÷ 4 = 48 元。" },
+        { q: "一打樹果賣 120 元，單買一個 12 元。買一打比單買 12 個便宜幾元？", a: "24", u: "元", opts: ["元", "個", "打", "米"], exp: "單買 12 個要 144 元。144 - 120 = 24 元。" },
+        { q: "240 ÷ (4 × 2) 和 240 ÷ 4 × 2 的結果相差多少？", a: "90", u: "無單位", opts: ["無單位", "元", "cm", "米"], exp: "30 與 120 的差別是 90。" },
+        { q: "伊布有 320 元，買 5 個玩偶後剩 20 元。每個玩偶幾元？", a: "60", u: "元", opts: ["元", "個", "cm", "米"], exp: "(320 - 20) ÷ 5 = 60 元。" },
+        { q: "120 顆潔牙餅乾，平分給 8 隻伊布，每隻吃幾顆？", ans: "15", u: "顆", opts: ["顆", "隻", "元", "米"], exp: "120 ÷ 8 = 15 顆。" },
+        { q: "計算：45 + 15 ÷ 5 = ？", a: "48", u: "無單位", opts: ["無單位", "元", "cm", "米"], exp: "先除後加：45 + 3 = 48。" },
+        { q: "計算：(100 - 25 × 3) × 2 = ？", a: "50", u: "無單位", opts: ["無單位", "元", "cm", "米"], exp: "(100 - 75) × 2 = 50。" },
+        { q: "喵喵有 216 塊金幣，平分給 8 隊。每隊分到幾塊？", a: "27", u: "塊", opts: ["塊", "元", "隻", "米"], exp: "216 ÷ 8 = 27 塊。" },
+        { q: "醫生把 720 ml 藥水先倒出 120 ml，剩下的平分給 5 隻寶可夢，每隻分到幾 ml？", a: "120", u: "ml", opts: ["ml", "瓶", "元", "cm"], exp: "(720 - 120) ÷ 5 = 120 ml。" },
+        { q: "小剛買 2 套訓練家衣服，上衣 120 元，褲子 80 元。共付幾元？", a: "400", u: "元", opts: ["元", "套", "件", "米"], exp: "(120 + 80) × 2 = 400 元。" },
+        { q: "寶可夢中心有貓和狗共 48 隻，狗是貓的 3 倍，貓有幾隻？", a: "12", u: "隻", opts: ["隻", "元", "cm", "米"], exp: "48 ÷ 4 = 12 隻。" },
+
+        // --- 周界系列 (20題) ---
+        { q: "正方形對戰場周界 96 米，邊長幾米？", a: "24", u: "米", opts: ["米", "cm", "元", "個"], exp: "96 ÷ 4 = 24 米。" },
+        { q: "長方形水系道館長 12 米，闊 8 米，周界幾米？", a: "40", u: "米", opts: ["米", "cm", "元", "座"], exp: "(12 + 8) × 2 = 40 米。" },
+        { q: "長方形道館長是闊的 3 倍，周界 32 米，求闊？", a: "4", u: "米", opts: ["米", "cm", "元", "座"], exp: "32 ÷ 8 = 4 米。" },
+        { q: "從長 18 cm、闊 12 cm 長方形剪出最大的正方形，其周界幾 cm？", a: "48", u: "cm", opts: ["cm", "米", "元", "個"], exp: "邊長 12 cm。12 × 4 = 48 cm。" },
+        { q: "正方形地毯邊長 15 cm，周界幾 cm？", a: "60", u: "cm", opts: ["cm", "米", "元", "張"], exp: "15 × 4 = 60 cm。" },
+        { q: "長方形長 18 米，闊是長的一半，周界幾米？", a: "54", u: "米", opts: ["米", "cm", "元", "座"], exp: "闊 9 米。(18 + 9) × 2 = 54 米。" },
+        { q: "長方形闊 6 米，長是闊的 3 倍，周界幾米？", a: "48", u: "米", opts: ["米", "cm", "元", "座"], exp: "長 18 米。(18 + 6) × 2 = 48 米。" },
+        { q: "用 120 cm 鐵絲圍成一個長 40 cm 長方形，闊幾 cm？", a: "20", u: "cm", opts: ["cm", "米", "元", "個"], exp: "120 ÷ 2 - 40 = 20 cm。" },
+        { q: "正方形邊長 10 cm，對摺一次變成長方形，其周界幾 cm？", a: "30", u: "cm", opts: ["cm", "米", "元", "張"], exp: "(10 + 5) × 2 = 30 cm。" },
+        { q: "把兩個邊長 8 cm 正方形拼成長方形，其周界幾 cm？", a: "48", u: "cm", opts: ["cm", "米", "元", "個"], exp: "長 16 闊 8。(16 + 8) × 2 = 48 cm。" },
+        { q: "繞正方形跑一圈 12 分鐘。周界 480 米，每分鐘走幾米？", a: "40", u: "米", opts: ["米", "cm", "分鐘", "元"], exp: "480 ÷ 12 = 40 米。" },
+        { q: "長方形長 27 米，闊 18 米。圍欄每米 30 元，共需幾元？", a: "2700", u: "元", opts: ["元", "米", "cm", "個"], exp: "(27+18)×2×30 = 2700 元。" },
+        { q: "繞長 15 米、闊 10 米長方形跑 4 圈，共跑幾米？", a: "200", u: "米", opts: ["米", "cm", "圈", "元"], exp: "50 × 4 = 200 米。" },
+        { q: "九宮格道館周界 72 cm，求裡面一個小正方形的周界？", a: "24", u: "cm", opts: ["cm", "米", "元", "個"], exp: "大邊 18 -> 小邊 6。6 × 4 = 24 cm。" },
+        { q: "★ × ★ - 15 = 34，請問 ★ 是幾？", a: "7", u: "無單位", opts: ["無單位", "元", "cm", "米"], exp: "★ × ★ = 49。 7 × 7 = 49。" },
+        { q: "長方形周界 50 cm。長和闊各增加 2 cm，新周界幾 cm？", a: "58", u: "cm", opts: ["cm", "米", "元", "個"], exp: "50 + 2×4 = 58 cm。" },
+        { q: "4 個邊長 12 cm 小正方形拼成大正方形，大周界幾 cm？", a: "96", u: "cm", opts: ["cm", "米", "塊", "元"], exp: "大邊 24。24 × 4 = 96 cm。" },
+        { q: "正方形邊長 20 cm，剪下最大正方形（還是 20x20），其周界？", a: "80", u: "cm", opts: ["cm", "米", "元", "塊"], exp: "20 × 4 = 80 cm。" },
+        { q: "從長 25 闊 16 剪下最大正方形，剩下圖形周界？", a: "50", u: "cm", opts: ["cm", "米", "元", "個"], exp: "(16 + 9) × 2 = 50 cm。" },
+        { q: "長方形長是闊的 4 倍，周界 50 cm，求闊？", a: "5", u: "cm", opts: ["cm", "米", "元", "個"], exp: "50 ÷ 10 = 5 cm。" }
+    ];
+
+    let currentTask = 0;
+    let selectedUnit = "";
+    const completedTasks = new Set();
+
+    function initMap() {
+        const grid = document.getElementById('task-grid');
+        grid.innerHTML = '';
+        for (let i = 0; i < 35; i++) {
+            const node = document.createElement('div');
+            node.className = 'task-node' + (completedTasks.has(i) ? ' completed' : '');
+            node.innerText = i + 1;
+            node.onclick = () => startQuest(i);
+            grid.appendChild(node);
+        }
+    }
+
+    function startQuest(index) {
+        currentTask = index;
+        selectedUnit = "";
+        document.getElementById('task-list-page').style.display = 'none';
+        document.getElementById('game-page').style.display = 'block';
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'block';
+        document.getElementById('user-answer').disabled = false;
+        document.getElementById('user-answer').value = '';
+        
+        document.getElementById('task-title').innerText = `Task #${index + 1}`;
+        document.getElementById('q-text').innerText = taskData[index].q;
+        
+        const unitContainer = document.getElementById('unit-options');
+        unitContainer.innerHTML = '';
+        taskData[index].opts.forEach(u => {
+            const btn = document.createElement('button');
+            btn.className = 'unit-btn';
+            btn.innerText = u;
+            btn.onclick = () => {
+                selectedUnit = u;
+                document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            };
+            unitContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer() {
+        const raw = document.getElementById('user-answer').value;
+        const clean = raw.replace(/\D/g, '');
+        const task = taskData[currentTask];
+
+        if (!clean || !selectedUnit) {
+            alert("請輸入數字並選擇單位！"); return;
+        }
+
+        const fb = document.getElementById('feedback-area');
+        const msg = document.getElementById('feedback-message');
+        const exp = document.getElementById('feedback-exp');
+        fb.style.display = 'block';
+
+        if (clean === task.a && selectedUnit === task.u) {
+            fb.className = 'correct';
+            msg.innerText = "✅ 成功收服！太棒了！";
+            completedTasks.add(currentTask);
+        } else {
+            fb.className = 'wrong';
+            msg.innerText = `❌ 哎呀，逃走了！正確答案是 ${task.a} ${task.u}`;
+        }
+        exp.innerText = "大師解析：" + task.exp;
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('user-answer').disabled = true;
+    }
+
+    function goHome() {
+        document.getElementById('task-list-page').style.display = 'block';
+        document.getElementById('game-page').style.display = 'none';
+        initMap();
+    }
+
+    function handleEnter(e) { if (e.key === 'Enter') checkAnswer(); }
+
+    window.onload = initMap;
+</script>
+
+</body>
+</html>
