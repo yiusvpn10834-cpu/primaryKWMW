@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚑 動物救護指揮中心：升級挑戰 🚑</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "PingFang HK", sans-serif;
+            background: url('https://img.freepik.com/free-vector/forest-scene-with-various-forest-trees_1308-54563.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            text-align: center;
+        }
+        .ui-container {
+            background: rgba(255, 255, 255, 0.9);
+            border: 5px solid #4caf50;
+            border-radius: 15px;
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #d32f2f;
+            text-shadow: 1px 1px 2px #fff;
+            margin-top: 0;
+            font-size: 32px;
+        }
+        .player-status {
+            display: flex;
+            justify-content: space-around;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 3px solid #81c784;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quest-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .quest-icon {
+            background: #ffffff;
+            border: 3px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px 5px;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #f57c00;
+            transition: transform 0.1s, background 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .quest-icon:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        .quest-icon:hover {
+            background: #fff3e0;
+        }
+        .quest-icon.completed {
+            background: #cfd8dc;
+            border-color: #90a4ae;
+            box-shadow: none;
+            cursor: default;
+            transform: translateY(5px);
+        }
+        .quest-name {
+            font-size: 16px;
+            font-weight: bold;
+            display: block;
+            margin-top: 8px;
+            color: #d32f2f;
+            background: #ffecb3;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+        .quest-icon.completed .quest-name {
+            background: #b0bec5;
+            color: #fff;
+        }
+        
+        /* 遊戲對話框 (Modal) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: #ffffff;
+            border: 6px solid #d32f2f;
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 0 30px rgba(211, 47, 47, 0.8);
+            text-align: left;
+        }
+        .npc-dialogue {
+            font-size: 22px;
+            font-weight: bold;
+            color: #37474f;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            border-bottom: 2px dashed #ff8a65;
+            padding-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background-color: #f5f5f5;
+            border: 2px solid #90a4ae;
+            color: #263238;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+        }
+        .option-btn:hover {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .close-btn {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: #d32f2f;
+            color: white;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 28px;
+            line-height: 35px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 20px;
+            text-align: center;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui-container">
+        <h1>🚑 動物救護指揮中心：升級挑戰 🚑</h1>
+        
+        <div class="player-status">
+            <div class="status-item">🎖️ 職級：<span id="level" style="color:#d32f2f;">初級救護員</span></div>
+            <div class="status-item">✨ 經驗值：<span id="exp">0</span> / 350</div>
+            <div class="status-item">🐾 成功救援：<span id="score">0</span></div>
+        </div>
+        
+        <div class="quest-board" id="questBoard">
+            </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="close-btn" onclick="closeModal()">✖</div>
+            <div class="npc-dialogue" id="qText">讀取任務中...</div>
+            <div class="options" id="optionsContainer"></div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        const prizes = ["🐶", "🐱", "🐰", "🦊", "🐨", "🐼", "🚁", "🚑", "🩺", "🩹", "💉", "💊"];
+        
+        // 沿用動物救護員的 35 條題目
+        const questions = [
+            // 第一部分：加減混合與括號陷阱 (1-10)
+            { q: "【緊急呼叫】救護站有 800 個繃帶，上午用了 150 個，下午用了 220 個。還剩多少個？", options: ["430 個", "330 個", "530 個", "870 個"], a: 0 },
+            { q: "【補給任務】買一個急救箱 145 元，一個聽診器 85 元。付 500 元找回多少元？", options: ["270 元", "370 元", "470 元", "260 元"], a: 0 },
+            { q: "【流浪動物】收容所有 235 隻流浪狗，被領養了 45 隻，又救回 60 隻。現在有幾隻？", options: ["130 隻", "250 隻", "340 隻", "240 隻"], a: 1 },
+            { q: "【時間管理】救護車去程用 18 分鐘，急救用 25 分鐘，回程用 20 分鐘。共用多少分鐘？", options: ["53 分鐘", "63 分鐘", "73 分鐘", "43 分鐘"], a: 1 },
+            { q: "【密碼解鎖】請計算：550 - (120 + 80) = ?", options: ["510", "450", "350", "550"], a: 2 },
+            { q: "【醫療費用】替小熊敷藥 45 元，包紮 30 元，因為有愛心津貼減免 10 元。共付多少元？", options: ["65 元", "85 元", "75 元", "55 元"], a: 0 },
+            { q: "【物資清點】救護中心有 1452 條毛巾，保暖被比毛巾少 320 條。保暖被有多少條？", options: ["1132 條", "1772 條", "1122 條", "1232 條"], a: 0 },
+            { q: "【密碼解鎖】請計算：245 + 155 - 100 = ?", options: ["200", "400", "500", "300"], a: 3 },
+            { q: "【災後統計】森林大火救出 85 隻動物，水災救出 65 隻，其中 40 隻已康復回家。還有多少隻在中心？", options: ["190 隻", "110 隻", "100 隻", "150 隻"], a: 1 },
+            { q: "【邏輯考驗】下列哪一個算式的結果和「400 - 120 - 135」的結果相同？", options: ["400 - (120 - 135)", "400 - (120 + 135)", "(400 - 120) + 135", "400 + 120 - 135"], a: 1 },
+            
+            // 第二部分：乘加與乘減混合 (11-20)
+            { q: "【藥房任務】一排消炎藥有 12 粒，救護員拿了 4 排，用去了 8 粒。還剩幾粒？", options: ["40 粒", "56 粒", "48 粒", "32 粒"], a: 0 },
+            { q: "【補給任務】買 5 包棉花，每包 15 元，加一瓶消毒水 40 元。共需付多少元？", options: ["115 元", "95 元", "105 元", "125 元"], a: 0 },
+            { q: "【直升機加油】救護直升機入油每升 20 元，入了 8 升，付 200 元紙幣，找回多少元？", options: ["60 元", "40 元", "20 元", "80 元"], a: 1 },
+            { q: "【冬季送暖】買 3 張動物保暖墊，每張 150 元，結帳時總共減 50 元優惠。共付多少元？", options: ["400 元", "450 元", "500 元", "350 元"], a: 0 },
+            { q: "【密碼解鎖】請計算：25 + 7 × 8 = ?", options: ["81", "256", "91", "71"], a: 0 },
+            { q: "【密碼解鎖】請計算：(65 - 15) × 3 = ?", options: ["20", "180", "150", "240"], a: 2 },
+            { q: "【鳥類救援】每隻受傷小鳥餵 3 條蟲，有 15 隻小鳥。原本有 100 條蟲，餵完還剩幾條？", options: ["45 條", "55 條", "65 條", "35 條"], a: 1 },
+            { q: "【時間管理】救助一隻海龜需 2 小時，救助 4 隻後，再用 1 小時寫報告。共用幾小時？", options: ["7 小時", "8 小時", "9 小時", "10 小時"], a: 2 },
+            { q: "【幼崽餵哺】買 6 罐特製動物奶粉，每罐 80 元，付 500 元找回多少元？", options: ["20 元", "40 元", "10 元", "30 元"], a: 0 },
+            { q: "【排班計算】獸醫每天工作 8 小時，工作 5 天後，加上週末值班 4 小時。一週共工作幾小時？", options: ["40 小時", "42 小時", "44 小時", "46 小時"], a: 2 },
+
+            // 第三部分：三角形幾何概念 (21-30)
+            { q: "【圖形辨識】救護站的警告標誌是三條邊一樣長的三角形，這叫什麼三角形？", options: ["等腰三角形", "直角三角形", "等邊三角形", "不等邊三角形"], a: 2 },
+            { q: "【急救裝備】用來固定小狗骨折的三角巾，有一個角是直角，這叫什麼三角形？", options: ["等邊三角形", "直角三角形", "等腰三角形", "不等邊三角形"], a: 1 },
+            { q: "【圖形辨識】貓頭鷹的繃帶是一個等腰三角形，它有什麼特徵？", options: ["三條邊一樣長", "有一個直角", "有兩條邊一樣長", "三條邊都不一樣長"], a: 2 },
+            { q: "【圖形邏輯】判斷題：一個三角形可以同時有兩個直角嗎？", options: ["可以", "不可以", "看情況", "如果是等腰就可以"], a: 1 },
+            { q: "【圖形邏輯】判斷題：所有的等邊三角形，都是等腰三角形的一種嗎？", options: ["是", "不是", "有時候是", "等腰三角形才是等邊的一種"], a: 0 },
+            { q: "【圖形辨識】如果一個三角形三條邊的長度都不一樣長，牠叫什麼？", options: ["等邊三角形", "等腰三角形", "直角三角形", "不等邊三角形"], a: 3 },
+            { q: "【圖形辨識】有一個三角形，兩條邊一樣長，而且有一個角是直角。這叫什麼？", options: ["純直角三角形", "等腰直角三角形", "等邊直角三角形", "不等邊直角三角形"], a: 1 },
+            { q: "【骨科手術】用 6cm, 6cm, 6cm 的竹籤幫小鳥做支架，這是一個什麼形狀？", options: ["不等邊三角形", "等腰三角形", "等邊三角形", "直角三角形"], a: 2 },
+            { q: "【骨科手術】哪一組竹籤的長度可以拼成一個等邊三角形？", options: ["3cm, 4cm, 5cm", "4cm, 4cm, 4cm", "4cm, 4cm, 6cm", "2cm, 5cm, 8cm"], a: 1 },
+            { q: "【圖形邏輯】等邊三角形有幾個銳角（比直角小的角）？", options: ["1 個", "2 個", "3 個", "沒有"], a: 2 },
+
+            // 第四部分：純文字列式題 (31-35) 不用計算
+            { q: "【指揮官測試】救護員帶了 800 元，買急救包 250 元和氧氣罩 180 元。下列哪一個是計算「找回金錢」的正確算式？", options: ["800 - 250 + 180", "800 - (250 + 180)", "(800 - 250) + 180", "800 + 250 - 180"], a: 1 },
+            { q: "【指揮官測試】買 4 支針筒，每支 12 元，再加上一瓶藥水 55 元。下列哪一個是計算「總收費」的正確算式？", options: ["12 + 4 × 55", "12 × 4 + 55", "(12 + 55) × 4", "12 × 55 + 4"], a: 1 },
+            { q: "【指揮官測試】站內有 300 罐貓糧，每天吃掉 25 罐，吃了 7 天。下列哪一個是計算「剩下貓糧」的正確算式？", options: ["300 - 25 + 7", "300 - 25 × 7", "(300 - 25) × 7", "300 × 7 - 25"], a: 1 },
+            { q: "【指揮官測試】買 5 件救護反光衣，原價每件 100 元，現在每件減 15 元。下列哪一個是計算「共需付多少」的正確算式？", options: ["100 - 15 × 5", "100 × 5 - 15", "(100 - 15) × 5", "100 × (15 - 5)"], a: 2 },
+            { q: "【指揮官測試】救護車上有 50 卷紗布，用去了 14 卷，剩下的平均分給 4 個急救箱。下列哪一個是計算「每個急救箱有幾卷」的正確算式？", options: ["50 - 14 ÷ 4", "(50 - 14) ÷ 4", "50 ÷ 4 - 14", "50 ÷ (14 - 4)"], a: 1 }
+        ];
+
+        let currentExp = 0;
+        let currentScore = 0;
+        let currentLevel = "初級救護員";
+        let activeQuestionIndex = -1;
+        let activeBox = null;
+
+        // 初始化任務佈告欄
+        const board = document.getElementById("questBoard");
+        questions.forEach((q, index) => {
+            const box = document.createElement("div");
+            box.className = "quest-icon";
+            box.innerHTML = `🧰<span class="quest-name">任務 ${index + 1}</span>`;
+            box.onclick = () => openQuest(index, box);
+            board.appendChild(box);
+        });
+
+        const modalOverlay = document.getElementById("modalOverlay");
+        const qText = document.getElementById("qText");
+        const optionsContainer = document.getElementById("optionsContainer");
+        const feedback = document.getElementById("feedback");
+
+        function openQuest(index, boxElement) {
+            if (boxElement.classList.contains("completed")) return;
+            activeQuestionIndex = index;
+            activeBox = boxElement;
+            const qData = questions[index];
+            
+            qText.innerText = qData.q;
+            optionsContainer.innerHTML = "";
+            feedback.innerText = "";
+            feedback.style.color = "#333";
+
+            qData.options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = String.fromCharCode(65 + i) + ". " + opt;
+                btn.onclick = () => checkAnswer(i, btn, qData.a);
+                optionsContainer.appendChild(btn);
+            });
+
+            modalOverlay.style.display = "flex";
+        }
+
+        function checkAnswer(selectedIndex, btnElement, correctIndex) {
+            const buttons = optionsContainer.querySelectorAll(".option-btn");
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === correctIndex) {
+                btnElement.style.backgroundColor = "#aed581";
+                btnElement.style.borderColor = "#388e3c";
+                feedback.innerText = "✨ 任務成功！獲得 10 EXP！";
+                feedback.style.color = "#2e7d32";
+                
+                // 更新玩家狀態
+                currentExp += 10;
+                currentScore += 1;
+                
+                if(currentExp >= 300) {
+                    currentLevel = "傳奇救護隊長 🌟";
+                } else if(currentExp >= 200) {
+                    currentLevel = "高級救護員 ⭐";
+                } else if(currentExp >= 100) {
+                    currentLevel = "中級救護員 🏅";
+                }
+                
+                document.getElementById("exp").innerText = currentExp;
+                document.getElementById("score").innerText = currentScore;
+                document.getElementById("level").innerText = currentLevel;
+
+                // 更換為隨機動物或獎勵圖標，並顯示完成狀態
+                const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                activeBox.innerHTML = `${randomPrize}<span class="quest-name">已完成</span>`;
+                activeBox.classList.add("completed");
+                
+                setTimeout(() => { closeModal(); }, 1500);
+            } else {
+                btnElement.style.backgroundColor = "#e57373";
+                btnElement.style.color = "white";
+                buttons[correctIndex].style.backgroundColor = "#aed581"; 
+                feedback.innerText = "🚨 哎呀，計算錯誤！請確認正確流程！";
+                feedback.style.color = "#c62828";
+                
+                setTimeout(() => { closeModal(); }, 2500);
+            }
+        }
+
+        function closeModal() {
+            modalOverlay.style.display = "none";
+        }
+    </script>
+</body>
+</html>
