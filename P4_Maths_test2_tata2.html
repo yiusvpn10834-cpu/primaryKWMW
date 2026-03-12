@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐾 貓貓樂園：Rosita 的數學盲盒 🐾</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Microsoft JhengHei', sans-serif;
+            background-color: #fff7ed; /* 溫暖的貓咪奶油色 */
+            color: #5c4a4d;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(251, 146, 60, 0.2);
+            padding: 30px;
+            border: 4px dashed #fb923c; /* 活潑的橘色邊框 */
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #f97316;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #78716c;
+            font-size: 1em;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        /* 盲盒區 */
+        #blind-box-area {
+            display: block;
+        }
+
+        .box-emoji {
+            font-size: 100px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .box-emoji:hover {
+            transform: scale(1.1);
+        }
+
+        .shake {
+            animation: shake 0.4s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(15deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .draw-btn {
+            background-color: #f97316;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(249, 115, 22, 0.4);
+            transition: all 0.2s;
+        }
+
+        .draw-btn:hover {
+            background-color: #ea580c;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
+        }
+
+        /* 題目區 */
+        #question-area {
+            display: none;
+            animation: popIn 0.4s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .q-tag {
+            background-color: #ffedd5;
+            color: #ea580c;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 2px solid #fdba74;
+        }
+
+        .question-text {
+            font-size: 1.25em;
+            line-height: 1.6;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #44403c;
+            text-align: left;
+            padding: 0 15px;
+        }
+
+        .input-group {
+            background-color: #fafaf9;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #d6d3d1;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 50%;
+            padding: 12px;
+            font-size: 1.3em;
+            background-color: #ffffff;
+            border: 3px solid #fdba74;
+            border-radius: 10px;
+            text-align: center;
+            color: #ea580c;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #f97316;
+        }
+
+        /* 單位選擇按鈕 */
+        .unit-options {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .unit-btn {
+            background-color: #ffffff;
+            color: #78716c;
+            border: 2px solid #e7e5e4;
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .unit-btn:hover {
+            border-color: #fca5a5;
+            color: #ef4444;
+        }
+
+        .unit-btn.selected {
+            background-color: #fef2f2;
+            color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+            transform: scale(1.05);
+        }
+
+        .submit-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #059669;
+        }
+
+        /* 解答與回饋區 */
+        #feedback-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            text-align: left;
+            animation: fadeIn 0.4s;
+        }
+
+        .correct-box {
+            background-color: #ecfdf5;
+            border: 3px dashed #34d399;
+            color: #047857;
+        }
+
+        .wrong-box {
+            background-color: #fef2f2;
+            border: 3px dashed #fca5a5;
+            color: #b91c1c;
+        }
+
+        .next-btn {
+            background-color: #f97316;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #ea580c;
+        }
+
+        .stats {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-weight: bold;
+            color: #ea580c;
+            background: #ffedd5;
+            padding: 6px 12px;
+            border-radius: 15px;
+            border: 2px solid #fdba74;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="stats">已開盲盒: <span id="box-count">0</span>/40</div>
+    <h1>🐾 貓貓樂園採購任務 🐾</h1>
+    <div class="subtitle">輸入數字後，記得幫貓貓選對【單位】喔！🐱</div>
+
+    <div id="blind-box-area">
+        <div class="box-emoji" id="box-icon">🧺</div><br>
+        <button class="draw-btn" onclick="openBox()">🐈 抽取貓咪任務 🐈</button>
+    </div>
+
+    <div id="question-area">
+        <div class="q-tag" id="q-tag">載入中...</div>
+        <div class="question-text" id="q-text">載入中...</div>
+        
+        <div class="input-group">
+            <input type="text" id="user-answer" placeholder="輸入數字..." onkeypress="handleEnter(event)">
+            <div style="color: #a8a29e; font-size: 0.9em; margin-bottom: 8px;">▼ 點選正確單位 ▼</div>
+            <div id="unit-options" class="unit-options">
+                </div>
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">🐟 餵食貓貓 (送出答案)</button>
+        </div>
+
+        <div id="feedback-area">
+            <div id="feedback-message"></div>
+            <div id="feedback-exp" style="margin-top: 12px; font-size: 0.95em; color: #57534e;"></div>
+            <button class="next-btn" id="next-action-btn" onclick="resetToBox()">🧺 繼續開盲盒</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 專屬 Rosita 的貓貓樂園 40 題大挑戰
+    const originalQuestions = [
+        // 第一部分：四則混合計算與採購 (10題)
+        { c: "購買貓糧", q: "買 3 罐貓罐頭送 1 罐，每罐 16 元。想拿 4 罐，平均每罐要花多少元？", ans: "12", unit: "元", unitOpts: ["元", "罐", "cm", "米"], exp: "買3送1代表拿4罐只要付3罐的錢。16 × 3 = 48 元。平均一罐 48 ÷ 4 = 12 元。" },
+        { c: "購買貓糧", q: "半打貓肉泥售 48 元，1 條貓肉泥是多少元？", ans: "8", unit: "元", unitOpts: ["元", "條", "打", "米"], exp: "小心陷阱！半打是 6 條。48 ÷ 6 = 8 元。" },
+        { c: "購買貓糧", q: "貓砂每包 45 元，逗貓棒一根 15 元。付 100 元買了各一件，應找回多少元？", ans: "40", unit: "元", unitOpts: ["元", "包", "點", "cm"], exp: "100 - (45 + 15) = 100 - 60 = 40 元。" },
+        { c: "分配日用品", q: "120 顆潔牙餅乾，平分給 8 隻貓，每隻貓可以吃幾顆？", ans: "15", unit: "顆", unitOpts: ["顆", "元", "隻", "米"], exp: "120 ÷ 8 = 15 顆。" },
+        { c: "分配日用品", q: "A區有 216 個小魚乾平分給 8 隻貓，B區有 216 個平分給 24 隻貓。A區的貓比B區的貓多拿幾個？", ans: "18", unit: "個", unitOpts: ["個", "隻", "元", "cm"], exp: "A區: 216÷8=27。B區: 216÷24=9。相差 27 - 9 = 18 個。" },
+        { c: "購買貓糧", q: "貓薄荷一盒 150 元，買 4 盒減 50 元。買 4 盒共要付多少元？", ans: "550", unit: "元", unitOpts: ["元", "盒", "cm", "米"], exp: "150 × 4 - 50 = 600 - 50 = 550 元。" },
+        { c: "分配日用品", q: "樂園有 120 個貓玩具，壞了 20 個。剩下的平分到 4 個房間，每個房間放幾個？", ans: "25", unit: "個", unitOpts: ["個", "元", "間", "米"], exp: "有括號先算喔！(120 - 20) ÷ 4 = 100 ÷ 4 = 25 個。" },
+        { c: "購買貓糧", q: "買 5 包貓餅乾送 1 包，每包 15 元。樂園總共需要 12 包，最少要付多少元？", ans: "150", unit: "元", unitOpts: ["元", "包", "米", "cm"], exp: "買5送1代表每6包是一組。12包剛好是2組。只需付 10 包的錢：15 × 10 = 150 元。" },
+        { c: "購買貓糧", q: "貓抓板一個 120 元，逗貓棒一根 80 元。買 2 套(各一件)共需多少元？", ans: "400", unit: "元", unitOpts: ["元", "套", "件", "米"], exp: "(120 + 80) × 2 = 200 × 2 = 400 元。" },
+        { c: "購買貓糧", q: "貓咪美容費 450 元，洗澡 150 元。平均分給 5 隻貓，每隻花費多少元？", ans: "120", unit: "元", unitOpts: ["元", "隻", "cm", "米"], exp: "(450 + 150) ÷ 5 = 600 ÷ 5 = 120 元。" },
+
+        // 第二部分：周界基礎 (10題)
+        { c: "佈置貓屋 (周界)", q: "正方形貓床的周界是 96 cm，它的邊長是多少 cm？", ans: "24", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "邊長 = 周界 ÷ 4。96 ÷ 4 = 24 cm。" },
+        { c: "佈置貓屋 (周界)", q: "長方形貓咪飯桌長 12 cm，闊 8 cm。周界是多少 cm？", ans: "40", unit: "cm", unitOpts: ["cm", "米", "元", "張"], exp: "長方形周界 = (長 + 闊) × 2。 (12 + 8) × 2 = 40 cm。" },
+        { c: "佈置貓屋 (周界)", q: "貓咪休息區長 18 米，【闊是長的一半】，這個休息區的周界是多少米？", ans: "54", unit: "米", unitOpts: ["米", "cm", "元", "區"], exp: "闊 = 18 ÷ 2 = 9。周界 = (18 + 9) × 2 = 54 米。" },
+        { c: "佈置貓屋 (周界)", q: "貓砂盆闊 6 cm，【長是闊的 3 倍】，周界是多少 cm？", ans: "48", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "長 = 6 × 3 = 18。周界 = (18 + 6) × 2 = 48 cm。" },
+        { c: "佈置貓屋 (周界)", q: "用一條長 100 cm 的絲帶剛好圍成一個正方形玩具，邊長是多少 cm？", ans: "25", unit: "cm", unitOpts: ["cm", "米", "條", "元"], exp: "絲帶長度就是周界！100 ÷ 4 = 25 cm。" },
+        { c: "佈置貓屋 (周界)", q: "正方形貓咪地毯的邊長是 15 cm，周界是多少 cm？", ans: "60", unit: "cm", unitOpts: ["cm", "米", "張", "元"], exp: "邊長 × 4 = 周界。15 × 4 = 60 cm。" },
+        { c: "佈置貓屋 (周界)", q: "長方形貓門的長是 22 cm，周界是 66 cm，闊是多少 cm？", ans: "11", unit: "cm", unitOpts: ["cm", "米", "元", "扇"], exp: "長+闊 = 66 ÷ 2 = 33。闊 = 33 - 22 = 11 cm。" },
+        { c: "佈置貓屋 (周界)", q: "用 80 cm 的毛線圍成一個長 25 cm 的長方形，闊是多少 cm？", ans: "15", unit: "cm", unitOpts: ["cm", "米", "元", "條"], exp: "長+闊 = 80 ÷ 2 = 40。闊 = 40 - 25 = 15 cm。" },
+        { c: "佈置貓屋 (周界)", q: "4 個邊長 10 cm 的小正方形貓地墊，拼成一個大正方形，大正方形邊長多少 cm？", ans: "20", unit: "cm", unitOpts: ["cm", "米", "塊", "元"], exp: "大正方形的邊長是小正方形的 2 倍。10 × 2 = 20 cm。" },
+        { c: "佈置貓屋 (周界)", q: "承上題，這個大正方形的周界是多少 cm？", ans: "80", unit: "cm", unitOpts: ["cm", "米", "塊", "元"], exp: "大正方形邊長是 20，周界 = 20 × 4 = 80 cm。" },
+
+        // 第三部分：進階幾何與剪紙 (10題)
+        { c: "貓屋設計師", q: "長方形貓咪樂園的【長是闊的 3 倍】，周界是 32 米。闊是多少米？", ans: "4", unit: "米", unitOpts: ["米", "cm", "元", "間"], exp: "代數魔法：長+長+闊+闊 = 8個闊。32 ÷ 8 = 4 米。" },
+        { c: "貓屋設計師", q: "貓咪餐廳的長是闊的 4 倍，周界 50 米。闊是多少米？", ans: "5", unit: "米", unitOpts: ["米", "cm", "元", "間"], exp: "4個闊+4個闊+1個闊+1個闊 = 10個闊。50 ÷ 10 = 5 米。" },
+        { c: "DIY 貓抓箱", q: "從長 18 cm、闊 12 cm 的紙箱，剪下一個【最大的正方形】貓洞。這正方形周界多少 cm？", ans: "48", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "最大正方形的邊長受限於【短邊】12 cm。周界 = 12 × 4 = 48 cm。" },
+        { c: "DIY 貓抓箱", q: "從長 25 cm、闊 16 cm 的紙箱剪下一個最大的正方形。剩下的圖形周界是多少 cm？", ans: "50", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "剪一刀後，剩下的圖形長和闊變成 16 cm 和 (25 - 16) = 9 cm。新周界 = (16 + 9) × 2 = 50 cm。" },
+        { c: "DIY 貓抓箱", q: "把一張邊長 10 cm 的正方形瓦楞紙對摺一次變成一個長方形。這長方形周界多少 cm？", ans: "30", unit: "cm", unitOpts: ["cm", "米", "張", "元"], exp: "對摺後，長不變(10)，闊變成一半(5)。周界 = (10 + 5) × 2 = 30 cm。" },
+        { c: "貓屋設計師", q: "把兩個邊長 8 cm 的正方形貓墊拼成一個長方形，這長方形周界多少 cm？", ans: "48", unit: "cm", unitOpts: ["cm", "米", "塊", "元"], exp: "拼起來後長變成 16，闊是 8。周界 = (16 + 8) × 2 = 48 cm。" },
+        { c: "貓屋設計師", q: "長方形花園長 27 米，闊 18 米，圍欄每米 30 元。圍滿整個花園共需多少元？", ans: "2700", unit: "元", unitOpts: ["元", "米", "cm", "個"], exp: "先算周界：(27+18)×2 = 90米。花費：90 × 30 = 2700 元。" },
+        { c: "貓貓運動", q: "貓咪繞正方形水池跑 5 圈共跑了 400 米，水池邊長多少米？", ans: "20", unit: "米", unitOpts: ["米", "cm", "圈", "元"], exp: "先算1圈(周界)：400 ÷ 5 = 80 米。再算邊長：80 ÷ 4 = 20 米。" },
+        { c: "貓貓運動", q: "小貓繞長 15 米、闊 10 米的長方形跑 4 圈，共跑了多少米？", ans: "200", unit: "米", unitOpts: ["米", "cm", "圈", "元"], exp: "1圈周界 = (15 + 10) × 2 = 50 米。4 圈 = 50 × 4 = 200 米。" },
+        { c: "貓屋設計師", q: "大正方形貓窩周界 72 cm，由 9 個小正方形(九宮格)組成。每個小正方形周界多少 cm？", ans: "24", unit: "cm", unitOpts: ["cm", "米", "個", "元"], exp: "大邊長 = 72 ÷ 4 = 18。九宮格代表小邊長 = 18 ÷ 3 = 6。小周界 = 6 × 4 = 24 cm。" },
+
+        // 第四部分：混合挑戰與邏輯 (10題)
+        { c: "貓咪代數", q: "貓咪項圈上的密碼：A × 4 ÷ 2 = 20，請問 A 是多少？", ans: "10", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "反推回去：20 × 2 ÷ 4 = 10。A 就是 10！" },
+        { c: "貓咪代數", q: "貓星人解謎：★ × ★ - 15 = 34，星星 (★) 是多少？", ans: "7", unit: "無單位", unitOpts: ["無單位", "元", "顆", "米"], exp: "★ × ★ = 34 + 15 = 49。因為 7 × 7 = 49，所以是 7！" },
+        { c: "四則運算魔法", q: "計算魔法：(45 + 15) ÷ 5 = ?", ans: "12", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "有括號先算！60 ÷ 5 = 12。" },
+        { c: "四則運算魔法", q: "計算魔法：24 ÷ 2 × 3 = ?", ans: "36", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "只有乘除，由左至右算。12 × 3 = 36。" },
+        { c: "DIY 貓草包", q: "貓屋有 520 克貓草，先用 280 克做了 14 個小香包。剩下的每 40 克做一個大香包，可做幾個大香包？", ans: "6", unit: "個", unitOpts: ["個", "克", "元", "米"], exp: "剩下：520 - 280 = 240 克。大香包：240 ÷ 40 = 6 個。" },
+        { c: "購買貓糧", q: "原本有 320 元，買 5 把貓梳子後剩下 20 元。每把梳子多少元？", ans: "60", unit: "元", unitOpts: ["元", "把", "cm", "米"], exp: "梳子總共花了 320 - 20 = 300 元。300 ÷ 5 = 60 元。" },
+        { c: "貓貓運動", q: "哥哥陪貓咪繞正方形樂園走一圈要 12 分鐘。樂園周界 480 米，他每分鐘走多少米？", ans: "40", unit: "米", unitOpts: ["米", "分鐘", "cm", "元"], exp: "不用除以4！一圈就是周界，直接算：480 ÷ 12 = 40 米。" },
+        { c: "購買貓糧", q: "買 2 套貓咪服裝，每件上衣 120 元，褲子 80 元。共需多少元？", ans: "400", unit: "元", unitOpts: ["元", "套", "件", "米"], exp: "一套是 120 + 80 = 200。兩套是 200 × 2 = 400 元。" },
+        { c: "購買貓糧", q: "貓罐頭一打 120 元，單買一罐 15 元。買一打比單買 12 罐便宜多少元？", ans: "60", unit: "元", unitOpts: ["元", "罐", "打", "米"], exp: "單買 12 罐要 15 × 12 = 180 元。180 - 120 = 60 元。" },
+        { c: "四則運算魔法", q: "計算魔法：(100 - 25 × 3) × 2 = ?", ans: "50", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "先算括號裡的乘法：100 - 75 = 25。再算 25 × 2 = 50。" }
+    ];
+
+    let questionPool = [...originalQuestions];
+    let currentQ = null;
+    let boxCount = 0;
+    let selectedUnit = "";
+
+    function openBox() {
+        if(questionPool.length === 0) {
+            document.getElementById('blind-box-area').innerHTML = '<div class="box-emoji">😻</div><h2 style="color:#059669;">40 個任務全數完成！</h2><p style="color:#78716c;">Rosita 妳太棒了！貓貓們現在超級開心！YAH！🐰</p>';
+            return;
+        }
+
+        const box = document.getElementById('box-icon');
+        box.classList.add('shake');
+        
+        setTimeout(() => {
+            box.classList.remove('shake');
+            
+            const randomIndex = Math.floor(Math.random() * questionPool.length);
+            currentQ = questionPool[randomIndex];
+            questionPool.splice(randomIndex, 1); 
+
+            // 重置 UI
+            selectedUnit = "";
+            document.getElementById('blind-box-area').style.display = 'none';
+            document.getElementById('question-area').style.display = 'block';
+            document.getElementById('feedback-area').style.display = 'none';
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('user-answer').focus();
+            
+            document.getElementById('q-tag').innerText = `[ ${currentQ.c} ]`;
+            document.getElementById('q-text').innerText = currentQ.q;
+
+            // 隨機打亂單位按鈕
+            const shuffledUnits = currentQ.unitOpts.sort(() => Math.random() - 0.5);
+            const unitContainer = document.getElementById('unit-options');
+            unitContainer.innerHTML = ''; 
+            
+            shuffledUnits.forEach(unit => {
+                const btn = document.createElement('button');
+                btn.className = 'unit-btn';
+                btn.innerText = unit;
+                btn.onclick = () => selectUnit(unit, btn);
+                unitContainer.appendChild(btn);
+            });
+            
+        }, 400);
+    }
+
+    // 處理單位選擇
+    function selectUnit(unit, btnElement) {
+        if (document.getElementById('user-answer').disabled) return;
+        
+        selectedUnit = unit;
+        const allBtns = document.querySelectorAll('.unit-btn');
+        allBtns.forEach(b => b.classList.remove('selected'));
+        btnElement.classList.add('selected');
+    }
+
+    function checkAnswer() {
+        const rawInput = document.getElementById('user-answer').value;
+        const cleanInput = rawInput.replace(/\D/g, ''); 
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackMsg = document.getElementById('feedback-message');
+        const feedbackExp = document.getElementById('feedback-exp');
+        const nextBtn = document.getElementById('next-action-btn');
+
+        if (cleanInput === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 咦？忘記輸入數字囉！</strong>';
+            feedbackExp.innerText = '貓貓需要數字才能知道答案喔！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        if (selectedUnit === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 忘記點選單位了！</strong>';
+            feedbackExp.innerText = '請在下面橘色框框裡點選正確的單位！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+
+        const isNumCorrect = (cleanInput === currentQ.ans);
+        const isUnitCorrect = (selectedUnit === currentQ.unit);
+
+        if (isNumCorrect && isUnitCorrect) {
+            feedbackArea.className = 'correct-box';
+            feedbackMsg.innerHTML = '<strong>🟢 喵~ 答對了！好棒喔！</strong>';
+            feedbackExp.innerText = `【魔法解析】${currentQ.exp}`;
+            
+            nextBtn.innerText = '🧺 抽取下一個任務';
+            nextBtn.style.backgroundColor = '#10b981';
+            nextBtn.style.color = 'white';
+            nextBtn.onclick = resetToBox;
+            
+            if(document.getElementById('user-answer').disabled === false){
+                 boxCount++;
+                 document.getElementById('box-count').innerText = boxCount;
+            }
+            document.getElementById('user-answer').disabled = true;
+            document.getElementById('submit-btn').style.display = 'none';
+
+        } else if (isNumCorrect && !isUnitCorrect) {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🟡 數字對了，可是「單位」選錯囉！</strong>`;
+            feedbackExp.innerText = '差一點點就完美了！請重新選一次正確的單位吧！';
+            nextBtn.style.display = 'none'; 
+
+        } else if (!isNumCorrect && isUnitCorrect) {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 單位正確，但數字算錯了！</strong> (妳輸入的數字: ${cleanInput})`;
+            feedbackExp.innerText = '拿張計算紙再算一次看看，或者請貓貓公佈答案！';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '💡 請貓貓公佈答案';
+            nextBtn.style.backgroundColor = '#fca5a5';
+            nextBtn.style.color = '#7f1d1d';
+            nextBtn.onclick = showExplanation;
+            
+        } else {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 哎呀，數字和單位都不太對喔！</strong> (妳輸入: ${cleanInput})`;
+            feedbackExp.innerText = '沒關係，再想一下，或者請貓貓公佈答案！';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '💡 請貓貓公佈答案';
+            nextBtn.style.backgroundColor = '#fca5a5';
+            nextBtn.style.color = '#7f1d1d';
+            nextBtn.onclick = showExplanation;
+        }
+    }
+
+    function showExplanation() {
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.className = 'wrong-box';
+        document.getElementById('feedback-message').innerHTML = `<strong>正確答案是：${currentQ.ans} ${currentQ.unit}</strong>`;
+        document.getElementById('feedback-exp').innerText = `【魔法解析】${currentQ.exp}`;
+        
+        const nextBtn = document.getElementById('next-action-btn');
+        nextBtn.innerText = '🧺 學會了！繼續開盲盒';
+        nextBtn.style.backgroundColor = '#f97316';
+        nextBtn.style.color = 'white';
+        nextBtn.onclick = resetToBox;
+        
+        document.getElementById('user-answer').disabled = true;
+        document.getElementById('submit-btn').style.display = 'none';
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            checkAnswer();
+        }
+    }
+
+    function resetToBox() {
+        document.getElementById('blind-box-area').style.display = 'block';
+        document.getElementById('question-area').style.display = 'none';
+        
+        const emojis = ['🧺', '🐱', '🧶', '🐟', '🐈'];
+        document.getElementById('box-icon').innerText = emojis[Math.floor(Math.random() * emojis.length)];
+    }
+</script>
+
+</body>
+</html>
