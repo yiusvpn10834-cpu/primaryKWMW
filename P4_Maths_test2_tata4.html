@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐶 寵物小獸醫：救援日記 (豪華 30 關版) 🐱</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Microsoft JhengHei', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
+            padding: 30px;
+            border-top: 8px solid #38bdf8;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #e2e8f0;
+        }
+
+        h1 {
+            color: #0284c7;
+            font-size: 1.8em;
+            margin: 0 0 10px 0;
+        }
+
+        .progress-text {
+            color: #64748b;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* 故事劇情區 */
+        .story-box {
+            background-color: #f0f9ff;
+            border-left: 5px solid #0ea5e9;
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 25px;
+            font-size: 1.15em;
+            line-height: 1.6;
+            color: #0369a1;
+            font-weight: bold;
+            animation: fadeIn 0.5s;
+        }
+
+        .chapter-title {
+            display: inline-block;
+            background-color: #e0f2fe;
+            color: #0284c7;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+            border: 1px solid #bae6fd;
+        }
+
+        /* 題目區 */
+        .question-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1e293b;
+            padding: 0 10px;
+        }
+
+        .input-group {
+            background-color: #f1f5f9;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 50%;
+            padding: 15px;
+            font-size: 1.4em;
+            background-color: #ffffff;
+            border: 3px solid #cbd5e1;
+            border-radius: 12px;
+            text-align: center;
+            color: #0f172a;
+            outline: none;
+            transition: all 0.3s;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        /* 單位選擇按鈕 */
+        .unit-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .unit-btn {
+            background-color: #ffffff;
+            color: #64748b;
+            border: 2px solid #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .unit-btn:hover {
+            border-color: #38bdf8;
+            color: #0284c7;
+        }
+
+        .unit-btn.selected {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+            transform: scale(1.05);
+        }
+
+        .submit-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* 解答與回饋區 */
+        #feedback-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            animation: fadeIn 0.4s;
+        }
+
+        .correct-box {
+            background-color: #ecfdf5;
+            border: 2px solid #34d399;
+            color: #065f46;
+        }
+
+        .wrong-box {
+            background-color: #fef2f2;
+            border: 2px solid #f87171;
+            color: #991b1b;
+        }
+
+        .next-btn {
+            background-color: #38bdf8;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #0284c7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #end-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="game-container">
+    <div class="header">
+        <h1>🐶 寵物小獸醫：救援日記 🐱</h1>
+        <div class="progress-text">任務進度：<span id="current-step">1</span> / 30</div>
+    </div>
+
+    <div id="quest-area">
+        <div class="story-box">
+            <div class="chapter-title" id="chapter-tag">章節</div>
+            <div id="story-text">劇情載入中...</div>
+        </div>
+        
+        <div class="question-text" id="q-text">題目載入中...</div>
+        
+        <div class="input-group">
+            <input type="text" id="user-answer" placeholder="輸入數字..." onkeypress="handleEnter(event)">
+            <div style="color: #64748b; font-size: 0.9em; margin-bottom: 10px;">▼ 點選正確單位 ▼</div>
+            <div id="unit-options" class="unit-options">
+                </div>
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">📝 執行任務</button>
+        </div>
+
+        <div id="feedback-area">
+            <div id="feedback-message"></div>
+            <div id="feedback-exp" style="margin-top: 12px; font-size: 0.95em; color: #475569;"></div>
+            <button class="next-btn" id="next-action-btn" onclick="nextQuest()">推進劇情 ➡️</button>
+        </div>
+    </div>
+
+    <div id="end-screen">
+        <div style="font-size: 80px; margin-bottom: 20px;">🏆👑🐾</div>
+        <h2 style="color: #0284c7; font-size: 2.2em;">恭喜 Rosita 首席院長！</h2>
+        <p style="font-size: 1.2em; color: #475569; line-height: 1.6;">
+            整整 30 個艱難的醫療任務，妳全都完美解決了！<br>
+            不管是魔王級的剪紙包紮，還是超難的代數密碼，都難不倒妳！<br>
+            明天早上的測驗，請帶著這份自信與實力，勇敢拿高分吧！YAH！🐰
+        </p>
+    </div>
+</div>
+
+<script>
+    // 故事模式 30 關豪華版 (加強 Rosita 的弱點題型)
+    const storyData = [
+        // --- 第一章：早晨的物資準備 ---
+        { ch: "第一章：忙碌的早晨", story: "早安，Rosita 院長！今天動物醫院來了好多小病人，我們先來清點倉庫裡的物資。", q: "倉庫有消炎藥 256 瓶，護士先把其中的 16 瓶放進急救箱。剩下的平分給 4 個病房，每個病房分到多少瓶？", ans: "60", unit: "瓶", unitOpts: ["瓶", "元", "間", "米"], exp: "(256 - 16) ÷ 4 = 240 ÷ 4 = 60 瓶。" },
+        { ch: "第一章：忙碌的早晨", story: "藥品分發完畢！接下來要幫醫院採購住院狗狗的罐頭。", q: "寵物店特價：買 3 罐送 1 罐，每罐 25 元。醫院需要 12 罐，最少要付多少元？", ans: "225", unit: "元", unitOpts: ["元", "罐", "打", "米"], exp: "買3送1代表拿4罐只要付3罐的錢。12罐是3組，所以只需付 9 罐的錢：25 × 9 = 225 元。" },
+        { ch: "第一章：忙碌的早晨", story: "有位主人帶著他的三隻大金毛來結帳了。", q: "一隻狗狗洗澡 150 元，剪指甲 50 元。三隻狗狗做「洗澡加剪指甲」全套，主人共要付多少元？", ans: "600", unit: "元", unitOpts: ["元", "隻", "點", "cm"], exp: "有括號先算喔！(150 + 50) × 3 = 200 × 3 = 600 元。" },
+        { ch: "第一章：忙碌的早晨", story: "糟糕！櫃台電腦當機了，系統要求輸入解除密碼...", q: "密碼提示：★ ÷ (16 ÷ 4) = 25，請問密碼 ★ 是多少？", ans: "100", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "先算括號：16 ÷ 4 = 4。 ★ ÷ 4 = 25，反推回去：25 × 4 = 100。" },
+        { ch: "第一章：忙碌的早晨", story: "電腦解鎖了！我們趕快核對昨天消耗的藥水紀錄。", q: "算式魔法對決：240 ÷ (4 × 2) 和 240 ÷ 4 × 2 的結果，相差多少？", ans: "90", unit: "無單位", unitOpts: ["無單位", "元", "ml", "米"], exp: "左邊有括號：240 ÷ 8 = 30。右邊沒括號由左至右：60 × 2 = 120。相差 120 - 30 = 90。" },
+        { ch: "第一章：忙碌的早晨", story: "護士需要調配給小貓的感冒糖漿。", q: "瓶子裡有 500 ml 的糖漿，先倒出 50 ml，剩下的平分裝成 9 劑。每一劑是多少 ml？", ans: "50", unit: "ml", unitOpts: ["ml", "元", "劑", "cm"], exp: "(500 - 50) ÷ 9 = 450 ÷ 9 = 50 ml。" },
+
+        // --- 第二章：擴建與設計 (周界與倍數反推) ---
+        { ch: "第二章：擴建動物樂園", story: "下午，院長決定擴建小動物的運動區。我們先畫兔子的運動場設計圖！", q: "長方形兔子場的長是 24 米，【長是闊的 4 倍】。這個運動場的周界是多少米？", ans: "60", unit: "米", unitOpts: ["米", "cm", "元", "間"], exp: "長是 24，長是闊的 4 倍，所以闊 = 24 ÷ 4 = 6 米。周界 = (24 + 6) × 2 = 60 米。" },
+        { ch: "第二章：擴建動物樂園", story: "兔子的畫好了，接下來是小貓的室內遊戲室。", q: "長方形貓咪遊戲室的【長是闊的 3 倍】，周界是 64 米。遊戲室的【闊】是多少米？", ans: "8", unit: "米", unitOpts: ["米", "cm", "元", "間"], exp: "長+長+闊+闊 = 3闊+3闊+1闊+1闊 = 8個闊。64 ÷ 8 = 8 米。" },
+        { ch: "第二章：擴建動物樂園", story: "為了讓貓咪跑得更開心，我們再畫一個更大的貓咪跑道。", q: "長方形貓跑道的【長是闊的 5 倍】，周界是 120 米。跑道的【長】是多少米？", ans: "50", unit: "米", unitOpts: ["米", "cm", "元", "條"], exp: "周界有 12 個闊，120 ÷ 12 = 10 (闊)。題目問的是長喔！長 = 10 × 5 = 50 米。" },
+        { ch: "第二章：擴建動物樂園", story: "室內要鋪上安全防撞地墊，我們買了一些正方形巧拼。", q: "4 個邊長 15 cm 的小正方形墊子，拼成一個大正方形。這大正方形的周界是多少 cm？", ans: "120", unit: "cm", unitOpts: ["cm", "米", "塊", "元"], exp: "大正方形的邊長是小正方形的 2 倍(15 × 2 = 30)。大周界 = 30 × 4 = 120 cm。" },
+        { ch: "第二章：擴建動物樂園", story: "戶外游泳池需要裝上安全護欄免得狗狗亂跑。", q: "長方形泳池周界是 80 米。長是 25 米，泳池的闊是多少米？", ans: "15", unit: "米", unitOpts: ["米", "cm", "元", "座"], exp: "長和闊加起來是周界的一半：80 ÷ 2 = 40。闊 = 40 - 25 = 15 米。" },
+        { ch: "第二章：擴建動物樂園", story: "工程隊說還有一些鐵絲網剩下來，可以幫倉鼠做一個小家。", q: "用長 120 cm 的鐵絲，剛好圍成一個長 40 cm 的長方形倉鼠籠。這籠子的闊是多少 cm？", ans: "20", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "鐵絲長度就是周界！長+闊 = 120 ÷ 2 = 60。闊 = 60 - 40 = 20 cm。" },
+
+        // --- 第三章：黃昏的特殊醫療 (剪裁大魔王) ---
+        { ch: "第三章：黃昏的手術室", story: "黃昏時，一隻翅膀受傷的小鳥送來了！我們需要剪裁防水布幫牠包紮。", q: "從長 30 cm、闊 18 cm 的醫療布上，剪下一個【最大的正方形】。這正方形周界是多少 cm？", ans: "72", unit: "cm", unitOpts: ["cm", "米", "塊", "元"], exp: "最大正方形的邊長受限於【短邊】18 cm。周界 = 18 × 4 = 72 cm。" },
+        { ch: "第三章：黃昏的手術室", story: "小鳥包紮好了，旁邊的小老鼠也需要一塊剩下的布料。", q: "承上題，從 30 cm × 18 cm 的布剪下最大正方形後，【剩下的圖形】周界是多少 cm？", ans: "60", unit: "cm", unitOpts: ["cm", "米", "元", "塊"], exp: "剪一刀後，剩下的圖形長和闊變成 18 cm 和 (30 - 18 = 12 cm)。新周界 = (18 + 12) × 2 = 60 cm。" },
+        { ch: "第三章：黃昏的手術室", story: "注意！這是今晚最精密的手術，需要連續剪裁！", q: "從長 22 cm、闊 15 cm 的紙板，剪下最大正方形後，再從【剩下的紙板】剪下「第二個最大的正方形」。第二個正方形周界多少 cm？", ans: "28", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "第一刀剪去 15x15，剩下 15x7。第二刀從 15x7 剪最大正方形，邊長會是 7。周界 = 7 × 4 = 28 cm。超強！" },
+        { ch: "第三章：黃昏的手術室", story: "還有一隻受傷的烏龜，我們要把一塊大正方形紗布摺疊起來用。", q: "把一張邊長 20 cm 的正方形紗布對摺一次變成一個長方形。這長方形的周界是多少 cm？", ans: "60", unit: "cm", unitOpts: ["cm", "米", "張", "元"], exp: "對摺後長仍是 20，闊變成一半的 10。周界 = (20 + 10) × 2 = 60 cm。" },
+        { ch: "第三章：黃昏的手術室", story: "手術很成功！現在要幫兔子做一個新的木板床。", q: "從長 28 cm、闊 20 cm 的木板剪下最大正方形。這個正方形的周界是多少 cm？", ans: "80", unit: "cm", unitOpts: ["cm", "米", "元", "塊"], exp: "短邊是 20 cm，所以最大正方形邊長是 20。周界 = 20 × 4 = 80 cm。" },
+        { ch: "第三章：黃昏的手術室", story: "剩下來的木板，還可以給小倉鼠當跳板呢！", q: "承上題，從 28 cm × 20 cm 剪下最大正方形後，剩下的長方形木板周界是多少 cm？", ans: "56", unit: "cm", unitOpts: ["cm", "米", "塊", "元"], exp: "剩下的圖形長和闊變成 20 cm 和 (28 - 20 = 8 cm)。周界 = (20 + 8) × 2 = 56 cm。" },
+
+        // --- 第四章：夜間巡房 (進階應用) ---
+        { ch: "第四章：夜間巡邏", story: "晚上，護士推著推車在醫院裡巡房，幫動物們換保暖墊。", q: "1 個保暖墊售 180 元，買 3 送 1。醫院幫 8 隻怕冷的狗狗各買 1 個，共要付多少元？", ans: "1080", unit: "元", unitOpts: ["元", "個", "cm", "米"], exp: "買3送1(每組4個)。買 8 個剛好是 2 組。只需付 6 個的錢：180 × 6 = 1080 元。" },
+        { ch: "第四章：夜間巡邏", story: "小護士拿著大鈔去超商幫醫生買消夜。", q: "付了 1000 元，買了 4 包貓咪零食，每包 150 元。收銀員要找回多少元？", ans: "400", unit: "元", unitOpts: ["元", "包", "米", "cm"], exp: "1000 - (150 × 4) = 1000 - 600 = 400 元。" },
+        { ch: "第四章：夜間巡邏", story: "巡邏到黃金獵犬的房間，牠們需要吃特別的潔牙骨。", q: "108 根潔牙骨，先平分到 12 個罐子裡。醫生拿出 1 罐，平分給 3 隻黃金獵犬。每隻分到幾根？", ans: "3", unit: "根", unitOpts: ["根", "元", "罐", "cm"], exp: "一罐有：108 ÷ 12 = 9 根。分給 3 隻狗：9 ÷ 3 = 3 根。" },
+        { ch: "第四章：夜間巡邏", story: "狗狗吃飽後，護士帶牠們去戶外運動場散步。", q: "正方形運動場邊長 15 米。護士帶狗狗繞著運動場走了 3 圈，共走了多少米？", ans: "180", unit: "米", unitOpts: ["米", "cm", "圈", "元"], exp: "先算1圈周界：15 × 4 = 60 米。3 圈：60 × 3 = 180 米。" },
+        { ch: "第四章：夜間巡邏", story: "病房的電腦系統又需要密碼驗證了！", q: "密碼提示：★ × (36 ÷ 12) = 150，請問密碼 ★ 是多少？", ans: "50", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "先算括號：36 ÷ 12 = 3。 ★ × 3 = 150，所以 ★ = 50。" },
+        { ch: "第四章：夜間巡邏", story: "為了獎勵乖乖吃藥的小動物，我們來整理獎勵貼紙。", q: "5 個邊長 6 cm 的正方形貼紙，排成一長條的長方形。這個長方形周界是多少 cm？", ans: "72", unit: "cm", unitOpts: ["cm", "米", "張", "元"], exp: "排成一長條後，長變成 6 × 5 = 30 cm，闊還是 6 cm。周界 = (30 + 6) × 2 = 72 cm。" },
+
+        // --- 第五章：年度結算與終極考驗 ---
+        { ch: "第五章：年度大結算", story: "隔天早上，院長要進行每月的財務結算！", q: "這個月醫院買了 5 台新的空氣清淨機，每台 200 元，又用折價券減了 150 元。總共付了多少元？", ans: "850", unit: "元", unitOpts: ["元", "台", "米", "cm"], exp: "算式：200 × 5 - 150 = 1000 - 150 = 850 元。" },
+        { ch: "第五章：年度大結算", story: "核對一下籠子的備品數量。", q: "有 55 個鐵籠，如果把 5 個壞掉的丟掉，剩下的每 10 個疊成一柱，可以疊成幾柱？", ans: "5", unit: "柱", unitOpts: ["柱", "個", "元", "米"], exp: "記得括號優先：(55 - 5) ÷ 10 = 50 ÷ 10 = 5 柱。" },
+        { ch: "第五章：年度大結算", story: "再來確認九宮格藥櫃的尺寸有沒有登記錯誤。", q: "一個大正方形藥櫃由 9 個小正方形抽屜(九宮格)組成。大藥櫃周界 144 cm，每個小抽屜周界是多少 cm？", ans: "48", unit: "cm", unitOpts: ["cm", "米", "個", "元"], exp: "大邊長 = 144 ÷ 4 = 36。九宮格代表小邊長 = 36 ÷ 3 = 12。小周界 = 12 × 4 = 48 cm。" },
+        { ch: "第五章：年度大結算", story: "我們有一個特殊的長方形展示櫃需要更換邊條。", q: "展示櫃的周界是 50 cm。如果未來【長和闊都增加 2 cm】，新的周界會變成多少 cm？", ans: "58", unit: "cm", unitOpts: ["cm", "米", "元", "個"], exp: "長增加2，闊增加2。周界包含 2個長和 2個闊，所以總共增加了 4個2 (8cm)。50 + 8 = 58 cm。" },
+        { ch: "第五章：年度大結算", story: "即將完成所有任務！最後核對今天住院的動物總數。", q: "醫院裡貓和狗總共 60 隻，【貓的數量是狗的 4 倍】。請問住院的【貓】有幾隻？", ans: "48", unit: "隻", unitOpts: ["隻", "元", "cm", "米"], exp: "終極代數！貓4份，狗1份，總共5份 = 60隻。1份(狗) = 12隻。貓有 12 × 4 = 48 隻！" },
+        { ch: "終極榮耀", story: "最後一個隱藏版密碼，解開它就能獲得「最佳小獸醫」稱號！", q: "解開密碼：100 - 20 ÷ 4 × 5 = ?", ans: "75", unit: "無單位", unitOpts: ["無單位", "元", "cm", "米"], exp: "魔王陷阱！先乘除後加減，且乘除由左至右：20 ÷ 4 = 5，5 × 5 = 25。最後 100 - 25 = 75！" }
+    ];
+
+    let currentStep = 0;
+    let selectedUnit = "";
+
+    function loadQuest() {
+        if (currentStep >= storyData.length) {
+            document.getElementById('quest-area').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+            document.getElementById('current-step').innerText = storyData.length;
+            return;
+        }
+
+        const data = storyData[currentStep];
+        
+        // 更新 UI
+        document.getElementById('current-step').innerText = currentStep + 1;
+        document.getElementById('chapter-tag').innerText = data.ch;
+        document.getElementById('story-text').innerText = data.story;
+        document.getElementById('q-text').innerText = "❓ 任務：" + data.q;
+        
+        document.getElementById('user-answer').value = '';
+        document.getElementById('user-answer').disabled = false;
+        document.getElementById('submit-btn').style.display = 'block';
+        document.getElementById('feedback-area').style.display = 'none';
+        selectedUnit = "";
+        document.getElementById('user-answer').focus();
+
+        // 生成單位按鈕 (隨機打亂)
+        const shuffledUnits = data.unitOpts.sort(() => Math.random() - 0.5);
+        const unitContainer = document.getElementById('unit-options');
+        unitContainer.innerHTML = ''; 
+        
+        shuffledUnits.forEach(unit => {
+            const btn = document.createElement('button');
+            btn.className = 'unit-btn';
+            btn.innerText = unit;
+            btn.onclick = () => selectUnit(unit, btn);
+            unitContainer.appendChild(btn);
+        });
+    }
+
+    function selectUnit(unit, btnElement) {
+        if (document.getElementById('user-answer').disabled) return;
+        selectedUnit = unit;
+        const allBtns = document.querySelectorAll('.unit-btn');
+        allBtns.forEach(b => b.classList.remove('selected'));
+        btnElement.classList.add('selected');
+    }
+
+    function checkAnswer() {
+        const rawInput = document.getElementById('user-answer').value;
+        const cleanInput = rawInput.replace(/\D/g, ''); 
+        const data = storyData[currentStep];
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackMsg = document.getElementById('feedback-message');
+        const feedbackExp = document.getElementById('feedback-exp');
+        const nextBtn = document.getElementById('next-action-btn');
+
+        if (cleanInput === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 院長，忘記輸入數字了！</strong>';
+            feedbackExp.innerText = '任務需要精確的數字才能執行喔！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        if (selectedUnit === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 忘記點選單位了！</strong>';
+            feedbackExp.innerText = '請在下方藍色按鈕中點選正確的單位！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+
+        const isNumCorrect = (cleanInput === data.ans);
+        const isUnitCorrect = (selectedUnit === data.unit);
+
+        if (isNumCorrect && isUnitCorrect) {
+            feedbackArea.className = 'correct-box';
+            feedbackMsg.innerHTML = '<strong>🟢 任務成功！太聰明了！</strong>';
+            feedbackExp.innerText = `【系統解析】${data.exp}`;
+            
+            nextBtn.innerText = '推進劇情 ➡️';
+            nextBtn.style.backgroundColor = '#0284c7';
+            nextBtn.style.color = 'white';
+            nextBtn.onclick = nextQuest;
+            
+            document.getElementById('user-answer').disabled = true;
+            document.getElementById('submit-btn').style.display = 'none';
+            nextBtn.style.display = 'block';
+
+        } else if (isNumCorrect && !isUnitCorrect) {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🟡 數字對了，可是「單位」選錯囉！</strong>`;
+            feedbackExp.innerText = '差一點點！請重新選擇正確的單位再送出一次！';
+            nextBtn.style.display = 'none'; 
+
+        } else if (!isNumCorrect && isUnitCorrect) {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 單位正確，但計算有點失誤！</strong> (妳輸入: ${cleanInput})`;
+            feedbackExp.innerText = '拿張計算紙畫圖算算看，或者查看正確解答繼續劇情！';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '💡 查看正確解答';
+            nextBtn.style.backgroundColor = '#f87171';
+            nextBtn.style.color = '#7f1d1d';
+            nextBtn.onclick = showExplanation;
+            
+        } else {
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 哎呀，數字和單位都需要再檢查喔！</strong> (妳輸入: ${cleanInput})`;
+            feedbackExp.innerText = '沒關係，這題比較難，深呼吸再想一下，或者查看正確解答！';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '💡 查看正確解答';
+            nextBtn.style.backgroundColor = '#f87171';
+            nextBtn.style.color = '#7f1d1d';
+            nextBtn.onclick = showExplanation;
+        }
+    }
+
+    function showExplanation() {
+        const data = storyData[currentStep];
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.className = 'wrong-box';
+        document.getElementById('feedback-message').innerHTML = `<strong>正確答案是：${data.ans} ${data.unit}</strong>`;
+        document.getElementById('feedback-exp').innerText = `【系統解析】${data.exp}`;
+        
+        const nextBtn = document.getElementById('next-action-btn');
+        nextBtn.innerText = '學會了！推進劇情 ➡️';
+        nextBtn.style.backgroundColor = '#0284c7';
+        nextBtn.style.color = 'white';
+        nextBtn.onclick = nextQuest;
+        
+        document.getElementById('user-answer').disabled = true;
+        document.getElementById('submit-btn').style.display = 'none';
+    }
+
+    function nextQuest() {
+        currentStep++;
+        loadQuest();
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            checkAnswer();
+        }
+    }
+
+    // 初始化第一關
+    window.onload = loadQuest;
+</script>
+
+</body>
+</html>
