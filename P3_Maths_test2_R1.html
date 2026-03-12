@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐶 照顧狗狗數學盲盒挑戰 🐶</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #fce4ec;
+            text-align: center;
+            color: #5d4037;
+            padding: 20px;
+        }
+        h1 { color: #d81b60; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .box {
+            background-color: #ffb74d;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background-color 0.2s;
+            user-select: none;
+        }
+        .box:hover {
+            transform: scale(1.05);
+            background-color: #ffa726;
+        }
+        .box.opened {
+            background-color: #81c784;
+            cursor: default;
+            transform: none;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .question-text {
+            font-size: 20px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-btn {
+            background-color: #e1bee7;
+            border: 2px solid #ce93d8;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: left;
+        }
+        .option-btn:hover { background-color: #ce93d8; }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        #feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 20px;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🐶 照顧狗狗數學盲盒挑戰 🐶</h1>
+    <p>點擊盲盒回答問題，答對就能解鎖狗狗的驚喜禮物喔！</p>
+    
+    <div class="grid" id="boxGrid"></div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="question-text" id="qText">問題載入中...</div>
+            <div class="options" id="optionsContainer"></div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        const prizes = ["🦴", "🥩", "🎾", "🥏", "🐕", "🐩", "🦮", "🥫"];
+        
+        const questions = [
+            // 第一部分：加減混合計算 (1-10)
+            { q: "1. 狗糧原有 850 克，狗狗早上吃了 120 克，晚上吃了 150 克，還剩多少克？", options: ["580 克", "600 克", "680 克", "820 克"], a: 0 },
+            { q: "2. 買一條狗帶 45 元，一個狗碗 38 元，付 100 元找回多少元？", options: ["27 元", "17 元", "83 元", "23 元"], a: 1 },
+            { q: "3. 寵物店有 125 個潔齒骨，昨天賣出 45 個，今天進貨 60 個，現在有幾個？", options: ["140 個", "20 個", "185 個", "230 個"], a: 0 },
+            { q: "4. 哥哥帶狗狗散步，去程用了 25 分鐘，回程用了 18 分鐘，他們在公園玩了 40 分鐘。一共用了多少分鐘？", options: ["65 分鐘", "73 分鐘", "83 分鐘", "93 分鐘"], a: 2 },
+            { q: "5. 一包狗零食有 200 粒，第一星期吃了 65 粒，第二星期吃了 55 粒，還剩下多少粒？", options: ["90 粒", "80 粒", "70 粒", "145 粒"], a: 1 },
+            { q: "6. 狗狗單剪毛 150 元，洗澡 110 元，如果選「洗剪套餐」可減 20 元。買套餐共付多少元？", options: ["240 元", "260 元", "280 元", "220 元"], a: 0 },
+            { q: "7. 狗窩 A 售 340 元，狗窩 B 比 A 便宜 65 元，買狗窩 B 付 500 元找回多少元？", options: ["160 元", "95 元", "225 元", "235 元"], a: 2 },
+            { q: "8. 寵物醫院早上有 42 隻狗狗看病，下午比早上少 15 隻，全日共有多少隻狗狗看病？", options: ["27 隻", "57 隻", "69 隻", "99 隻"], a: 2 },
+            { q: "9. 計算：300 - (120 + 80) = ?", options: ["100", "260", "200", "300"], a: 0 },
+            { q: "10. 計算：450 - 180 + 70 = ?", options: ["200", "340", "270", "560"], a: 1 },
+            
+            // 第二部分：乘加和乘減混合計算 (11-20)
+            { q: "11. 一罐狗罐頭 18 元，買 4 罐，加一包 25 元的餅乾，共付多少元？", options: ["97 元", "72 元", "85 元", "115 元"], a: 0 },
+            { q: "12. 每包尿墊有 50 塊，買了 3 包，用了 45 塊，還剩多少塊？", options: ["95 塊", "105 塊", "115 塊", "150 塊"], a: 1 },
+            { q: "13. 狗狗訓練班每堂 120 元，報名 5 堂可減 50 元。共要付多少元？", options: ["550 元", "600 元", "650 元", "700 元"], a: 0 },
+            { q: "14. 買 6 件狗狗衣服，每件 45 元，付 300 元，找回多少元？", options: ["20 元", "30 元", "40 元", "50 元"], a: 1 },
+            { q: "15. 買 2 張狗床，每張 250 元，結帳時總共減免 50 元。共付多少元？", options: ["400 元", "450 元", "500 元", "550 元"], a: 1 },
+            { q: "16. 寵物展門票成人 60 元，小童 30 元。爸爸媽媽帶 1 個小孩去，共付多少元？", options: ["90 元", "120 元", "150 元", "180 元"], a: 2 },
+            { q: "17. 狗狗每天吃 2 粒維他命，一樽有 60 粒。吃了 3 星期 (21 天) 後，還剩多少粒？", options: ["18 粒", "28 粒", "38 粒", "42 粒"], a: 0 },
+            { q: "18. 梳毛刷一個 35 元，指甲剪一個 28 元。買 1 個梳毛刷和 2 個指甲剪，共付多少元？", options: ["63 元", "91 元", "98 元", "119 元"], a: 1 },
+            { q: "19. 計算：15 + 8 × 9 = ?", options: ["87", "95", "103", "207"], a: 0 },
+            { q: "20. 計算：(42 - 18) × 5 = ?", options: ["32", "120", "150", "210"], a: 1 },
+
+            // 第三部分：三角形 (21-30)
+            { q: "21. 狗狗的三角巾有三條邊，長度分別是 10cm, 10cm, 10cm。這是一塊什麼三角形的布？", options: ["等邊三角形", "直角三角形", "不等邊三角形", "等腰直角三角形"], a: 0 },
+            { q: "22. 狗狗屋的屋頂是一個三角形，只有兩條邊一樣長，這叫做什麼三角形？", options: ["等邊三角形", "等腰三角形", "不等邊三角形", "直角三角形"], a: 1 },
+            { q: "23. 狗狗的玩具是一個三角形，其中一個角是直角，這叫做什麼三角形？", options: ["等邊三角形", "等腰三角形", "直角三角形", "不等邊三角形"], a: 2 },
+            { q: "24. 等邊三角形有幾個銳角？", options: ["1 個", "2 個", "3 個", "沒有"], a: 2 },
+            { q: "25. 以下哪一項關於三角形的描述是錯誤的？", options: ["三角形有三條邊", "等邊三角形也是等腰三角形的一種", "一個三角形不可能有兩個直角", "所有直角三角形的三條邊都不一樣長"], a: 3 },
+            { q: "26. 剪裁一件狗狗披肩，需要一個三條邊都不一樣長的三角形，這叫做？", options: ["等腰三角形", "等邊三角形", "直角三角形", "不等邊三角形"], a: 3 },
+            { q: "27. 判斷題概念：一個等腰三角形，其中一個角是直角，它叫什麼？", options: ["等腰直角三角形", "等邊直角三角形", "不等邊三角形", "銳角三角形"], a: 0 },
+            { q: "28. 狗狗的圍欄用三塊長度為 5米、5米、8米的木板圍成。這圍欄是什麼形狀？", options: ["等邊三角形", "等腰三角形", "直角三角形", "不等邊三角形"], a: 1 },
+            { q: "29. 下列哪一組幾何條可以拼出一個等邊三角形？", options: ["3cm, 4cm, 5cm", "6cm, 6cm, 4cm", "5cm, 5cm, 5cm", "2cm, 8cm, 8cm"], a: 2 },
+            { q: "30. 如果把一張正方形的抹身紙巾對摺一半，會變成什麼形狀的三角形？", options: ["不等邊三角形", "等邊三角形", "只有直角三角形", "等腰直角三角形"], a: 3 },
+
+            // 第四部分：純列式邏輯題 (31-35) 不用計算
+            { q: "31. 帕恰狗 (Pochacco) 帶了 500 元去寵物店，買了一張狗床 120 元和一個玩具 85 元。下列哪一個算式能找出他應找回多少元？", options: ["500 - 120 + 85", "500 - (120 + 85)", "500 + 120 - 85", "(500 - 120) + 85"], a: 1 },
+            { q: "32. 帕恰狗想買零食，一盒骨頭餅乾售 45 元。他買了 4 盒，再加上一罐 30 元的狗罐頭，下列哪一個算式能找出共需付多少元？", options: ["45 × 4 + 30", "(45 + 30) × 4", "45 + 30 × 4", "45 × 4 × 30"], a: 0 },
+            { q: "33. 帕恰狗和 3 隻狗狗朋友（共 4 隻狗）去寵物餐廳，每隻狗狗的入場費是 50 元。他們有一張全單減 20 元的優惠券，下列哪一個算式能找出最終要付的價錢？", options: ["50 × 3 - 20", "50 × 4 - 20", "50 × (4 - 20)", "(50 - 20) × 4"], a: 1 },
+            { q: "34. 一大包狗糧重 80 公斤。帕恰狗每天吃 3 公斤，吃了 14 天後，下列哪一個算式能找出還剩下多少公斤狗糧？", options: ["80 - 3 + 14", "80 - 14 × 3", "(80 - 14) × 3", "80 × 3 - 14"], a: 1 },
+            { q: "35. 帕恰狗有 150 粒小食，他的朋友比他少 30 粒。下列哪一個算式能找出他們兩人共有小食多少粒？", options: ["150 + 30", "150 - 30", "150 + (150 + 30)", "150 + (150 - 30)"], a: 3 }
+        ];
+
+        let currentBoxIndex = -1;
+
+        // 初始化盲盒網格
+        const grid = document.getElementById("boxGrid");
+        questions.forEach((q, index) => {
+            const box = document.createElement("div");
+            box.className = "box";
+            box.innerHTML = "🎁";
+            box.onclick = () => openBox(index, box);
+            grid.appendChild(box);
+        });
+
+        const modalOverlay = document.getElementById("modalOverlay");
+        const qText = document.getElementById("qText");
+        const optionsContainer = document.getElementById("optionsContainer");
+        const feedback = document.getElementById("feedback");
+
+        function openBox(index, boxElement) {
+            if (boxElement.classList.contains("opened")) return;
+            currentBoxIndex = index;
+            const qData = questions[index];
+            qText.innerText = qData.q;
+            optionsContainer.innerHTML = "";
+            feedback.innerText = "";
+            feedback.style.color = "black";
+
+            qData.options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = String.fromCharCode(65 + i) + ". " + opt; // A, B, C, D
+                btn.onclick = () => checkAnswer(i, btn, boxElement);
+                optionsContainer.appendChild(btn);
+            });
+
+            modalOverlay.style.display = "flex";
+        }
+
+        function checkAnswer(selectedIndex, btnElement, boxElement) {
+            const qData = questions[currentBoxIndex];
+            const buttons = optionsContainer.querySelectorAll(".option-btn");
+            
+            // 停用所有按鈕
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === qData.a) {
+                btnElement.style.backgroundColor = "#81c784";
+                feedback.innerText = "🎉 答對了！好棒！";
+                feedback.style.color = "#2e7d32";
+                
+                // 更換盲盒圖標為隨機狗狗獎品
+                const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                boxElement.innerHTML = randomPrize;
+                boxElement.classList.add("opened");
+                
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
+            } else {
+                btnElement.style.backgroundColor = "#e57373";
+                buttons[qData.a].style.backgroundColor = "#81c784"; // 顯示正確答案
+                feedback.innerText = "❌ 哎呀，答錯了！再接再厲！";
+                feedback.style.color = "#c62828";
+                
+                setTimeout(() => {
+                    closeModal();
+                }, 2500);
+            }
+        }
+
+        function closeModal() {
+            modalOverlay.style.display = "none";
+        }
+    </script>
+</body>
+</html>
