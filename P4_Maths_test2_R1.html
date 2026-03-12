@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 機械人大戰：數學能量盲盒 🤖</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Microsoft JhengHei', sans-serif;
+            background-color: #0b1120;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background-color: #1e293b;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+            padding: 30px;
+            border: 3px solid #38bdf8;
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #7dd3fc;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(125, 211, 252, 0.5);
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1em;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        /* 盲盒區 */
+        #blind-box-area {
+            display: block;
+        }
+
+        .box-emoji {
+            font-size: 90px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 20px 0;
+            display: inline-block;
+            filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.8));
+        }
+
+        .box-emoji:hover {
+            transform: scale(1.1);
+        }
+
+        .shake {
+            animation: shake 0.4s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            25% { transform: translate(-1px, -2px) rotate(-10deg); }
+            50% { transform: translate(-3px, 0px) rotate(10deg); }
+            75% { transform: translate(3px, 2px) rotate(-10deg); }
+            100% { transform: translate(1px, -1px) rotate(0deg); }
+        }
+
+        .draw-btn {
+            background-color: #0284c7;
+            color: white;
+            border: 2px solid #38bdf8;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.6);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .draw-btn:hover {
+            background-color: #0369a1;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* 題目區 */
+        #question-area {
+            display: none;
+            animation: popIn 0.4s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .q-tag {
+            background-color: #312e81;
+            color: #a5b4fc;
+            padding: 6px 18px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+            border: 1px solid #4f46e5;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 1.25em;
+            line-height: 1.6;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #f8fafc;
+            text-align: left;
+            padding: 0 15px;
+        }
+
+        .input-group {
+            background-color: #0f172a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 50%;
+            padding: 12px;
+            font-size: 1.3em;
+            background-color: #1e293b;
+            border: 2px solid #475569;
+            border-radius: 6px;
+            text-align: center;
+            color: #38bdf8;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: monospace;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        /* 單位選擇按鈕 */
+        .unit-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .unit-btn {
+            background-color: #1e293b;
+            color: #94a3b8;
+            border: 2px solid #475569;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .unit-btn:hover {
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        .unit-btn.selected {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            transform: scale(1.05);
+        }
+
+        .submit-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+            width: 100%;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            background-color: #059669;
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.5);
+        }
+
+        /* 解答與回饋區 */
+        #feedback-area {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            text-align: left;
+            animation: fadeIn 0.4s;
+        }
+
+        .correct-box {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 2px solid #34d399;
+            color: #a7f3d0;
+        }
+
+        .wrong-box {
+            background-color: rgba(225, 29, 72, 0.1);
+            border: 2px solid #fb7185;
+            color: #fecdd3;
+        }
+
+        .next-btn {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+            text-transform: uppercase;
+            transition: background-color 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #7dd3fc;
+        }
+
+        .stats {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-weight: bold;
+            color: #38bdf8;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #0284c7;
+            font-family: monospace;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="stats">能量核: <span id="box-count">0</span>/20</div>
+    <h1>⚔️ 機械人大戰：破解能量核 ⚔️</h1>
+    <div class="subtitle">系統提示：輸入數字後，請記得選擇正確的【單位】！</div>
+
+    <div id="blind-box-area">
+        <div class="box-emoji" id="box-icon">🔋</div><br>
+        <button class="draw-btn" onclick="openBox()">⚡ 抽取作戰任務 ⚡</button>
+    </div>
+
+    <div id="question-area">
+        <div class="q-tag" id="q-tag">載入中...</div>
+        <div class="question-text" id="q-text">載入中...</div>
+        
+        <div class="input-group">
+            <input type="text" id="user-answer" placeholder="輸入數據..." onkeypress="handleEnter(event)">
+            <div style="color: #94a3b8; font-size: 0.9em; margin-bottom: 8px;">▼ 請選擇單位 ▼</div>
+            <div id="unit-options" class="unit-options">
+                </div>
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">📡 傳送數據與單位</button>
+        </div>
+
+        <div id="feedback-area">
+            <div id="feedback-message"></div>
+            <div id="feedback-exp" style="margin-top: 12px; font-size: 0.95em; color: #cbd5e1;"></div>
+            <button class="next-btn" id="next-action-btn" onclick="resetToBox()">🔋 領取下一個任務</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 題庫加入了單位的選項 (unit) 和供選擇的混淆單位 (unitOpts)
+    const originalQuestions = [
+        { c: "基礎戰鬥計算", q: "機甲有 45 點護盾值，補充了 15 點後，平均分配給 5 個防禦裝甲，每個裝甲分到多少護盾值？", ans: "12", unit: "點", unitOpts: ["點", "架", "元", "米"], exp: "先算補充後的總值！(45 + 15) ÷ 5 = 60 ÷ 5 = 12 點。" },
+        { c: "基礎戰鬥計算", q: "敵艦有 120 點生命值，被我方 4 發導彈擊中，每發造成 20 點傷害。敵艦還剩多少生命值？", ans: "40", unit: "點", unitOpts: ["點", "分鐘", "元", "米"], exp: "先算導彈造成的總傷害！120 - 20 × 4 = 120 - 80 = 40 點。" },
+        { c: "基礎戰鬥計算", q: "基地有 36 顆電池，平均分給 6 台機甲。其中 2 台機甲總共拿到了多少電池？", ans: "12", unit: "顆", unitOpts: ["顆", "架", "塊", "元"], exp: "先算一台機甲拿幾顆：36 ÷ 6 = 6。兩台機甲：6 × 2 = 12 顆。" },
+        { c: "戰術邏輯", q: "一台突擊機甲生產需 100 分鐘，扣除準備時間 25 分鐘，剩下的時間由 5 台機器人同時組裝，每台機器人平均負責多少時間？", ans: "15", unit: "分鐘", unitOpts: ["分鐘", "米", "點", "元"], exp: "括號優先算！(100 - 25) ÷ 5 = 75 ÷ 5 = 15 分鐘。" },
+        { c: "戰術邏輯", q: "A庫有 216 塊能量晶體平分給 8 隊，B庫有 216 塊能量晶體平分給 24 隊。兩庫每支小隊分到的晶體相差多少？", ans: "18", unit: "塊", unitOpts: ["塊", "把", "cm", "元"], exp: "分別計算再相減：(216 ÷ 8) - (216 ÷ 24) = 27 - 9 = 18 塊。" },
+        { c: "後勤補給", q: "買 3 把激光劍送 1 把。每把售 64 能量幣，如果總共想拿到 4 把，平均每把花費多少？", ans: "48", unit: "能量幣", unitOpts: ["能量幣", "元", "米", "點"], exp: "拿 4 把只需付 3 把的錢：(64 × 3) ÷ 4 = 192 ÷ 4 = 48 能量幣。" },
+        { c: "後勤補給", q: "總司令有 500 戰功幣，買了 20 個升級零件，每個 9 戰功幣。應找回多少戰功幣？", ans: "320", unit: "戰功幣", unitOpts: ["戰功幣", "能量幣", "元", "米"], exp: "總共花了 9 × 20 = 180 戰功幣。500 - 180 = 320 戰功幣。" },
+        { c: "後勤補給", q: "一把激光步槍 500 元，【兩把光劍和一把激光步槍】共 800 元。一把光劍多少元？", ans: "150", unit: "元", unitOpts: ["元", "點", "米", "cm"], exp: "先扣除步槍的錢：800 - 500 = 300。兩把光劍是 300，一把就是 300 ÷ 2 = 150 元。" },
+        { c: "後勤補給", q: "半打微型偵察機共耗費 48 點電量。啟動 1 架偵察機需要多少點電量？", ans: "8", unit: "點", unitOpts: ["點", "架", "元", "分鐘"], exp: "陷阱注意！半打是 6 架。48 ÷ 6 = 8 點。" },
+        { c: "基地周界", q: "正方形指揮中心的周界是 96 米，它的邊長是多少？", ans: "24", unit: "米", unitOpts: ["米", "cm", "元", "點"], exp: "反推魔法：邊長 = 周界 ÷ 4。96 ÷ 4 = 24 米。" },
+        { c: "基地周界", q: "長方形防護牆的長是 12 米，闊是 8 米，這道防護牆的周界是多少？", ans: "40", unit: "米", unitOpts: ["米", "cm", "分鐘", "元"], exp: "長方形周界 = (長 + 闊) × 2。 (12 + 8) × 2 = 40 米。" },
+        { c: "基地周界", q: "長方形停機坪的長是 18 米，【闊是長的一半】，這個停機坪的周界是多少？", ans: "54", unit: "米", unitOpts: ["米", "cm", "架", "塊"], exp: "闊 = 18 ÷ 2 = 9。周界 = (18 + 9) × 2 = 54 米。" },
+        { c: "基地周界", q: "長方形雷達站的闊是 6 米，【長是闊的 3 倍】，它的周界是多少？", ans: "48", unit: "米", unitOpts: ["米", "cm", "點", "元"], exp: "長 = 6 × 3 = 18。周界 = (18 + 6) × 2 = 24 × 2 = 48 米。" },
+        { c: "空間裁切", q: "從長 18 米、闊 12 米的長方形裝甲板上，切下一個【最大的正方形】做護盾。這個正方形護盾的周界是多少？", ans: "48", unit: "米", unitOpts: ["米", "cm", "把", "顆"], exp: "最大正方形的邊長受限於【短邊】12 米。周界 = 12 × 4 = 48 米。" },
+        { c: "空間裁切", q: "把一張邊長 10 米的正方形能量網對摺一次變成一個長方形。這長方形的周界是多少？", ans: "30", unit: "米", unitOpts: ["米", "cm", "點", "分鐘"], exp: "對摺後，長仍是 10，闊變成一半的 5。周界 = (10 + 5) × 2 = 30 米。" },
+        { c: "裝甲拼合", q: "一個大型正方形防禦陣列由 4 個小型正方形拼成。大型陣列的邊長是 10 米，小型陣列的邊長是多少？", ans: "5", unit: "米", unitOpts: ["米", "cm", "元", "塊"], exp: "大正方形的邊長剛好是小正方形的 2 倍。10 ÷ 2 = 5 米。" },
+        { c: "機甲代數", q: "解開終極密碼：★ × ★ - 15 = 34，請問星星 (★) 代表的數字是多少？", ans: "7", unit: "無單位", unitOpts: ["無單位", "米", "元", "點"], exp: "反推邏輯：什麼數字減 15 會變 34？(34 + 15 = 49)。★ × ★ = 49，所以是 7。" },
+        { c: "機甲代數", q: "長方形維修站的【長是闊的 3 倍】，周界是 32 米。求它的闊是多少？", ans: "4", unit: "米", unitOpts: ["米", "cm", "元", "點"], exp: "長+長+闊+闊 = 3個闊+3個闊+1個闊+1個闊 = 8個闊。32 ÷ 8 = 4 米。" },
+        { c: "綜合演練", q: "巡邏機甲繞正方形營地走一圈需 12 分鐘。營地周界是 480 米，機甲每分鐘走多少？", ans: "40", unit: "米", unitOpts: ["米", "分鐘", "cm", "點"], exp: "一圈就是周界！不需要除以4。直接算速度：480 ÷ 12 = 40 米。" },
+        { c: "綜合演練", q: "機甲維修費 150 能量幣，買 4 次保養可以減 50 能量幣。連續保養 4 次共要付多少？", ans: "550", unit: "能量幣", unitOpts: ["能量幣", "元", "米", "點"], exp: "算式：150 × 4 - 50 = 600 - 50 = 550 能量幣。" }
+    ];
+
+    let questionPool = [...originalQuestions];
+    let currentQ = null;
+    let boxCount = 0;
+    let selectedUnit = "";
+
+    function openBox() {
+        if(questionPool.length === 0) {
+            document.getElementById('blind-box-area').innerHTML = '<div class="box-emoji">🏆</div><h2 style="color:#34d399;">任務全數完成！</h2><p style="color:#94a3b8;">指揮官，你已成功破解所有數學能量核！</p>';
+            return;
+        }
+
+        const box = document.getElementById('box-icon');
+        box.classList.add('shake');
+        
+        setTimeout(() => {
+            box.classList.remove('shake');
+            
+            const randomIndex = Math.floor(Math.random() * questionPool.length);
+            currentQ = questionPool[randomIndex];
+            questionPool.splice(randomIndex, 1); 
+
+            // 重置 UI
+            selectedUnit = "";
+            document.getElementById('blind-box-area').style.display = 'none';
+            document.getElementById('question-area').style.display = 'block';
+            document.getElementById('feedback-area').style.display = 'none';
+            document.getElementById('user-answer').value = '';
+            document.getElementById('user-answer').disabled = false;
+            document.getElementById('submit-btn').style.display = 'block';
+            document.getElementById('user-answer').focus();
+            
+            document.getElementById('q-tag').innerText = `[ ${currentQ.c} ]`;
+            document.getElementById('q-text').innerText = currentQ.q;
+
+            // 隨機打亂單位按鈕順序並生成
+            const shuffledUnits = currentQ.unitOpts.sort(() => Math.random() - 0.5);
+            const unitContainer = document.getElementById('unit-options');
+            unitContainer.innerHTML = ''; // 清空舊按鈕
+            
+            shuffledUnits.forEach(unit => {
+                const btn = document.createElement('button');
+                btn.className = 'unit-btn';
+                btn.innerText = unit;
+                btn.onclick = () => selectUnit(unit, btn);
+                unitContainer.appendChild(btn);
+            });
+            
+        }, 400);
+    }
+
+    // 處理單位選擇
+    function selectUnit(unit, btnElement) {
+        if (document.getElementById('user-answer').disabled) return; // 如果已經答題，鎖定按鈕
+        
+        selectedUnit = unit;
+        // 移除其他按鈕的選中狀態
+        const allBtns = document.querySelectorAll('.unit-btn');
+        allBtns.forEach(b => b.classList.remove('selected'));
+        // 添加當前按鈕的選中狀態
+        btnElement.classList.add('selected');
+    }
+
+    function checkAnswer() {
+        const rawInput = document.getElementById('user-answer').value;
+        const cleanInput = rawInput.replace(/\D/g, ''); 
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackMsg = document.getElementById('feedback-message');
+        const feedbackExp = document.getElementById('feedback-exp');
+        const nextBtn = document.getElementById('next-action-btn');
+
+        // 檢查是否沒有輸入數字或沒有選擇單位
+        if (cleanInput === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 警報：未偵測到數字。</strong>';
+            feedbackExp.innerText = '系統提示：請輸入純數字！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        if (selectedUnit === '') {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = '<strong>⚠️ 警報：未選擇單位。</strong>';
+            feedbackExp.innerText = '系統提示：請在下方點選正確的單位選項！';
+            nextBtn.style.display = 'none';
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+
+        const isNumCorrect = (cleanInput === currentQ.ans);
+        const isUnitCorrect = (selectedUnit === currentQ.unit);
+
+        if (isNumCorrect && isUnitCorrect) {
+            // 數字和單位全對
+            feedbackArea.className = 'correct-box';
+            feedbackMsg.innerHTML = '<strong>🟢 密碼與單位完全正確！能量核已解鎖！</strong>';
+            feedbackExp.innerText = `【系統解析】${currentQ.exp}`;
+            
+            nextBtn.innerText = '🔋 領取下一個任務';
+            nextBtn.style.backgroundColor = '#10b981';
+            nextBtn.style.color = 'white';
+            nextBtn.onclick = resetToBox;
+            
+            if(document.getElementById('user-answer').disabled === false){
+                 boxCount++;
+                 document.getElementById('box-count').innerText = boxCount;
+            }
+            // 鎖定輸入
+            document.getElementById('user-answer').disabled = true;
+            document.getElementById('submit-btn').style.display = 'none';
+
+        } else if (isNumCorrect && !isUnitCorrect) {
+            // 數字對，單位錯
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🟡 數字對了，但是「單位」選錯囉！</strong>`;
+            feedbackExp.innerText = '差一點點就完美了！請重新選擇正確的單位再試一次！';
+            nextBtn.style.display = 'none'; // 強迫他重選並重按送出
+
+        } else if (!isNumCorrect && isUnitCorrect) {
+            // 數字錯，單位對
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 單位正確，但數字計算有誤！</strong> (輸入數據: ${cleanInput})`;
+            feedbackExp.innerText = '建議在計算紙上重新核對算式，或者請求戰術解析支援。';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '📡 請求戰術解析';
+            nextBtn.style.backgroundColor = '#fb7185';
+            nextBtn.style.color = '#4c0519';
+            nextBtn.onclick = showExplanation;
+            
+        } else {
+            // 數字和單位都錯
+            feedbackArea.className = 'wrong-box';
+            feedbackMsg.innerHTML = `<strong>🔴 警報！數據與單位皆錯誤！</strong> (輸入數據: ${cleanInput})`;
+            feedbackExp.innerText = '請重新計算，或者請求戰術解析支援。';
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = '📡 請求戰術解析';
+            nextBtn.style.backgroundColor = '#fb7185';
+            nextBtn.style.color = '#4c0519';
+            nextBtn.onclick = showExplanation;
+        }
+    }
+
+    function showExplanation() {
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.className = 'wrong-box';
+        document.getElementById('feedback-message').innerHTML = `<strong>正確答案是：${currentQ.ans} ${currentQ.unit}</strong>`;
+        document.getElementById('feedback-exp').innerText = `【系統解析】${currentQ.exp}`;
+        
+        const nextBtn = document.getElementById('next-action-btn');
+        nextBtn.innerText = '🔋 學會了！領取下一個任務';
+        nextBtn.style.backgroundColor = '#38bdf8';
+        nextBtn.style.color = '#0f172a';
+        nextBtn.onclick = resetToBox;
+        
+        document.getElementById('user-answer').disabled = true;
+        document.getElementById('submit-btn').style.display = 'none';
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            checkAnswer();
+        }
+    }
+
+    function resetToBox() {
+        document.getElementById('blind-box-area').style.display = 'block';
+        document.getElementById('question-area').style.display = 'none';
+        
+        const emojis = ['🔋', '⚙️', '🛡️', '🛰️', '🚀'];
+        document.getElementById('box-icon').innerText = emojis[Math.floor(Math.random() * emojis.length)];
+    }
+</script>
+
+</body>
+</html>
