@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>足球名將：數學大聯賽 (P1-P3)</title>
+    <style>
+        :root { --grass: #2ecc71; --white: #ffffff; --gold: #f1c40f; --dark: #2c3e50; }
+        body { font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif; background-color: #27ae60; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--dark); }
+        #game-box { background: #fff; width: 95%; max-width: 600px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 5px solid var(--gold); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .score-board { display: flex; justify-content: space-between; background: var(--dark); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; }
+        
+        .math-card { background: #f9f9f9; padding: 25px; border-radius: 15px; border: 2px solid #eee; margin-bottom: 20px; text-align: center; }
+        .question-text { font-size: 1.3em; line-height: 1.6; margin-bottom: 15px; color: #333; }
+        .difficulty { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8em; color: white; margin-bottom: 10px; }
+        .p1 { background: #3498db; } .p2 { background: #9b59b6; } .p3 { background: #e67e22; }
+
+        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button.ans-btn { padding: 15px; font-size: 1.2em; border: 2px solid #ddd; background: #fff; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        button.ans-btn:hover { border-color: var(--grass); background: #f0fff0; transform: translateY(-2px); }
+        
+        #feedback { margin-top: 15px; font-weight: bold; height: 30px; text-align: center; font-size: 1.1em; }
+        .correct { color: var(--grass); }
+        .wrong { color: #e74c3c; }
+        #next-btn { display: none; width: 100%; margin-top: 15px; padding: 15px; background: var(--grass); color: white; border: none; border-radius: 10px; font-size: 1.1em; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <div class="header">
+        <h1 style="color:var(--grass); margin:0;">⚽ 數學大聯賽</h1>
+        <p style="margin:5px 0;">足球員計算大挑戰 (P1-P3)</p>
+    </div>
+
+    <div class="score-board">
+        <span>🏃 進攻次數: <span id="progress">1</span> / 30</span>
+        <span>🏆 入球數: <span id="score">0</span></span>
+    </div>
+
+    <div id="quiz-area">
+        <div class="math-card">
+            <div id="level-tag" class="difficulty">P1 基礎</div>
+            <div class="question-text" id="q-text">載入戰術中...</div>
+        </div>
+
+        <div class="ans-grid" id="options"></div>
+        <div id="feedback"></div>
+        <button id="next-btn" onclick="nextQuestion()">傳球射門 ➔</button>
+    </div>
+</div>
+
+<script>
+    const mathDB = [
+        // P1 程度 (加減、基本數概念)
+        { s: "足球隊上半年進了 12 球，下半年進了 7 球，全年共進多少球？", o: ["18", "19", "20"], c: 1, l: "P1" },
+        { s: "球場上有 15 個足球，借走 6 個後，還剩多少個？", o: ["8", "9", "10"], c: 1, l: "P1" },
+        { s: "足球是甚麼形狀的？", o: ["圓形", "球體", "正方形"], c: 1, l: "P1" },
+        { s: "球衣號碼 18 號的前一個數字是甚麼？", o: ["17", "19", "20"], c: 0, l: "P1" },
+        { s: "你有 $10，買一張 $8 的貼紙，應找回多少錢？", o: ["$1", "$2", "$3"], c: 1, l: "P1" },
+        // P2 程度 (100內加減、乘法、長度)
+        { s: "每隊足球隊有 11 人，兩隊比賽共有多少人在場上？", o: ["20", "22", "24"], c: 1, l: "P2" },
+        { s: "足球襪每雙 $15，買 2 雙共需多少錢？", o: ["$25", "$30", "$35"], c: 1, l: "P2" },
+        { s: "一場比賽上半場 45 分鐘，下半場也是 45 分鐘，合共多少分鐘？", o: ["80", "90", "100"], c: 1, l: "P2" },
+        { s: "5 排座位，每排坐 10 個觀眾，共有多少個觀眾？", o: ["40", "50", "60"], c: 1, l: "P2" },
+        { s: "足球場長 100 米，小明跑了 40 米，還要跑多少米才到終點？", o: ["50", "60", "70"], c: 1, l: "P2" },
+        // P3 程度 (三位數、除法、分數、時間)
+        { s: "一打足球有 12 個，3 打共有多少個？", o: ["24", "36", "48"], c: 1, l: "P3" },
+        { s: "24 個足球平均分給 4 隊，每隊分得多少個？", o: ["5", "6", "7"], c: 1, l: "P3" },
+        { s: "比賽在 2:00 開始，3:30 結束，比賽進行了多久？", o: ["1小時", "1小時30分", "2小時"], c: 1, l: "P3" },
+        { s: "球場門票每張 $45，買 2 張付 $100，應找回多少？", o: ["$10", "$5", "$55"], c: 0, l: "P3" }, // 修正：100-90=10
+        { s: "一個披薩切成 8 份，隊長吃了 3 份，他吃了整個披薩的幾分之幾？", o: ["3/8", "5/8", "1/8"], c: 0, l: "P3" },
+        { s: "300 + 450 = ?", o: ["700", "750", "800"], c: 1, l: "P3" },
+        { s: "哪一個重量最接近一個足球？", o: ["400克", "400公斤", "4克"], c: 0, l: "P3" },
+        { s: "正方形球場邊長 10 米，周界是多少米？", o: ["20", "40", "100"], c: 1, l: "P3" },
+        { s: "50 裡面有多少個 5？", o: ["5", "10", "15"], c: 1, l: "P2" },
+        { s: "小明有 $50，買足球用去 $32，還剩多少？", o: ["$18", "$28", "$12"], c: 0, l: "P2" }
+        // (此處可根據需要增加至50題，為保持簡短先列出20題示範)
+    ];
+
+    // 隨機抽選題目
+    let quizData = mathDB.sort(() => 0.5 - Math.random()).slice(0, 30);
+    let currentIdx = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = quizData[currentIdx];
+        document.getElementById('progress').innerText = currentIdx + 1;
+        document.getElementById('q-text').innerText = q.s;
+        
+        const tag = document.getElementById('level-tag');
+        tag.innerText = q.l + " 程度";
+        tag.className = "difficulty " + q.l.toLowerCase();
+        
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('next-btn').style.display = 'none';
+
+        q.o.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'ans-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAns(index);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function checkAns(selected) {
+        const q = quizData[currentIdx];
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.ans-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selected === q.c) {
+            feedback.innerHTML = "⚽ 漂亮進球！計算正確！";
+            feedback.className = "correct";
+            score++;
+            document.getElementById('score').innerText = score;
+        } else {
+            feedback.innerHTML = `🥅 射門被擋！正確答案是 ${q.o[q.c]}`;
+            feedback.className = "wrong";
+        }
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let msg = score > 25 ? "你是球隊的 MVP 數學家！" : "表現穩定，繼續訓練！";
+        document.getElementById('quiz-area').innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <h1 style="font-size:3em;">🏆</h1>
+                <h2>聯賽賽果</h2>
+                <p style="font-size:1.4em;">總入球：${score} / ${quizData.length}</p>
+                <p>${msg}</p>
+                <button class="ans-btn" onclick="location.reload()" style="width:100%; margin-top:15px; background:var(--gold);">再次挑戰</button>
+            </div>
+        `;
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
