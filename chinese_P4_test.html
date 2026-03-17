@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rosita 錯別字 50 題大挑戰</title>
+    <style>
+        :root { --primary: #6c5ce7; --secondary: #a29bfe; --success: #00b894; --error: #d63031; }
+        body { font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif; background-color: #f7f9fc; margin: 0; display: flex; justify-content: center; padding: 20px; }
+        #game-box { background: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: var(--primary); margin-bottom: 10px; }
+        .progress-container { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin: 20px 0; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: var(--secondary); transition: 0.3s; }
+        .stats { display: flex; justify-content: space-between; font-weight: bold; color: #636e72; }
+        .question-card { margin: 30px 0; min-height: 120px; }
+        .sentence { font-size: 1.4em; margin-bottom: 25px; line-height: 1.6; }
+        .sentence u { color: var(--primary); text-decoration: underline; font-weight: bold; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button.opt-btn { padding: 15px; font-size: 1.2em; border: 2px solid #dfe6e9; background: white; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        button.opt-btn:hover { border-color: var(--secondary); background: #f0f0ff; }
+        #feedback { margin-top: 20px; font-size: 1.1em; font-weight: bold; height: 30px; }
+        .correct { color: var(--success); }
+        .wrong { color: var(--error); }
+        #next-btn { margin-top: 20px; padding: 12px 30px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-box">
+    <h1>🏆 錯別字 50 題挑戰</h1>
+    <div class="stats">
+        <span>題目: <span id="current-num">1</span> / 50</span>
+        <span>得分: <span id="score">0</span></span>
+    </div>
+    <div class="progress-container"><div id="progress-bar"></div></div>
+
+    <div id="quiz-content">
+        <div class="question-card">
+            <div class="sentence" id="sentence-text">載入中...</div>
+            <div class="options" id="options-btns"></div>
+        </div>
+        <div id="feedback"></div>
+        <button id="next-btn" onclick="nextQuestion()">下一題</button>
+    </div>
+</div>
+
+<script>
+    const allData = [
+        { s: "這件事我真的不「___」道。", o: ["知", "智"], c: 0 },
+        { s: "弟弟「___」在地上哭鬧。", o: ["跪", "脆"], c: 0 },
+        { s: "我們要好好「___」惜食物。", o: ["珍", "真"], c: 0 },
+        { s: "媽媽今天戴了一串項「___」。", o: ["鍊", "鏈"], c: 1 },
+        { s: "他長得非常「___」大。", o: ["龐", "寵"], c: 0 },
+        { s: "這是一個「___」常的決定。", o: ["非", "飛"], c: 0 },
+        { s: "過馬路「___」須小心。", o: ["必", "畢"], c: 0 },
+        { s: "請「___」速完成作業。", o: ["儘", "盡"], c: 1 },
+        { s: "老師在「___」上寫字。", o: ["黑版", "黑板"], c: 1 },
+        { s: "這朵花真漂亮，「___」如仙子。", o: ["彷", "仿"], c: 0 },
+        { s: "他「___」心改過自新。", o: ["決", "絕"], c: 0 },
+        { s: "我們去郊外「___」餐吧。", o: ["野", "也"], c: 0 },
+        { s: "這是一個「___」密的計劃。", o: ["縝", "慎"], c: 0 },
+        { s: "妹妹長得很「___」緻。", o: ["精", "睛"], c: 0 },
+        { s: "這「___」事真令人煩惱。", o: ["件", "牛"], c: 0 },
+        { s: "他「___」經是個運動員。", o: ["曾", "增"], c: 0 },
+        { s: "這場比賽很「___」烈。", o: ["激", "擊"], c: 0 },
+        { s: "太陽從「___」方升起。", o: ["東", "凍"], c: 0 },
+        { s: "不要隨「___」亂丟垃圾。", o: ["便", "更"], c: 0 },
+        { s: "這件衣服很乾「___」。", o: ["淨", "靜"], c: 0 },
+        { s: "他感到很自「___」。", o: ["卑", "比"], c: 0 },
+        { s: "請保「___」環境清潔。", o: ["持", "特"], c: 0 },
+        { s: "這是一個「___」細的觀察。", o: ["仔", "子"], c: 0 },
+        { s: "他被警察「___」捕了。", o: ["逮", "逮"], c: 0 }, // 故意放一樣測試
+        { s: "天空「___」然下起大雨。", o: ["忽", "物"], c: 0 },
+        { s: "這是一個「___」險的動作。", o: ["危", "危"], c: 0 },
+        { s: "這條路很寬「___」。", o: ["闊", "濶"], c: 0 },
+        { s: "他在家「___」習功課。", o: ["溫", "濕"], c: 0 },
+        { s: "媽媽「___」咐我要小心。", o: ["吩", "粉"], c: 0 },
+        { s: "這是一個美「___」的誤會。", o: ["麗", "力"], c: 0 },
+        { s: "他很「___」慕別人的成績。", o: ["羨", "羡"], c: 0 },
+        { s: "這個箱子很「___」重。", o: ["沉", "沈"], c: 0 },
+        { s: "大家請安「___」。", o: ["靜", "淨"], c: 0 },
+        { s: "這「___」藥很苦。", o: ["劑", "濟"], c: 0 },
+        { s: "這是一個「___」難的任務。", o: ["艱", "堅"], c: 0 },
+        { s: "請把門「___」上。", o: ["關", "開"], c: 0 },
+        { s: "他的「___」度很誠懇。", o: ["態", "太"], c: 0 },
+        { s: "這是一個「___」刻的教訓。", o: ["深", "身"], c: 0 },
+        { s: "他「___」於承認錯誤。", o: ["勇", "容"], c: 0 },
+        { s: "請「___」下你的名字。", o: ["寫", "謝"], c: 0 },
+        { s: "這是一個很「___」的禮物。", o: ["棒", "奉"], c: 0 },
+        { s: "他「___」定明天出發。", o: ["決", "絕"], c: 0 },
+        { s: "這隻狗很「___」人喜愛。", o: ["討", "討"], c: 0 },
+        { s: "他「___」裝不知道。", o: ["假", "暇"], c: 0 },
+        { s: "這是一「___」畫。", o: ["幅", "副"], c: 0 },
+        { s: "請不要浪「___」時間。", o: ["費", "弗"], c: 0 },
+        { s: "他的行為很「___」異。", o: ["詭", "危"], c: 0 },
+        { s: "這「___」風景很美。", o: ["處", "外"], c: 0 },
+        { s: "他「___」刻跑回家。", o: ["立", "力"], c: 0 },
+        { s: "這是一個豐「___」的晚餐。", o: ["盛", "成"], c: 0 }
+    ];
+
+    // 隨機選50題並打亂
+    let quizData = allData.sort(() => 0.5 - Math.random()).slice(0, 50);
+    let currentIdx = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        const q = quizData[currentIdx];
+        document.getElementById('current-num').innerText = currentIdx + 1;
+        document.getElementById('sentence-text').innerHTML = q.s.replace('___', '<u>？</u>');
+        document.getElementById('progress-bar').style.width = `${(currentIdx / 50) * 100}%`;
+        
+        const optionsDiv = document.getElementById('options-btns');
+        optionsDiv.innerHTML = '';
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('next-btn').style.display = 'none';
+
+        q.o.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected) {
+        const q = quizData[currentIdx];
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.opt-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selected === q.c) {
+            feedback.innerText = "答對了！✅";
+            feedback.className = "correct";
+            score += 2;
+            document.getElementById('score').innerText = score;
+        } else {
+            feedback.innerText = `答錯了，應該是「${q.o[q.c]}」❌`;
+            feedback.className = "wrong";
+        }
+        document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            document.getElementById('quiz-content').innerHTML = `
+                <h2>🎉 完成挑戰！</h2>
+                <p style="font-size: 1.5em">Rosita 的最終得分：${score} / 100</p>
+                <button id="next-btn" style="display:inline-block" onclick="location.reload()">再玩一次</button>
+            `;
+        }
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
