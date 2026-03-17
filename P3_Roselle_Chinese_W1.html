@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roselle 公主夢幻日記 - 錯別字大挑戰</title>
+    <style>
+        :root {
+            --princess-pink: #ffdae9;
+            --royal-purple: #9b59b6;
+            --gold: #f1c40f;
+            --sparkle: #ffffff;
+        }
+        body {
+            font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #4a4a4a;
+        }
+        #diary-container {
+            background: white;
+            width: 90%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(255, 182, 193, 0.4);
+            border: 4px solid var(--princess-pink);
+            position: relative;
+        }
+        .crown-icon { font-size: 3em; color: var(--gold); margin-bottom: 10px; }
+        h1 { color: #d81b60; font-size: 1.8em; margin: 0; }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #8e44ad;
+        }
+        .magic-bar-bg {
+            width: 100%;
+            background: #fdf0f5;
+            height: 12px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        #magic-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff80ab, #ba68c8);
+            transition: 0.5s;
+        }
+        .diary-page {
+            background: #fffafa;
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #fce4ec;
+            margin-bottom: 20px;
+            min-height: 140px;
+            position: relative;
+        }
+        .diary-page::before {
+            content: "✨";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
+        .sentence { font-size: 1.4em; line-height: 1.8; color: #5d4037; }
+        .sentence span { border-bottom: 3px dotted #ff80ab; padding: 0 5px; color: #d81b60; font-weight: bold; }
+
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button.choice-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #f8bbd0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #ad1457;
+        }
+        button.choice-btn:hover {
+            background: #f8bbd0;
+            color: white;
+            transform: scale(1.02);
+        }
+        #feedback { margin-top: 20px; font-weight: bold; height: 30px; text-align: center; }
+        .correct { color: #43a047; }
+        .wrong { color: #e53935; }
+        #next-btn {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: #d81b60;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(216, 27, 96, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div id="diary-container">
+    <div style="text-align: center;">
+        <div class="crown-icon">👑</div>
+        <h1>Roselle 公主夢幻日記</h1>
+        <p>優雅地找出日記裡的錯別字吧！</p>
+    </div>
+
+    <div class="stats-bar">
+        <span>📖 日記頁數: <span id="page-num">1</span> / 50</span>
+        <span>💎 寶石積分: <span id="score">0</span></span>
+    </div>
+    <div class="magic-bar-bg"><div id="magic-progress"></div></div>
+
+    <div id="game-content">
+        <div class="diary-page">
+            <div class="sentence" id="sentence-display">載入公主的記憶中...</div>
+        </div>
+
+        <div class="choice-grid" id="choices"></div>
+        <div id="feedback"></div>
+        <button id="next-btn" onclick="nextPage()">翻開下一頁 📖</button>
+    </div>
+</div>
+
+<script>
+    const diaryData = [
+        { s: "今天在芭蕾舞課，我練習了旋「___」。", o: ["轉", "傳"], c: 0 },
+        { s: "我「___」定要在Open Day表演中做到最好。", o: ["決", "絕"], c: 0 },
+        { s: "畫冊裡的圖畫色彩鮮「___」。", o: ["艷", "驗"], c: 0 },
+        { s: "老師稱「___」我的畫作很有創意。", o: ["讚", "鑽"], c: 0 },
+        { s: "媽媽買了一雙閃亮的舞「___」給我。", o: ["鞋", "娃"], c: 0 },
+        { s: "妹妹「___」皮地弄亂了我的彩色筆。", o: ["頑", "玩"], c: 0 },
+        { s: "這「___」事讓我感到非常驚訝。", o: ["件", "牛"], c: 0 },
+        { s: "陽光「___」下，花園裡的玫瑰開得很美。", o: ["照", "招"], c: 0 },
+        { s: "我們「___」須保持安靜。", o: ["必", "畢"], c: 0 },
+        { s: "小貓「___」在我腿上睡覺，真可愛。", o: ["躺", "尚"], c: 0 },
+        { s: "我要「___」細地辨別這兩種顏色。", o: ["仔", "子"], c: 0 },
+        { s: "這場舞蹈比賽很激「___」。", o: ["烈", "列"], c: 0 },
+        { s: "我「___」經學會了用電腦畫畫。", o: ["曾", "增"], c: 0 },
+        { s: "公主居住在「___」麗的城堡裡。", o: ["華", "花"], c: 0 },
+        { s: "請「___」速完成這幅畫。", o: ["盡", "儘"], c: 0 },
+        { s: "姐姐的琴「___」非常優美。", o: ["聲", "生"], c: 0 },
+        { s: "我們要珍「___」每一段美好的時光。", o: ["惜", "借"], c: 0 },
+        { s: "這「___」點心味道甜而不膩。", o: ["道", "到"], c: 0 },
+        { s: "他「___」慕我有這麼漂亮的裙子。", o: ["羨", "羡"], c: 0 },
+        { s: "這是一個「___」難的舞蹈動作。", o: ["艱", "堅"], c: 0 },
+        { s: "天空「___」然下起了花瓣雨。", o: ["忽", "物"], c: 0 },
+        { s: "我要「___」心學習新的舞步。", o: ["專", "傳"], c: 0 },
+        { s: "這件衣服很乾「___」。", o: ["淨", "靜"], c: 0 },
+        { s: "我們一起「___」祝我的生日吧。", o: ["慶", "親"], c: 0 },
+        { s: "這是一「___」感人的日記。", o: ["段", "斷"], c: 0 },
+        { s: "請保「___」環境整潔。", o: ["持", "特"], c: 0 },
+        { s: "這隻小鳥「___」如在唱歌。", o: ["彷", "仿"], c: 0 },
+        { s: "他在「___」上寫下了願望。", o: ["紙", "底"], c: 0 },
+        { s: "我們在草地上「___」餐。", o: ["野", "也"], c: 0 },
+        { s: "這是一個「___」常美好的下午。", o: ["非", "飛"], c: 0 },
+        { s: "請把門「___」上。", o: ["關", "開"], c: 0 },
+        { s: "這「___」風景真迷人。", o: ["處", "外"], c: 0 },
+        { s: "他「___」裝不知道這件事。", o: ["假", "暇"], c: 0 },
+        { s: "這隻狗狗很「___」人喜愛。", o: ["討", "計"], c: 0 },
+        { s: "我要努力「___」習，爭取好成績。", o: ["溫", "濕"], c: 0 },
+        { s: "這是一個美「___」的傳說。", o: ["麗", "力"], c: 0 },
+        { s: "他長得非常「___」大。", o: ["龐", "寵"], c: 0 },
+        { s: "請「___」下你的祝福語。", o: ["寫", "謝"], c: 0 },
+        { s: "這隻小猴子很「___」明。", o: ["聰", "總"], c: 0 },
+        { s: "大家安「___」地坐在座位上。", o: ["靜", "淨"], c: 0 },
+        { s: "這「___」藥水可以治療傷口。", o: ["劑", "濟"], c: 0 },
+        { s: "這是一個「___」細的觀察日記。", o: ["詳", "祥"], c: 0 },
+        { s: "他「___」心改過自新。", o: ["決", "絕"], c: 0 },
+        { s: "這是一「___」精美的畫作。", o: ["幅", "副"], c: 0 },
+        { s: "我要保護「___」稀的小動物。", o: ["珍", "真"], c: 0 },
+        { s: "這場演出的幕「___」花絮很有趣。", o: ["後", "候"], c: 0 },
+        { s: "他很「___」心，經常幫助別人。", o: ["熱", "熟"], c: 0 },
+        { s: "這是一個難「___」的機會。", o: ["得", "特"], c: 0 },
+        { s: "大家一「___」去郊遊吧。", o: ["起", "走"], c: 0 },
+        { s: "我的夢想是成為一名藝「___」家。", o: ["術", "述"], c: 0 }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let shuffledData = diaryData.sort(() => 0.5 - Math.random());
+
+    function loadPage() {
+        const q = shuffledData[currentIdx];
+        document.getElementById('page-num').innerText = currentIdx + 1;
+        document.getElementById('sentence-display').innerHTML = q.s.replace('___', '<span>？</span>');
+        document.getElementById('magic-progress').style.width = `${((currentIdx) / 50) * 100}%`;
+        
+        const choicesDiv = document.getElementById('choices');
+        choicesDiv.innerHTML = '';
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('next-btn').style.display = 'none';
+
+        q.o.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkChoice(index);
+            choicesDiv.appendChild(btn);
+        });
+    }
+
+    function checkChoice(selected) {
+        const q = shuffledData[currentIdx];
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.choice-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selected === q.c) {
+            feedback.innerHTML = "💖 答對了！公主的智慧真耀眼！";
+            feedback.className = "correct";
+            score += 2;
+            document.getElementById('score').innerText = score;
+        } else {
+            feedback.innerHTML = `✨ 差一點點，正確的字是「${q.o[q.c]}」喔！`;
+            feedback.className = "wrong";
+        }
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextPage() {
+        currentIdx++;
+        if (currentIdx < 50) {
+            loadPage();
+        } else {
+            showCeremony();
+        }
+    }
+
+    function showCeremony() {
+        let title = score >= 90 ? "璀璨全能女皇" : (score >= 70 ? "優雅資深公主" : "努力實習公主");
+        document.getElementById('game-content').innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <h1 style="font-size: 3em;">🏰</h1>
+                <h2>挑戰完成！</h2>
+                <p style="font-size: 1.5em">Roselle 的總積分：${score} / 100</p>
+                <h3 style="color:#d81b60">獲得榮譽：${title}</h3>
+                <p>妳成功修復了 50 頁日記，太厲害了！</p>
+                <button class="choice-btn" onclick="location.reload()" style="width:100%; margin-top: 20px; background:#d81b60; color:white;">再次開啟冒險</button>
+            </div>
+        `;
+    }
+
+    loadPage();
+</script>
+
+</body>
+</html>
