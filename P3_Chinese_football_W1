@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>足球員錯別字聯賽 - P3 挑戰</title>
+    <style>
+        :root { --pitch-green: #27ae60; --line-white: #ffffff; --ball-black: #2d3436; --goal-yellow: #f1c40f; }
+        body { font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif; background-color: #ecf0f1; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        #stadium { background: var(--pitch-green); width: 95%; max-width: 600px; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 4px solid var(--line-white); color: white; position: relative; }
+        .scoreboard { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+        .pitch-line { width: 100%; height: 2px; background: rgba(255,255,255,0.5); margin: 20px 0; }
+        
+        .question-box { background: white; color: var(--ball-black); padding: 20px; border-radius: 15px; min-height: 120px; margin-bottom: 20px; text-align: center; }
+        .sentence { font-size: 1.4em; line-height: 1.6; }
+        .sentence span { border-bottom: 3px solid var(--pitch-green); padding: 0 5px; font-weight: bold; color: #d35400; }
+
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button.kick-btn { padding: 15px; font-size: 1.3em; border: none; background: var(--line-white); color: var(--pitch-green); border-radius: 50px; cursor: pointer; transition: 0.2s; font-weight: bold; box-shadow: 0 4px 0 #bdc3c7; }
+        button.kick-btn:hover { transform: scale(1.05); background: var(--goal-yellow); color: #000; }
+        button.kick-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        #commentary { margin-top: 15px; font-weight: bold; text-align: center; font-size: 1.1em; height: 30px; }
+        .goal { color: var(--goal-yellow); text-shadow: 1px 1px 2px #000; }
+        .miss { color: #ff7675; }
+        
+        #next-match { display: none; width: 100%; margin-top: 20px; padding: 15px; background: var(--goal-yellow); color: #000; border: none; border-radius: 10px; font-size: 1.1em; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="stadium">
+    <div class="scoreboard">
+        <span>🏟️ 聯賽進度: <span id="progress">1</span> / 50</span>
+        <span>⚽ 入球數: <span id="score">0</span></span>
+    </div>
+
+    <div class="question-box">
+        <div class="sentence" id="sentence-text">準備開球...</div>
+    </div>
+
+    <div class="action-grid" id="options"></div>
+    <div id="commentary"></div>
+    <button id="next-match" onclick="nextQuestion()">繼續傳球 ➔</button>
+
+    <div class="pitch-line"></div>
+    <div style="text-align:center; font-size: 0.9em; opacity: 0.8;">足球員錯別字大賽 - 三年級專用版</div>
+</div>
+
+<script>
+    const soccerQuestions = [
+        { s: "足球員正在草「___」上跑步。", o: ["場", "長"], c: 0 },
+        { s: "教練要求我們每天都要「___」習。", o: ["練", "連"], c: 0 },
+        { s: "這是我最喜歡的一「___」球隊。", o: ["支", "枝"], c: 0 },
+        { s: "比賽「___」始了，大家加油！", o: ["開", "關"], c: 0 },
+        { s: "足球員踢「___」了對方的球。", o: ["走", "足"], c: 0 },
+        { s: "這場比「___」真精彩。", o: ["賽", "寒"], c: 0 },
+        { s: "我們一定要團「___」一致。", o: ["結", "潔"], c: 0 },
+        { s: "守門員成功「___」住了足球。", o: ["接", "按"], c: 0 },
+        { s: "小球員流了一身大「___」。", o: ["汗", "干"], c: 0 },
+        { s: "足球在空中劃過一「___」弧線。", o: ["道", "到"], c: 0 },
+        { s: "老師請我們「___」心踢球。", o: ["專", "傳"], c: 0 },
+        { s: "足球員「___」快地跑向球門。", o: ["飛", "非"], c: 0 },
+        { s: "這是一個「___」常好的入球。", o: ["非", "飛"], c: 0 },
+        { s: "比賽結「___」後，大家握握手。", o: ["束", "速"], c: 0 },
+        { s: "球員們感到非常「___」倦。", o: ["疲", "皮"], c: 0 },
+        { s: "他是我們隊中的「___」力球員。", o: ["主", "王"], c: 0 },
+        { s: "我們要遵「___」比賽規則。", o: ["守", "手"], c: 0 },
+        { s: "對手實力非常「___」大。", o: ["強", "牆"], c: 0 },
+        { s: "這雙足球「___」很耐穿。", o: ["鞋", "娃"], c: 0 },
+        { s: "足球員穿上「___」齊的球衣。", o: ["整", "正"], c: 0 },
+        { s: "我們「___」望能贏得冠軍。", o: ["希", "稀"], c: 0 },
+        { s: "足球在場地「___」央旋轉。", o: ["中", "種"], c: 0 },
+        { s: "隊長大「___」一聲：進攻！", o: ["喊", "減"], c: 0 },
+        { s: "比賽進行得十分激「___」。", o: ["烈", "列"], c: 0 },
+        { s: "我們要感謝「___」眾的支持。", o: ["觀", "歡"], c: 0 },
+        { s: "足球員保持「___」快的笑容。", o: ["愉", "輸"], c: 0 },
+        { s: "裁判吹響了哨「___」。", o: ["子", "仔"], c: 0 },
+        { s: "這是一個「___」貴的機會。", o: ["寶", "保"], c: 0 },
+        { s: "足球員努力向「___」衝。", o: ["前", "箭"], c: 0 },
+        { s: "他「___」心改進踢球技術。", o: ["決", "絕"], c: 0 },
+        { s: "這是一「___」感人的比賽。", o: ["場", "廠"], c: 0 },
+        { s: "我們在更衣室「___」息。", o: ["休", "體"], c: 0 },
+        { s: "足球員「___」備好上場了。", o: ["準", "准"], c: 0 },
+        { s: "弟弟「___」望快點長大踢波。", o: ["渴", "喝"], c: 0 },
+        { s: "球員在場上互相「___」合。", o: ["配", "陪"], c: 0 },
+        { s: "他「___」得滿頭大汗。", o: ["跑", "包"], c: 0 },
+        { s: "這「___」事真令人興奮。", o: ["件", "牛"], c: 0 },
+        { s: "我們要珍「___」每一次比賽。", o: ["惜", "借"], c: 0 },
+        { s: "球員們展示了「___」湛的球技。", o: ["精", "睛"], c: 0 },
+        { s: "大家安「___」地觀看比賽。", o: ["靜", "淨"], c: 0 },
+        { s: "足球員「___」刻傳出好球。", o: ["立", "力"], c: 0 },
+        { s: "隊伍「___」經準備就緒。", o: ["已", "己"], c: 0 },
+        { s: "我們「___」勝了強大的對手。", o: ["戰", "站"], c: 0 },
+        { s: "球員在「___」陽下練習。", o: ["烈", "列"], c: 0 },
+        { s: "教練的「___」度很認真。", o: ["態", "太"], c: 0 },
+        { s: "足球員的「___」力非常好。", o: ["體", "梯"], c: 0 },
+        { s: "我們要保「___」環境整潔。", o: ["持", "特"], c: 0 },
+        { s: "足球「___」到了球網裏。", o: ["滾", "孔"], c: 0 },
+        { s: "這是一個難「___」的時刻。", o: ["忘", "望"], c: 0 },
+        { s: "大家一「___」去慶祝吧。", o: ["起", "走"], c: 0 }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+    let quizData = soccerQuestions.sort(() => 0.5 - Math.random());
+
+    function loadQuestion() {
+        const q = quizData[currentIdx];
+        document.getElementById('progress').innerText = currentIdx + 1;
+        document.getElementById('sentence-text').innerHTML = q.s.replace('___', '<span>？</span>');
+        
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        document.getElementById('commentary').innerText = '';
+        document.getElementById('next-match').style.display = 'none';
+
+        q.o.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'kick-btn';
+            btn.innerText = opt;
+            btn.onclick = () => shoot(index);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function shoot(selected) {
+        const q = quizData[currentIdx];
+        const comm = document.getElementById('commentary');
+        const btns = document.querySelectorAll('.kick-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selected === q.c) {
+            comm.innerHTML = "GOAL!!! ⚽ 入球成功！";
+            comm.className = "goal";
+            score++;
+            document.getElementById('score').innerText = score;
+        } else {
+            comm.innerHTML = `射歪了！正確字是「${q.o[q.c]}」🚩`;
+            comm.className = "miss";
+        }
+        document.getElementById('next-match').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < 50) {
+            loadQuestion();
+        } else {
+            finishMatch();
+        }
+    }
+
+    function finishMatch() {
+        let title = score > 45 ? "金靴獎得主" : (score > 30 ? "正選球員" : "後備之星");
+        document.getElementById('stadium').innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <h1 style="font-size: 3em;">🏆</h1>
+                <h2>聯賽完場！</h2>
+                <p style="font-size: 1.5em">總入球：${score} / 50</p>
+                <h3 style="color:var(--goal-yellow)">獲得稱號：${title}</h3>
+                <button class="kick-btn" onclick="location.reload()" style="width:100%; margin-top: 20px;">參加下一場聯賽</button>
+            </div>
+        `;
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
