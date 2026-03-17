@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>足球名將：標點大守門</title>
+    <style>
+        :root { --field-green: #2ecc71; --goal-post: #ffffff; --ball-white: #f5f6fa; --miss-red: #e74c3c; }
+        body { font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif; background-color: #27ae60; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; }
+        #game-stadium { background: rgba(0,0,0,0.3); width: 95%; max-width: 650px; padding: 30px; border-radius: 20px; border: 3px solid var(--goal-post); text-align: center; }
+        .match-stats { display: flex; justify-content: space-between; font-size: 1.1em; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; }
+        
+        .goal-area { background: white; color: #2d3436; padding: 30px; border-radius: 15px; margin-bottom: 25px; min-height: 100px; display: flex; align-items: center; justify-content: center; border-bottom: 8px solid #dfe6e9; }
+        .sentence { font-size: 1.5em; line-height: 1.6; font-weight: bold; }
+        .sentence span { color: #2980b9; border-bottom: 2px dashed #2980b9; padding: 0 5px; }
+
+        .button-zone { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        button.save-btn { padding: 15px; font-size: 1.5em; border: none; background: var(--ball-white); color: #2c3e50; border-radius: 10px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        button.save-btn:hover { background: #f1c40f; transform: scale(1.05); }
+        
+        #referee-comment { margin-top: 20px; font-size: 1.2em; font-weight: bold; min-height: 30px; }
+        .saved { color: #f1c40f; }
+        .conceded { color: #ff7675; }
+        
+        #next-play { display: none; width: 100%; margin-top: 20px; padding: 15px; background: #fff; color: #27ae60; border: none; border-radius: 10px; font-size: 1.2em; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-stadium">
+    <div class="match-stats">
+        <span>⏱️ 賽事進度: <span id="progress">1</span> / 50</span>
+        <span>🧤 成功救波: <span id="saves">0</span></span>
+    </div>
+
+    <div class="goal-area">
+        <div class="sentence" id="display-text">準備撲救...</div>
+    </div>
+
+    <div class="button-zone" id="controls"></div>
+    <div id="referee-comment"></div>
+    <button id="next-play" onclick="nextQuestion()">準備下一球 ⚽</button>
+
+    <div style="margin-top: 25px; font-size: 0.8em; opacity: 0.7;">
+        三年級標點符號專訓 - 逗號、句號、問號、感嘆號、冒號、引號
+    </div>
+</div>
+
+<script>
+    const puncQuestions = [
+        { s: "你喜歡踢足球嗎( )", o: ["。", "？", "！"], c: 1 },
+        { s: "今天的比賽真精彩( )", o: ["。", "！", "？"], c: 1 },
+        { s: "老師說( )( )大家要努力練習。( )", o: ["： 「", "」", "。」"], c: 0 }, // 簡化處理
+        { s: "我不小心跌倒了( )膝蓋有點痛。", o: ["，", "。", "！"], c: 0 },
+        { s: "隊長問( )「誰想當守門員？」", o: ["：", "，", "。"], c: 0 },
+        { s: "球場上有草地( )球門和球員。", o: ["，", "。", "？"], c: 0 },
+        { s: "哇( )這個入球太漂亮了！", o: ["！", "，", "。"], c: 0 },
+        { s: "你知道冠軍是誰嗎( )", o: ["？", "。", "！"], c: 0 },
+        { s: "明天不用上學( )我們可以去踢波了。", o: ["，", "。", "！"], c: 0 },
+        { s: "媽媽大聲喊( )「加油呀！」", o: ["：", "，", "。"], c: 0 },
+        { s: "足球員跑得真快( )", o: ["。", "！", "？"], c: 0 },
+        { s: "你想踢前鋒( )還是踢後衛？", o: ["，", "？", "。"], c: 0 },
+        { s: "這場比賽結束了( )我們贏了。", o: ["，", "。", "！"], c: 1 },
+        { s: "小明問道( )「我可以加入你們嗎？」", o: ["：", "，", "。"], c: 0 },
+        { s: "天氣太熱了( )大家去喝水吧。", o: ["，", "。", "！"], c: 0 },
+        { s: "天啊( )球進了！", o: ["！", "，", "。"], c: 0 },
+        { s: "這是一雙新球鞋( )", o: ["。", "？", "！"], c: 0 },
+        { s: "你準備好了嗎( )", o: ["？", "！", "。"], c: 0 },
+        { s: "教練說( )「團結就是力量。」", o: ["：", "，", "。"], c: 0 },
+        { s: "足球員「___」射門了！", o: ["。", "！", "？"], c: 1 },
+        { s: "操場上有很多人( )非常熱鬧。", o: ["，", "。", "！"], c: 0 },
+        { s: "你看見我的足球嗎( )", o: ["？", "。", "！"], c: 0 },
+        { s: "大家排好隊( )準備出發。", o: ["，", "。", "？"], c: 0 },
+        { s: "這裏的風景真美( )", o: ["！", "。", "？"], c: 0 },
+        { s: "小狗在球場上跑來跑去( )", o: ["。", "！", "？"], c: 0 },
+        { s: "誰把球踢到水溝裏了( )", o: ["？", "。", "！"], c: 0 },
+        { s: "爸爸買了一個足球( )一個籃球。", o: ["，", "。", "！"], c: 0 },
+        { s: "快點( )比賽要開始了！", o: ["！", "，", "。"], c: 0 },
+        { s: "小麗說( )「我也想試試看。」", o: ["：", "，", "。"], c: 0 },
+        { s: "我們是最好的隊友( )", o: ["。", "！", "？"], c: 0 },
+        { s: "你明天會來練習嗎( )", o: ["？", "。", "！"], c: 0 },
+        { s: "太棒了( )我們拿到了冠軍！", o: ["！", "，", "。"], c: 0 },
+        { s: "弟弟學會了踢波( )心裏很高興。", o: ["，", "。", "！"], c: 0 },
+        { s: "教練問( )「大家累不累？」", o: ["：", "，", "。"], c: 0 },
+        { s: "太陽下山了( )比賽也結束了。", o: ["，", "。", "！"], c: 1 },
+        { s: "這場足球賽一共進了三球( )", o: ["。", "！", "？"], c: 0 },
+        { s: "你想喝果汁( )還是喝清水？", o: ["，", "？", "。"], c: 0 },
+        { s: "天上的白雲像足球一樣圓( )", o: ["。", "！", "？"], c: 0 },
+        { s: "加油( )加油！", o: ["！", "，", "。"], c: 1 },
+        { s: "醫生說( )「受傷了要多休息。」", o: ["：", "，", "。"], c: 0 },
+        { s: "你看( )那顆星星好亮。", o: ["，", "。", "！"], c: 0 },
+        { s: "誰是今年的最有價值球員( )", o: ["？", "。", "！"], c: 0 },
+        { s: "球員們跑得很累( )但很開心。", o: ["，", "。", "！"], c: 0 },
+        { s: "這是一場難忘的比賽( )", o: ["。", "！", "？"], c: 0 },
+        { s: "裁判大聲說( )「比賽開始！」", o: ["：", "，", "。"], c: 0 },
+        { s: "球進了( )球進了！", o: ["！", "，", "。"], c: 0 },
+        { s: "你為什麼不去踢球( )", o: ["？", "。", "！"], c: 0 },
+        { s: "公園裏有小朋友在玩耍( )", o: ["。", "！", "？"], c: 0 },
+        { s: "我們約定好( )明天公園見。", o: ["，", "。", "！"], c: 0 },
+        { s: "大家一齊大喊( )「我們贏了！」", o: ["：", "，", "。"], c: 0 }
+    ];
+
+    let currentIdx = 0;
+    let saveCount = 0;
+    let quizData = puncQuestions.sort(() => 0.5 - Math.random());
+
+    function loadQuestion() {
+        const q = quizData[currentIdx];
+        document.getElementById('progress').innerText = currentIdx + 1;
+        document.getElementById('display-text').innerHTML = q.s.replace('( )', '<span>( ? )</span>');
+        
+        const controls = document.getElementById('controls');
+        controls.innerHTML = '';
+        document.getElementById('referee-comment').innerText = '';
+        document.getElementById('next-play').style.display = 'none';
+
+        q.o.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'save-btn';
+            btn.innerText = opt;
+            btn.onclick = () => saveAttempt(index);
+            controls.appendChild(btn);
+        });
+    }
+
+    function saveAttempt(selected) {
+        const q = quizData[currentIdx];
+        const comment = document.getElementById('referee-comment');
+        const btns = document.querySelectorAll('.save-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (selected === q.c) {
+            comment.innerHTML = "🧤 精彩撲救！你守住了這一球！";
+            comment.className = "saved";
+            saveCount++;
+            document.getElementById('saves').innerText = saveCount;
+        } else {
+            comment.innerHTML = `🥅 哎呀，球進了！正確標點是「${q.o[q.c]}」`;
+            comment.className = "conceded";
+        }
+        document.getElementById('next-play').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < 50) {
+            loadQuestion();
+        } else {
+            matchReport();
+        }
+    }
+
+    function matchReport() {
+        let rating = saveCount > 40 ? "世界級龍門" : (saveCount > 25 ? "穩定主力" : "繼續努力");
+        document.getElementById('game-stadium').innerHTML = `
+            <div style="padding: 20px;">
+                <h1 style="font-size: 3em;">⚽</h1>
+                <h2>全場完！賽事報告</h2>
+                <p style="font-size: 1.5em">成功撲救：${saveCount} / 50</p>
+                <h3 style="color:#f1c40f">你的表現評級：${rating}</h3>
+                <button class="save-btn" onclick="location.reload()" style="width:100%; margin-top: 20px; background:#fff; color:#27ae60">重返訓練場</button>
+            </div>
+        `;
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
