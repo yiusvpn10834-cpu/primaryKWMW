@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-pop 出道大挑戰：錯別字特訓</title>
+    <style>
+        :root {
+            --stage-purple: #6c5ce7;
+            --neon-pink: #fd79a8;
+            --spotlight: #ffeaa7;
+            --dark-bg: #2d3436;
+        }
+        body {
+            font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at 20% 30%, #3d3d3d 0%, #2d3436 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+        #stage-container {
+            background: rgba(45, 52, 54, 0.9);
+            width: 95%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid var(--stage-purple);
+            box-shadow: 0 0 20px var(--stage-purple);
+            text-align: center;
+        }
+        h1 { color: var(--neon-pink); text-shadow: 2px 2px 10px var(--neon-pink); margin-bottom: 5px; }
+        .status-panel {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+        .energy-bar-bg {
+            width: 100%;
+            background: #444;
+            height: 12px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        #energy-level {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--stage-purple), var(--neon-pink));
+            transition: 0.5s;
+        }
+        .script-card {
+            background: #fff;
+            color: #333;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            min-height: 120px;
+            font-size: 1.3em;
+            line-height: 1.6;
+            border-left: 10px solid var(--neon-pink);
+            text-align: left;
+        }
+        .script-card span {
+            color: var(--stage-purple);
+            border-bottom: 2px solid var(--stage-purple);
+            font-weight: bold;
+        }
+
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button.kpop-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid var(--neon-pink);
+            background: transparent;
+            color: var(--neon-pink);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        button.kpop-btn:hover {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+        #comment { margin-top: 20px; font-weight: bold; height: 30px; font-size: 1.1em; }
+        #next-task {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--stage-purple);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="stage-container">
+    <h1>🌟 K-pop 全能偶像挑戰</h1>
+    <p>檢查回歸企劃書，順利出道成為巨星！</p>
+
+    <div class="status-panel">
+        <span>🎤 訓練進度: <span id="task-num">1</span> / 50</span>
+        <span>🔥 粉絲人數: <span id="fans">0</span>K</span>
+    </div>
+    <div class="energy-bar-bg"><div id="energy-level"></div></div>
+
+    <div id="game-play">
+        <div class="script-card" id="script-text">
+            正在接收經理人的訊息...
+        </div>
+
+        <div class="button-grid" id="options"></div>
+        <div id="comment"></div>
+        <button id="next-task" onclick="loadNext()">下一步特訓 ➔</button>
+    </div>
+</div>
+
+<script>
+    const kpopQuiz = [
+        { s: "我們要為新歌「___」辦一場粉絲見面會。", o: ["籌", "壽"], c: 0 },
+        { s: "這支舞的節奏非常「___」快。", o: ["輕", "青"], c: 0 },
+        { s: "練習生「___」須每天練習八小時。", o: ["必", "畢"], c: 0 },
+        { s: "在舞台上，我要保持「___」亮的笑容。", o: ["明", "朋"], c: 0 },
+        { s: "這首歌的歌詞很感人，很有意「___」。", o: ["義", "議"], c: 0 },
+        { s: "粉絲送的禮物非常「___」貴。", o: ["珍", "真"], c: 0 },
+        { s: "我們要「___」慎檢查舞台設備。", o: ["謹", "勤"], c: 0 },
+        { s: "這「___」舞蹈動作非常困難。", o: ["段", "斷"], c: 0 },
+        { s: "歌手「___」經在世界各地巡迴演出。", o: ["曾", "增"], c: 0 },
+        { s: "音樂錄影帶的畫面很美「___」。", o: ["麗", "力"], c: 0 },
+        { s: "請大家保持安「___」，準備開場。", o: ["靜", "淨"], c: 0 },
+        { s: "這「___」事讓我感到很榮幸。", o: ["件", "牛"], c: 0 },
+        { s: "我們要「___」心學習新的曲風。", o: ["專", "傳"], c: 0 },
+        { s: "他的歌聲非常有吸引「___」。", o: ["力", "立"], c: 0 },
+        { s: "這場演出的效果出「___」意料。", o: ["乎", "呼"], c: 0 },
+        { s: "「___」然我是新人，但我會努力。", o: ["雖", "離"], c: 0 },
+        { s: "歌迷們在場外「___」心等待。", o: ["耐", "奈"], c: 0 },
+        { s: "這是一「___」非常有力量的歌曲。", o: ["首", "手"], c: 0 },
+        { s: "我們要「___」定目標，勇敢前進。", o: ["決", "絕"], c: 0 },
+        { s: "他在舞台上展現了極大的勇「___」。", o: ["氣", "汽"], c: 0 },
+        { s: "這件表演服非常「___」麗。", o: ["華", "花"], c: 0 },
+        { s: "經理人「___」咐我們要多喝水。", o: ["吩", "粉"], c: 0 },
+        { s: "這場比賽結「___」後，大家都很感動。", o: ["束", "速"], c: 0 },
+        { s: "我們要「___」護每一位支持者的心。", o: ["愛", "受"], c: 0 },
+        { s: "新專輯的封面設計很「___」緻。", o: ["精", "睛"], c: 0 },
+        { s: "他「___」裝聽不到場外的雜音。", o: ["假", "暇"], c: 0 },
+        { s: "隊長大「___」一聲：We are the best！", o: ["喊", "減"], c: 0 },
+        { s: "這是一個難「___」的演出機會。", o: ["得", "特"], c: 0 },
+        { s: "我們要保「___」良好的體能狀況。", o: ["持", "特"], c: 0 },
+        { s: "這場表演「___」如一場幻夢。", o: ["仿", "彷"], c: 1 },
+        { s: "這是一「___」精采的幕後花絮。", o: ["段", "斷"], c: 0 },
+        { s: "練習室很乾「___」，大家要保持衛生。", o: ["淨", "靜"], c: 0 },
+        { s: "這位歌手很有名「___」。", o: ["氣", "汽"], c: 0 },
+        { s: "我們「___」望能拿到音樂榜冠軍。", o: ["希", "稀"], c: 0 },
+        { s: "這「___」風景在MV裡出現過。", o: ["處", "外"], c: 0 },
+        { s: "大家一「___」跳舞，動作很整齊。", o: ["起", "走"], c: 0 },
+        { s: "老師請我們「___」細檢查歌譜。", o: ["仔", "子"], c: 0 },
+        { s: "這「___」藥可以舒緩喉嚨痛。", o: ["劑", "濟"], c: 0 },
+        { s: "這是一個豐「___」的慶功宴。", o: ["盛", "成"], c: 0 },
+        { s: "他「___」心改進唱功。", o: ["決", "絕"], c: 0 },
+        { s: "這首歌的節奏很輕「___」。", o: ["快", "抉"], c: 0 },
+        { s: "請大家支持我「___」！", o: ["們", "門"], c: 0 },
+        { s: "這「___」演出一共三小時。", o: ["場", "廠"], c: 0 },
+        { s: "他是隊中的「___」要人物。", o: ["重", "種"], c: 0 },
+        { s: "我們要遵「___」公司的守則。", o: ["守", "手"], c: 0 },
+        { s: "太陽「___」下，我們還在練舞。", o: ["照", "招"], c: 0 },
+        { s: "歌迷的熱情令我感「___」。", o: ["動", "重"], c: 0 },
+        { s: "我們要珍「___」每一次上台的機會。", o: ["惜", "借"], c: 0 },
+        { s: "這首歌「___」經紅遍全球。", o: ["已", "己"], c: 0 },
+        { s: "你是最優秀的藝「___」。", o: ["人", "入"], c: 0 }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let quiz = kpopQuiz.sort(() => 0.5 - Math.random());
+
+    function render() {
+        const q = quiz[current];
+        document.getElementById('task-num').innerText = current + 1;
+        document.getElementById('script-text').innerHTML = q.s.replace('___', '<span>？</span>');
+        document.getElementById('energy-level').style.width = `${(current / 50) * 100}%`;
+        
+        const optDiv = document.getElementById('options');
+        optDiv.innerHTML = '';
+        document.getElementById('comment').innerText = '';
+        document.getElementById('next-task').style.display = 'none';
+
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'kpop-btn';
+            btn.innerText = opt;
+            btn.onclick = () => check(idx);
+            optDiv.appendChild(btn);
+        });
+    }
+
+    function check(idx) {
+        const q = quiz[current];
+        const comm = document.getElementById('comment');
+        const btns = document.querySelectorAll('.kpop-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (idx === q.c) {
+            comm.innerHTML = "✨ Daebak! (太棒了) 錯別字消失了！";
+            comm.style.color = "var(--neon-pink)";
+            score += 10;
+            document.getElementById('fans').innerText = score;
+        } else {
+            comm.innerHTML = `⚠️ NG! 正確應該是「${q.o[q.c]}」喔！`;
+            comm.style.color = "#ff7675";
+        }
+        document.getElementById('next-task').style.display = 'block';
+    }
+
+    function loadNext() {
+        current++;
+        if (current < 50) {
+            render();
+        } else {
+            document.getElementById('game-play').innerHTML = `
+                <div style="padding: 20px;">
+                    <h1 style="font-size: 3em;">🏆</h1>
+                    <h2>正式出道！</h2>
+                    <p style="font-size: 1.5em">最終粉絲數量：${score}K</p>
+                    <p>你已經準備好站在世界舞台上了！</p>
+                    <button class="kpop-btn" onclick="location.reload()" style="width:100%; margin-top:20px;">再次回歸演出</button>
+                </div>
+            `;
+        }
+    }
+
+    render();
+</script>
+
+</body>
+</html>
