@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roselle 星空雙魚公主 - 魔法標點點綴</title>
+    <style>
+        :root {
+            --night-sky: #1a0b2e;
+            --star-gold: #f6e58d;
+            --pisces-purple: #c56cf0;
+            --ballet-pink: #ff9ff3;
+            --ocean-blue: #18dcff;
+        }
+        body {
+            font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, var(--night-sky) 0%, #30104a 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        #magic-book {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 650px;
+            padding: 30px;
+            border-radius: 25px;
+            border: 2px solid var(--pisces-purple);
+            box-shadow: 0 0 30px rgba(197, 108, 240, 0.3);
+            text-align: center;
+            position: relative;
+        }
+        h1 { color: var(--ballet-pink); text-shadow: 0 0 10px var(--pisces-purple); margin-bottom: 5px; font-size: 1.8em; }
+        .subtitle { color: var(--ocean-blue); font-size: 0.9em; margin-bottom: 20px; }
+        
+        .progress-panel {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--star-gold);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 20px;
+            border-radius: 15px;
+        }
+        
+        .page-area {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            min-height: 130px;
+            font-size: 1.4em;
+            line-height: 1.8;
+            border-left: 8px solid var(--ocean-blue);
+            text-align: left;
+            position: relative;
+        }
+        .page-area::after { content: "✨"; position: absolute; top: 10px; right: 15px; font-size: 1.5em; opacity: 0.5; }
+        .page-area span { color: var(--pisces-purple); font-weight: bold; padding: 0 8px; border-bottom: 2px dashed var(--pisces-purple); }
+
+        .wand-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        button.wand-btn {
+            padding: 15px;
+            font-size: 1.5em;
+            border: 2px solid var(--ocean-blue);
+            background: rgba(24, 220, 255, 0.1);
+            color: var(--ocean-blue);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        button.wand-btn:hover {
+            background: var(--ocean-blue);
+            color: #fff;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--ocean-blue);
+        }
+        
+        #magic-feedback { margin-top: 20px; font-weight: bold; height: 30px; font-size: 1.2em; }
+        #next-spell {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--pisces-purple), var(--ballet-pink));
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 159, 243, 0.4);
+        }
+        .stars { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="magic-book">
+    <h1>🩰 星空雙魚公主日記</h1>
+    <div class="subtitle">為凌晨 2:42 的魔法星空點上正確的標點吧！</div>
+
+    <div class="progress-panel">
+        <span>📖 日記頁數: <span id="spell-num">1</span> / 50</span>
+        <span>✨ 收集星塵: <span id="stardust">0</span></span>
+    </div>
+
+    <div id="game-zone">
+        <div class="page-area" id="sentence-box">
+            魔法咒語讀取中...
+        </div>
+
+        <div class="wand-grid" id="marks-options"></div>
+        <div id="magic-feedback"></div>
+        <button id="next-spell" onclick="nextPage()">翻開下一頁 ➔</button>
+    </div>
+</div>
+
+<script>
+    const diarySentences = [
+        { s: "公主穿上了粉紅色的芭蕾舞鞋( )", o: ["。", "，", "！"], c: 0 },
+        { s: "你喜歡在平板電腦上畫畫嗎( )", o: ["。", "？", "！"], c: 1 },
+        { s: "哇( )這件裙子太漂亮了！", o: ["！", "，", "。"], c: 0 },
+        { s: "皇后溫柔地說( )「今天我們要舉行宴會。」", o: ["：", "，", "。"], c: 0 },
+        { s: "皇宮花園裡有玫瑰( )百合和鬱金香。", o: ["、", "，", "。"], c: 0 },
+        { s: "王子( )公主和國王一起欣賞音樂會。", o: ["、", "，", "。"], c: 0 },
+        { s: "到底是誰拿走了魔法畫筆呢( )", o: ["？", "。", "！"], c: 0 },
+        { s: "這幅星空畫作真美啊( )", o: ["！", "。", "？"], c: 0 },
+        { s: "我今天學習了一個新的舞蹈動作( )", o: ["。", "，", "！"], c: 0 },
+        { s: "侍衛大聲宣佈( )「舞會正式開始！」", o: ["：", "，", "。"], c: 0 },
+        { s: "我的畫板上有紅色( )黃色和藍色。", o: ["、", "，", "。"], c: 0 },
+        { s: "小貓( )小狗和小兔都是我的好朋友。", o: ["、", "，", "。"], c: 0 },
+        { s: "這首流行曲是誰唱的( )", o: ["？", "。", "！"], c: 0 },
+        { s: "太棒了( )我終於學會這支舞了！", o: ["！", "，", "。"], c: 0 },
+        { s: "老師稱讚我( )「你的畫非常有創意。」", o: ["：", "，", "。"], c: 0 },
+        { s: "凌晨的星空有月亮( )星星和雲朵。", o: ["、", "，", "。"], c: 0 },
+        { s: "天氣太冷了( )你要多穿一件衣服。", o: ["，", "。", "！"], c: 0 },
+        { s: "天啊( )我的皇冠不見了！", o: ["！", "，", "。"], c: 0 },
+        { s: "你準備好上台表演了嗎( )", o: ["？", "！", "。"], c: 0 },
+        { s: "妹妹問( )「我可以和你一起跳舞嗎？」", o: ["：", "，", "。"], c: 0 },
+        { s: "桌子上有畫筆( )顏料和畫紙。", o: ["、", "，", "。"], c: 0 },
+        { s: "舞台上的燈光閃閃發亮( )", o: ["。", "！", "？"], c: 0 },
+        { s: "我們一起數星星吧( )", o: ["！", "。", "？"], c: 0 },
+        { s: "你明天會去參加芭蕾舞比賽嗎( )", o: ["？", "。", "！"], c: 0 },
+        { s: "媽媽買了蘋果( )橙子和香蕉。", o: ["、", "，", "。"], c: 0 },
+        { s: "快點過來( )音樂要開始了！", o: ["！", "，", "。"], c: 0 },
+        { s: "這首韓唱歌舞真好聽( )", o: ["。", "！", "？"], c: 0 },
+        { s: "公主輕輕地說( )「謝謝你的禮物。」", o: ["：", "，", "。"], c: 0 },
+        { s: "我的寶石盒裡有珍珠( )鑽石和水晶。", o: ["、", "，", "。"], c: 0 },
+        { s: "這是一場夢幻的演出( )", o: ["。", "！", "？"], c: 0 },
+        { s: "為甚麼小鳥在窗外唱歌呢( )", o: ["？", "。", "！"], c: 0 },
+        { s: "大家一齊歡呼( )「演出成功！」", o: ["：", "，", "。"], c: 0 },
+        { s: "我喜歡畫畫( )因為色彩能讓我開心。", o: ["，", "。", "！"], c: 0 },
+        { s: "多麼閃耀的星空啊( )", o: ["！", "。", "？"], c: 0 },
+        { s: "文具盒裡有鉛筆( )橡皮擦和直尺。", o: ["、", "，", "。"], c: 0 },
+        { s: "你覺得這件紫色的裙子好看嗎( )", o: ["？", "。", "！"], c: 0 },
+        { s: "夜深了( )公主慢慢進入了夢鄉。", o: ["，", "。", "！"], c: 0 },
+        { s: "隊長大聲喊( )「大家準備好！」", o: ["：", "，", "。"], c: 0 },
+        { s: "花園裡飛舞著蝴蝶( )蜜蜂和蜻蜓。", o: ["、", "，", "。"], c: 0 },
+        { s: "這真是一個巨大的驚喜( )", o: ["！", "。", "？"], c: 0 },
+        { s: "我每天都會練習跳舞( )", o: ["。", "！", "？"], c: 0 },
+        { s: "你想彈鋼琴( )還是打鼓？", o: ["，", "？", "。"], c: 0 },
+        { s: "姐姐問( )「你的畫作完成了嗎？」", o: ["：", "，", "。"], c: 0 },
+        { s: "海洋裡有小魚( )海龜和水母。", o: ["、", "，", "。"], c: 0 },
+        { s: "我們在草地上野餐( )十分愉快。", o: ["，", "。", "！"], c: 0 },
+        { s: "你看( )那顆流星好亮！", o: ["，", "。", "！"], c: 0 },
+        { s: "這是誰遺下的水晶鞋( )", o: ["？", "。", "！"], c: 0 },
+        { s: "加油( )我們一定能做到！", o: ["！", "，", "。"], c: 0 },
+        { s: "書包裡有課本( )筆記本和顏色筆。", o: ["、", "，", "。"], c: 0 },
+        { s: "這本星空日記記載了美好的回憶( )", o: ["。", "！", "？"], c: 0 }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let quiz = diarySentences.sort(() => 0.5 - Math.random());
+
+    function renderPage() {
+        const q = quiz[current];
+        document.getElementById('spell-num').innerText = current + 1;
+        document.getElementById('sentence-box').innerHTML = q.s.replace('( )', '<span>( ? )</span>');
+        
+        const optDiv = document.getElementById('marks-options');
+        optDiv.innerHTML = '';
+        document.getElementById('magic-feedback').innerText = '';
+        document.getElementById('next-spell').style.display = 'none';
+
+        q.o.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'wand-btn';
+            btn.innerText = opt;
+            btn.onclick = () => castSpell(idx);
+            optDiv.appendChild(btn);
+        });
+    }
+
+    function castSpell(idx) {
+        const q = quiz[current];
+        const fb = document.getElementById('magic-feedback');
+        const btns = document.querySelectorAll('.wand-btn');
+        btns.forEach(b => b.disabled = true);
+
+        if (idx === q.c) {
+            fb.innerHTML = "✨ 施法成功！星塵收集完畢！";
+            fb.style.color = "var(--ballet-pink)";
+            score += 2;
+            document.getElementById('stardust').innerText = score;
+        } else {
+            fb.innerHTML = `💧 魔法稍微失誤了，正確標點是「${q.o[q.c]}」喔。`;
+            fb.style.color = "var(--ocean-blue)";
+        }
+        document.getElementById('next-spell').style.display = 'block';
+    }
+
+    function nextPage() {
+        current++;
+        if (current < 50) {
+            renderPage();
+        } else {
+            document.getElementById('game-zone').innerHTML = `
+                <div style="padding: 20px;">
+                    <h1 style="font-size: 3em;">👑</h1>
+                    <h2 style="color: var(--ballet-pink);">日記書寫完成！</h2>
+                    <p style="font-size: 1.5em; color: var(--star-gold);">總星塵數量：${score} / 100</p>
+                    <p>雙魚座的浪漫與智慧在你身上完美展現，你已成功為所有魔法句子點上靈魂！</p>
+                    <button class="wand-btn" onclick="location.reload()" style="width:100%; margin-top:20px; background:var(--pisces-purple); color:#fff;">再次翻開日記</button>
+                </div>
+            `;
+        }
+    }
+
+    renderPage();
+</script>
+
+</body>
+</html>
