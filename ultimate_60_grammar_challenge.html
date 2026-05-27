@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔥 終極 60 題大兜亂：英文文法打大佬</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Comic Sans MS', 'Nunito', 'Microsoft JhengHei', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #1A2980 0%, #26D0CE 100%);
+      margin: 0; padding: 20px;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; color: #333;
+    }
+    .container {
+      background-color: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      width: 100%; max-width: 750px;
+      padding: 40px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    h1 { color: #1A2980; font-size: 32px; margin-top: 0; }
+    .subtitle { color: #666; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
+    
+    .progress-bar-bg {
+      background: #e0e0e0; border-radius: 20px; height: 12px;
+      width: 100%; margin-bottom: 20px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #FF8008 0%, #FFA03A 100%);
+      height: 100%; width: 0%; transition: width 0.3s ease;
+    }
+    
+    .header-info {
+      display: flex; justify-content: space-between;
+      font-size: 18px; font-weight: bold; color: #1A2980;
+      margin-bottom: 20px; border-bottom: 2px dashed #ccc; padding-bottom: 10px;
+    }
+    
+    .question-box {
+      background: #f8f9fa; border: 2px solid #e9ecef;
+      border-radius: 16px; padding: 30px 20px;
+      font-size: 26px; font-weight: bold; color: #2d3436;
+      margin-bottom: 30px; line-height: 1.5;
+    }
+    
+    .options-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    }
+    .option-btn {
+      background: white; border: 3px solid #dee2e6;
+      border-radius: 16px; padding: 20px;
+      font-size: 22px; font-weight: bold; color: #495057;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .option-btn:hover {
+      border-color: #26D0CE; background: #e0fbfc; transform: scale(1.02);
+    }
+    .option-btn.correct {
+      background: #d4edda !important; border-color: #28a745 !important; color: #155724 !important;
+    }
+    .option-btn.wrong {
+      background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important;
+    }
+    
+    .feedback {
+      margin-top: 25px; padding: 15px; border-radius: 12px;
+      font-size: 18px; font-weight: bold; display: none;
+    }
+    .feedback.show-correct { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .feedback.show-wrong { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+    .start-btn, .next-btn {
+      background: linear-gradient(135deg, #FF8008 0%, #FFA03A 100%);
+      color: white; border: none; border-radius: 16px;
+      padding: 15px 40px; font-size: 22px; font-weight: bold;
+      cursor: pointer; margin-top: 20px; transition: transform 0.2s;
+      width: 100%;
+    }
+    .start-btn:hover, .next-btn:hover { transform: scale(1.05); }
+    .next-btn { display: none; }
+    
+    .hidden { display: none !important; }
+    
+    /* Report Screen */
+    .report-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;
+    }
+    .report-card {
+      background: #f8f9fa; padding: 15px; border-radius: 12px;
+      border: 2px solid #e9ecef; text-align: center;
+    }
+    .report-card h3 { margin: 0 0 10px 0; font-size: 16px; color: #495057; }
+    .report-card .score { font-size: 24px; font-weight: bold; color: #1A2980; }
+  </style>
+</head>
+<body>
+
+<div class="container" id="start-screen">
+  <h1>🔥 終極 60 題大兜亂：打大佬挑戰！</h1>
+  <div class="subtitle">
+    這是一個包含 60 題的「綜合隨機」大挑戰！<br>
+    系統已將所有時態 (Tense)、原形動詞 (Base form)、介詞 (Prepositions) 和代名詞 (Pronouns) <b>全部打亂</b>！<br><br>
+    💪 <b>提示：</b>題目很多，建議準備好水，中途可以稍作休息。<br>妳準備好迎接終極測驗了嗎？
+  </div>
+  <button class="start-btn" onclick="startQuiz()">⚔️ 接受挑戰，開始打大佬！</button>
+</div>
+
+<div class="container hidden" id="quiz-screen">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  <div class="header-info">
+    <span id="q-counter">Question: 1 / 60</span>
+    <span id="score-counter">⭐ Score: 0</span>
+  </div>
+  
+  <div class="question-box" id="q-text">Loading...</div>
+  
+  <div class="options-grid" id="options-container"></div>
+  
+  <div id="feedback-box" class="feedback"></div>
+  
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">下一題 →</button>
+</div>
+
+<div class="container hidden" id="result-screen">
+  <h1>🏆 挑戰完成！妳是文法大師！</h1>
+  <div class="subtitle">經歷了 60 題的魔鬼洗禮，這是一份詳細的能力分析報告：</div>
+  <h2 style="color: #FF8008; font-size: 48px; margin: 10px 0;" id="final-score">0 / 60</h2>
+  
+  <div class="report-grid">
+    <div class="report-card">
+      <h3>Past Tense 過去式</h3>
+      <div class="score" id="score-cat1">0/12</div>
+    </div>
+    <div class="report-card">
+      <h3>did / doesn't 原形</h3>
+      <div class="score" id="score-cat2">0/12</div>
+    </div>
+    <div class="report-card">
+      <h3>good at + V-ing</h3>
+      <div class="score" id="score-cat3">0/12</div>
+    </div>
+    <div class="report-card">
+      <h3>Prepositions 空間介詞</h3>
+      <div class="score" id="score-cat4">0/12</div>
+    </div>
+    <div class="report-card" style="grid-column: span 2;">
+      <h3>Object Pronouns 受詞代名詞</h3>
+      <div class="score" id="score-cat5">0/12</div>
+    </div>
+  </div>
+  
+  <div style="margin-top: 30px; font-size: 14px; color: #666; background: #eee; padding: 10px; border-radius: 8px;">
+    📸 媽媽請截圖 (Screenshot) 此畫面，這份報告清楚顯示了她大兜亂後的真實弱點！
+  </div>
+</div>
+
+<script>
+  // 60 題題庫 (每類 12 題，總共 60 題)
+  const rawQuestions = [
+    // Cat 1: Past Tense (12)
+    { q: "Yesterday, I ________ a yummy apple.", opts: ["eat", "ate", "eats", "eating"], ans: 1, cat: 1, hint: "見到 Yesterday 要轉過去式。" },
+    { q: "We ________ songs in the music room last week.", opts: ["sing", "sang", "sings", "singing"], ans: 1, cat: 1, hint: "last week 是過去式。" },
+    { q: "She ________ milk this morning.", opts: ["drink", "drinks", "drank", "drinking"], ans: 2, cat: 1, hint: "this morning (今天早上) 已經過去了。" },
+    { q: "He ________ out the candles last night.", opts: ["blow", "blew", "blows", "blowing"], ans: 1, cat: 1, hint: "last night 過去式 blow -> blew。" },
+    { q: "Mum ________ me a nice present yesterday.", opts: ["give", "gave", "gives", "giving"], ans: 1, cat: 1, hint: "yesterday 過去式 give -> gave。" },
+    { q: "Dad ________ me to the park last Sunday.", opts: ["take", "took", "takes", "taking"], ans: 1, cat: 1, hint: "last Sunday 過去式 take -> took。" },
+    { q: "We ________ a fun party last night.", opts: ["have", "has", "had", "having"], ans: 2, cat: 1, hint: "last night 過去式 have -> had。" },
+    { q: "Tom ________ the birthday cake yesterday.", opts: ["cut", "cutted", "cuts", "cutting"], ans: 0, cat: 1, hint: "cut 的過去式仍然是 cut！(不規則陷阱)" },
+    { q: "I ________ a magic show two days ago.", opts: ["watch", "watches", "watched", "watching"], ans: 2, cat: 1, hint: "ago 過去式，加 ed。" },
+    { q: "The children ________ football last night.", opts: ["play", "plays", "played", "playing"], ans: 2, cat: 1, hint: "last night 過去式，加 ed。" },
+    { q: "I ________ a little bird in the sky yesterday.", opts: ["see", "saw", "sees", "seeing"], ans: 1, cat: 1, hint: "yesterday 過去式 see -> saw。" },
+    { q: "We ________ to the zoo last Saturday.", opts: ["go", "goes", "went", "going"], ans: 2, cat: 1, hint: "last Saturday 過去式 go -> went。" },
+
+    // Cat 2: did / doesn't + base form (12)
+    { q: "What did you ________ yesterday?", opts: ["do", "did", "does", "done"], ans: 0, cat: 2, hint: "有 did 保護，動詞打回原形 do。" },
+    { q: "I didn't ________ the TV show.", opts: ["watch", "watched", "watches", "watching"], ans: 0, cat: 2, hint: "有 didn't 保護，用原形 watch。" },
+    { q: "She doesn't ________ to me.", opts: ["listen", "listened", "listens", "listening"], ans: 0, cat: 2, hint: "有 doesn't 保護，用原形 listen。" },
+    { q: "Did he ________ the cake just now?", opts: ["eat", "ate", "eats", "eating"], ans: 0, cat: 2, hint: "有 Did 在前面，動詞打回原形 eat。" },
+    { q: "He doesn't ________ tricks on his friends.", opts: ["play", "played", "plays", "playing"], ans: 0, cat: 2, hint: "有 doesn't，不要加 s，用 play。" },
+    { q: "Why did you ________ at him?", opts: ["shout", "shouted", "shouts", "shouting"], ans: 0, cat: 2, hint: "有 did，動詞用原形 shout。" },
+    { q: "Did she ________ the storybook?", opts: ["like", "liked", "likes", "liking"], ans: 0, cat: 2, hint: "有 Did，動詞用原形 like。" },
+    { q: "They didn't ________ any photos.", opts: ["take", "took", "takes", "taking"], ans: 0, cat: 2, hint: "有 didn't，用原形 take。" },
+    { q: "He doesn't ________ with his classmates.", opts: ["fight", "fought", "fights", "fighting"], ans: 0, cat: 2, hint: "有 doesn't，不要加 s，用 fight。" },
+    { q: "Did you ________ the little cat?", opts: ["see", "saw", "sees", "seeing"], ans: 0, cat: 2, hint: "有 Did，用原形 see。" },
+    { q: "I didn't ________ to school yesterday.", opts: ["go", "went", "goes", "going"], ans: 0, cat: 2, hint: "雖然有 yesterday，但有 didn't 保護，用原形 go。" },
+    { q: "Does your friend ________ apples?", opts: ["like", "liked", "likes", "liking"], ans: 0, cat: 2, hint: "有 Does，動詞用原形 like，不加 s。" },
+
+    // Cat 3: good at + ing (12)
+    { q: "Mary is good at ________ pictures.", opts: ["draw", "drew", "draws", "drawing"], ans: 3, cat: 3, hint: "good at 後面動作加 -ing。" },
+    { q: "He is good at ________ a bicycle.", opts: ["ride", "rode", "rides", "riding"], ans: 3, cat: 3, hint: "去 e 加 ing (riding)。" },
+    { q: "They are good at ________ the piano.", opts: ["play", "played", "plays", "playing"], ans: 3, cat: 3, hint: "good at 後加 playing。" },
+    { q: "I am good at ________ Maths sums.", opts: ["do", "did", "does", "doing"], ans: 3, cat: 3, hint: "good at 後加 doing。" },
+    { q: "The boys are good at ________.", opts: ["run", "ran", "runs", "running"], ans: 3, cat: 3, hint: "短母音，雙寫字尾 n (running)。" },
+    { q: "She is good at ________ in the pool.", opts: ["swim", "swam", "swims", "swimming"], ans: 3, cat: 3, hint: "短母音，雙寫字尾 m (swimming)。" },
+    { q: "Peter is good at ________ English.", opts: ["speak", "spoke", "speaks", "speaking"], ans: 3, cat: 3, hint: "good at 後加 speaking。" },
+    { q: "We are good at ________ storybooks.", opts: ["read", "readed", "reads", "reading"], ans: 3, cat: 3, hint: "good at 後加 reading。" },
+    { q: "Ben is good at ________ poems.", opts: ["write", "wrote", "writes", "writing"], ans: 3, cat: 3, hint: "去 e 加 ing (writing)。" },
+    { q: "Are you good at ________ the computer?", opts: ["use", "used", "uses", "using"], ans: 3, cat: 3, hint: "去 e 加 ing (using)。" },
+    { q: "My sister is good at ________ paper.", opts: ["cut", "cutted", "cuts", "cutting"], ans: 3, cat: 3, hint: "短母音，雙寫字尾 t (cutting)。" },
+    { q: "They are good at ________ quiet.", opts: ["sit", "sat", "sits", "sitting"], ans: 3, cat: 3, hint: "短母音，雙寫字尾 t (sitting)。" },
+
+    // Cat 4: Prepositions (12)
+    { q: "Tim sits ________ Tom and Mary.", opts: ["between", "next to", "behind", "in front of"], ans: 0, cat: 4, hint: "看到 and (A and B)，必定是 between。" },
+    { q: "The blackboard is ________ the students, they look at it.", opts: ["behind", "in front of", "next to", "between"], ans: 1, cat: 4, hint: "學生看著黑板，所以黑板在他們前面。" },
+    { q: "The clock is ________ me, I have to turn back to see it.", opts: ["behind", "in front of", "next to", "between"], ans: 0, cat: 4, hint: "要轉頭(turn back)才看到，所以是在後面。" },
+    { q: "Winnie sits next ________ Simon.", opts: ["at", "in", "to", "of"], ans: 2, cat: 4, hint: "固定配搭：next TO。" },
+    { q: "Ken sits on my ________ side, I use my left hand to touch him.", opts: ["right", "behind", "left", "front"], ans: 2, cat: 4, hint: "用左手摸到，所以在 left side。" },
+    { q: "If A is in front of B, then B is ________ A.", opts: ["behind", "in front of", "next to", "between"], ans: 0, cat: 4, hint: "A在B前面，代表B在A後面 (behind)。" },
+    { q: "The teacher stands in ________ of the class.", opts: ["front", "behind", "next", "between"], ans: 0, cat: 4, hint: "固定配搭：in FRONT of。" },
+    { q: "I sit ________ Jack and Mary.", opts: ["between", "next to", "behind", "in front of"], ans: 0, cat: 4, hint: "看到 and (Jack and Mary)，用 between。" },
+    { q: "If I am on your right side, you are on my ________ side.", opts: ["right", "left", "behind", "front"], ans: 1, cat: 4, hint: "左右相對反轉，right 的相反是 left。" },
+    { q: "Please sit ________ to me.", opts: ["next", "between", "behind", "front"], ans: 0, cat: 4, hint: "後面有 to，所以配 next。" },
+    { q: "The dog hid ________ the door. We couldn't see it.", opts: ["in front of", "behind", "next to", "between"], ans: 1, cat: 4, hint: "躲起來看不到，通常在門後面 (behind)。" },
+    { q: "Who sits ________ you and Billy?", opts: ["next to", "behind", "between", "in front of"], ans: 2, cat: 4, hint: "看到 and，用 between。" },
+
+    // Cat 5: Object Pronouns (12)
+    { q: "I like Lily. I want to play with ________.", opts: ["she", "her", "he", "him"], ans: 1, cat: 5, hint: "放在 with 後面，女仔 she 變 her。" },
+    { q: "This is my brother. I gave ________ a hug.", opts: ["he", "him", "she", "her"], ans: 1, cat: 5, hint: "放在 gave 後面，男仔 he 變 him。" },
+    { q: "My friends are nice. I talk to ________.", opts: ["they", "them", "we", "us"], ans: 1, cat: 5, hint: "放在 to 後面，複數 they 變 them。" },
+    { q: "Mum looks after my sister and me. She looks after ________.", opts: ["we", "us", "they", "them"], ans: 1, cat: 5, hint: "包含 me 在內，是我們 (we)，放動詞後變 us。" },
+    { q: "Please listen to ________ carefully.", opts: ["I", "me", "my", "mine"], ans: 1, cat: 5, hint: "放在 to 後面，I 變 me。" },
+    { q: "Mr. Lee is our teacher. We like ________ very much.", opts: ["he", "him", "his", "she"], ans: 1, cat: 5, hint: "放在 like 後面，男老師 he 變 him。" },
+    { q: "Miss Chan calls Mary. She wants to see ________.", opts: ["she", "her", "he", "him"], ans: 1, cat: 5, hint: "放在 see 後面，女仔 she 變 her。" },
+    { q: "Come with John and me! Join ________.", opts: ["they", "them", "we", "us"], ans: 3, cat: 5, hint: "我和約翰=我們(we)，放動詞後變 us。" },
+    { q: "The candies are yummy. I like ________.", opts: ["it", "its", "they", "them"], ans: 3, cat: 5, hint: "candies 是眾數物件(they)，放 like 後變 them。" },
+    { q: "This is a nice book. My dad bought ________ for me.", opts: ["it", "its", "them", "they"], ans: 0, cat: 5, hint: "book 是單數死物，主詞受詞都是 it。" },
+    { q: "Gopal is brave. Naughty boys don't shout at ________.", opts: ["he", "him", "his", "they"], ans: 1, cat: 5, hint: "放在 at 後面，男仔 he 變 him。" },
+    { q: "You are my best friend. I will always play with ________.", opts: ["you", "your", "me", "us"], ans: 0, cat: 5, hint: "you 的受詞不變，還是 you。" }
+  ];
+
+  // 隨機打亂陣列函數 (Fisher-Yates Shuffle)
+  function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex != 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+  }
+
+  let quizQuestions = [];
+  let currentQ = 0;
+  let score = 0;
+  let isAnswered = false;
+  
+  // 分類計分
+  let catScores = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+  let catTotals = { 1:12, 2:12, 3:12, 4:12, 5:12 };
+
+  function startQuiz() {
+    quizQuestions = shuffle([...rawQuestions]);
+    document.getElementById("start-screen").classList.add("hidden");
+    document.getElementById("quiz-screen").classList.remove("hidden");
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    isAnswered = false;
+    document.getElementById("next-btn").style.display = "none";
+    document.getElementById("feedback-box").className = "feedback";
+    
+    let qData = quizQuestions[currentQ];
+    
+    // 更新進度與分數
+    document.getElementById("q-counter").innerText = `Question: ${currentQ + 1} / 60`;
+    document.getElementById("score-counter").innerText = `⭐ Score: ${score}`;
+    let progressPct = (currentQ / 60) * 100;
+    document.getElementById("progress-fill").style.width = `${progressPct}%`;
+    
+    // 顯示題目
+    document.getElementById("q-text").innerText = qData.q;
+    
+    // 顯示選項
+    let optionsHtml = "";
+    qData.opts.forEach((opt, idx) => {
+      optionsHtml += `<button class="option-btn" onclick="checkAnswer(${idx}, this)">${opt}</button>`;
+    });
+    document.getElementById("options-container").innerHTML = optionsHtml;
+  }
+
+  function checkAnswer(selectedIdx, btnEl) {
+    if(isAnswered) return;
+    isAnswered = true;
+    
+    let qData = quizQuestions[currentQ];
+    let btns = document.querySelectorAll(".option-btn");
+    
+    // 鎖定所有按鈕
+    btns.forEach(b => b.style.pointerEvents = "none");
+    
+    let fbBox = document.getElementById("feedback-box");
+    
+    if(selectedIdx === qData.ans) {
+      // 答對
+      btnEl.classList.add("correct");
+      score++;
+      catScores[qData.cat]++;
+      fbBox.innerText = `✅ 答對了！ ${qData.hint}`;
+      fbBox.className = "feedback show-correct";
+    } else {
+      // 答錯
+      btnEl.classList.add("wrong");
+      btns[qData.ans].classList.add("correct");
+      fbBox.innerText = `❌ 哎呀！正確答案是 ${qData.opts[qData.ans]}。 ${qData.hint}`;
+      fbBox.className = "feedback show-wrong";
+    }
+    
+    // 更新分數顯示
+    document.getElementById("score-counter").innerText = `⭐ Score: ${score}`;
+    
+    // 顯示下一題按鈕
+    document.getElementById("next-btn").style.display = "block";
+  }
+
+  function nextQuestion() {
+    currentQ++;
+    if(currentQ < 60) {
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    document.getElementById("quiz-screen").classList.add("hidden");
+    document.getElementById("result-screen").classList.remove("hidden");
+    
+    document.getElementById("final-score").innerText = `${score} / 60`;
+    
+    document.getElementById("score-cat1").innerText = `${catScores[1]} / 12`;
+    document.getElementById("score-cat2").innerText = `${catScores[2]} / 12`;
+    document.getElementById("score-cat3").innerText = `${catScores[3]} / 12`;
+    document.getElementById("score-cat4").innerText = `${catScores[4]} / 12`;
+    document.getElementById("score-cat5").innerText = `${catScores[5]} / 12`;
+  }
+</script>
+
+</body>
+</html>
