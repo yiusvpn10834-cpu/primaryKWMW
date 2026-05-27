@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P.3 英文進階填充題特訓</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', 'Helvetica Neue', Arial, 'Microsoft JhengHei', sans-serif;
+    }
+    body {
+      background-color: #f5fff5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #2c3e50;
+    }
+    .container {
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(46, 204, 113, 0.15);
+      width: 100%;
+      max-width: 680px;
+      padding: 35px;
+    }
+    h1 {
+      color: #27ae60;
+      text-align: center;
+      font-size: 26px;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #555;
+      font-size: 15px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 100%;
+      gap: 15px;
+    }
+    .menu-card {
+      background-color: #fff;
+      border: 2px solid #a3e4d7;
+      border-radius: 14px;
+      padding: 18px 22px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-card:hover {
+      border-color: #2ecc71;
+      background-color: #eafaf1;
+      transform: translateY(-2px);
+    }
+    .menu-card h3 {
+      margin: 0 0 6px 0;
+      color: #27ae60;
+      font-size: 17px;
+    }
+    .menu-card p {
+      margin: 0;
+      color: #666;
+      font-size: 13px;
+    }
+    .badge {
+      background-color: #d5f5e3;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 12px;
+      border-bottom: 2px dashed #a3e4d7;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #27ae60;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      padding: 0;
+    }
+    .progress {
+      font-size: 15px;
+      color: #555;
+      font-weight: bold;
+    }
+    .question-box {
+      margin-bottom: 30px;
+      background-color: #f4fdf8;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #d5f5e3;
+    }
+    .category-tag {
+      display: inline-block;
+      background-color: #2ecc71;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 12px;
+    }
+    .question-text {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.6;
+      color: #2c3e50;
+    }
+    .input-container {
+      margin-bottom: 25px;
+    }
+    .answer-input {
+      width: 100%;
+      padding: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      border: 2px solid #a3e4d7;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+      color: #2c3e50;
+      text-align: center;
+    }
+    .answer-input:focus {
+      border-color: #2ecc71;
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+    }
+    .feedback-box {
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      display: none;
+    }
+    .feedback-box.correct {
+      display: block;
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .feedback-box.wrong {
+      display: block;
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .action-btn {
+      width: 100%;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .action-btn:hover {
+      background-color: #27ae60;
+    }
+    .action-btn.next-btn {
+      background-color: #3498db;
+    }
+    .action-btn.next-btn:hover {
+      background-color: #2980b9;
+    }
+    .report-card {
+      text-align: center;
+    }
+    .result-score {
+      font-size: 72px;
+      font-weight: 900;
+      color: #27ae60;
+      margin: 20px 0;
+    }
+    .tips-box {
+      background-color: #eafaf1;
+      border-left: 6px solid #2ecc71;
+      padding: 18px;
+      border-radius: 0 14px 14px 0;
+      text-align: left;
+      margin: 25px 0;
+    }
+    .tips-box h4 {
+      margin: 0 0 6px 0;
+      color: #27ae60;
+      font-size: 16px;
+    }
+    .tips-box p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 主選單頁面 -->
+    <div id="menu-page">
+      <h1>⭐ P.3 英文進階填充特訓</h1>
+      <div class="subtitle">
+        已經掌握了選擇題嗎？現在進入<b>進階挑戰（手寫填充版）</b>！<br>
+        請準備用鍵盤輸入正確的英文單字，全面考驗你的文法變身與拼寫能力！
+      </div>
+      <div class="menu-grid">
+        <div class="menu-card" onclick="startQuiz(1)">
+          <div>
+            <h3>Item 1: Past Tense 過去式不規則動詞</h3>
+            <p>根據時間線索，自己拼寫動詞過去式 (如 ate, sang, blew)</p>
+          </div>
+          <span class="badge">10 題</span>
+        </div>
+        <div class="menu-card" onclick="startQuiz(2)">
+          <div>
+            <h3>Item 2: did / doesn't + 原形動詞</h3>
+            <p>考驗「原形動詞」概念，小心不要加上 s 或 ed</p>
+          </div>
+          <span class="badge">10 題</span>
+        </div>
+        <div class="menu-card" onclick="startQuiz(3)">
+          <div>
+            <h3>Item 3: good at + 動詞-ing</h3>
+            <p>手寫動作名詞，注意去 e 加 ing 或是雙寫字尾</p>
+          </div>
+          <span class="badge">10 題</span>
+        </div>
+        <div class="menu-card" onclick="startQuiz(4)">
+          <div>
+            <h3>Item 4: Prepositions of Place 空間介詞</h3>
+            <p>邏輯思維填充 (behind, left, between...)</p>
+          </div>
+          <span class="badge">10 題</span>
+        </div>
+        <div class="menu-card" onclick="startQuiz(5)">
+          <div>
+            <h3>Item 5: Object Pronouns 受詞代名詞</h3>
+            <p>在動詞/介詞後，精準填入變身後的代名詞 (him, her, us...)</p>
+          </div>
+          <span class="badge">10 題</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 答題頁面 -->
+    <div id="quiz-page" class="hidden">
+      <div class="quiz-header">
+        <button class="back-btn" onclick="showMenu()">← 返回主選單</button>
+        <div class="progress" id="progress-text">第 1 / 10 題</div>
+      </div>
+      <div class="question-box">
+        <span class="category-tag" id="category-label">範疇</span>
+        <div class="question-text" id="question-title">Question text?</div>
+      </div>
+      
+      <div class="input-container">
+        <input type="text" id="user-answer" class="answer-input" placeholder="請在此處輸入英文答案" autocomplete="off" autofocus>
+      </div>
+
+      <div id="feedback-box" class="feedback-box">回饋訊息</div>
+
+      <button id="submit-btn" class="action-btn" onclick="handleSubmit()">提交答案</button>
+    </div>
+
+    <!-- 結果報告頁面 -->
+    <div id="report-page" class="hidden">
+      <div class="report-card">
+        <h1 id="report-title">🎉 挑戰完成！</h1>
+        <div class="subtitle">進階填充特訓成果報告書</div>
+        <div class="result-score" id="report-score">0 / 10</div>
+        
+        <div class="tips-box">
+          <h4 id="tips-title">💡 老師小叮嚀：</h4>
+          <p id="tips-content">核心規則提示</p>
+        </div>
+
+        <button class="action-btn" style="background-color: #27ae60; margin-top: 20px;" onclick="showMenu()">挑戰其他進階範疇</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 通用 P.3 進階填充題，每個範疇 10 題
+    const quizData = {
+      1: {
+        title: "Item 1: Past Tense 過去式不規則動詞",
+        tips: "【過去式拼寫叮嚀】手寫時要特別看清時間字眼 (yesterday, last week)。不規則動詞的拼寫要準確：eat->ate, sing->sang, drink->drank, blow->blew, take->took, give->gave。",
+        questions: [
+          { q: "Yesterday, I __________ (eat) a yummy red apple.", ans: ["ate"] },
+          { q: "We __________ (sing) songs in the music room last week.", ans: ["sang"] },
+          { q: "She __________ (drink) some milk this morning.", ans: ["drank"] },
+          { q: "He __________ (blow) out the candles last night.", ans: ["blew"] },
+          { q: "They __________ (give) me a nice present yesterday.", ans: ["gave"] },
+          { q: "Mum __________ (take) me to the park yesterday.", ans: ["took"] },
+          { q: "We __________ (have) a fun party last Sunday.", ans: ["had"] },
+          { q: "Tom __________ (cut) the birthday cake yesterday.", ans: ["cut"] },
+          { q: "I __________ (watch) a magic show two days ago.", ans: ["watched"] },
+          { q: "The children __________ (play) football last night.", ans: ["played"] }
+        ]
+      },
+      2: {
+        title: "Item 2: did / doesn't + 原形動詞",
+        tips: "【原形動詞叮嚀】句子裡只要有 did、didn't、does、doesn't，後面的空格「絕對只能填原形動詞」！千萬不要自己多手轉 past tense 或加 s！",
+        questions: [
+          { q: "What did you __________ (do) yesterday?", ans: ["do"] },
+          { q: "I didn't __________ (watch) the TV show.", ans: ["watch"] },
+          { q: "She doesn't __________ (listen) to me.", ans: ["listen"] },
+          { q: "Did he __________ (eat) the cake just now?", ans: ["eat"] },
+          { q: "He doesn't __________ (play) tricks on his friends.", ans: ["play"] },
+          { q: "Why did you __________ (shout) at him?", ans: ["shout"] },
+          { q: "Did she __________ (like) the storybook?", ans: ["like"] },
+          { q: "They didn't __________ (take) any photos.", ans: ["take"] },
+          { q: "He doesn't __________ (fight) with his classmates.", ans: ["fight"] },
+          { q: "Did you __________ (see) the little cat?", ans: ["see"] }
+        ]
+      },
+      3: {
+        title: "Item 3: good at + 動詞-ing",
+        tips: "【動詞-ing拼寫叮嚀】good at 或 like 後面做動作一定要加 -ing！注意拼寫機關：ride 去掉 e 變成 riding；write 去掉 e 變成 writing；run 要雙寫 n 變成 running；swim 要雙寫 m 變成 swimming！",
+        questions: [
+          { q: "Mary is good at __________ (draw) beautiful pictures.", ans: ["drawing"] },
+          { q: "He is good at __________ (ride) a bicycle.", ans: ["riding"] },
+          { q: "They are good at __________ (play) the piano.", ans: ["playing"] },
+          { q: "I am good at __________ (do) Maths sums.", ans: ["doing"] },
+          { q: "The energetic boys are good at __________ (run).", ans: ["running"] },
+          { q: "She is good at __________ (swim) in the pool.", ans: ["swimming"] },
+          { q: "Peter is good at __________ (speak) English.", ans: ["speaking"] },
+          { q: "We are good at __________ (read) storybooks.", ans: ["reading"] },
+          { q: "Ben is good at __________ (write) poems.", ans: ["writing"] },
+          { q: "Are you good at __________ (use) the computer?", ans: ["using"] }
+        ]
+      },
+      4: {
+        title: "Item 4: Prepositions of Place 空間與邏輯介詞",
+        tips: "【邏輯介詞叮嚀】空間題目如果沒有圖片，就要在腦海中反轉思考：A 在 B 前面 = B 在 A 後面 (behind)；C 在我右邊 = 我在 C 左邊 (left)。看見 and 要想到 between！",
+        questions: [
+          { q: "If A sits in front of B, then B sits __________ A.", ans: ["behind"] },
+          { q: "If C sits on my right side, then I sit on C's __________ side.", ans: ["left"] },
+          { q: "If F sits between G and H, she sits __________ G and H.", ans: ["between"] },
+          { q: "D sits next __________ E's desk.", ans: ["to"] },
+          { q: "Look at the teacher in __________ of the classroom.", ans: ["front"] },
+          { q: "The clock is on the wall __________ (在...後面) the students.", ans: ["behind"] },
+          { q: "If I sit between A and B, A and B sit on both sides __________ me.", ans: ["of"] },
+          { q: "On my right is Tom, on my __________ is Peter.", ans: ["left"] },
+          { q: "She sits next __________ her mum.", ans: ["to"] },
+          { q: "The dog hid __________ (在...後面) the door.", ans: ["behind"] }
+        ]
+      },
+      5: {
+        title: "Item 5: Object Pronouns 受詞代名詞",
+        tips: "【受詞代名詞叮嚀】放在 play with, talk to, shout at, look after 後面的代名詞，必須是用接受動作的變身版：I->me, he->him, she->her, they->them, we->us。",
+        questions: [
+          { q: "I like Lily. I want to play with __________ (she).", ans: ["her"] },
+          { q: "This is my brother. I gave __________ (he) a hug.", ans: ["him"] },
+          { q: "My friends are nice. I talk to __________ (they).", ans: ["them"] },
+          { q: "Mum looks after my sister and me. She looks after __________ (we).", ans: ["us"] },
+          { q: "Please listen to __________ (I) carefully.", ans: ["me"] },
+          { q: "Mr. Lee is our teacher. We like __________ (he) very much.", ans: ["him"] },
+          { q: "Miss Chan calls Mary. She wants to see __________ (she).", ans: ["her"] },
+          { q: "Come with John and me! Join __________ (we).", ans: ["us"] },
+          { q: "The candies are yummy. I like __________ (they).", ans: ["them"] },
+          { q: "This is a nice book. My dad bought __________ (it) for me.", ans: ["it"] }
+        ]
+      }
+    };
+
+    let currentItem = null;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isChecked = false;
+
+    // 監聽鍵盤 Enter 鍵
+    document.getElementById("user-answer").addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        handleSubmit();
+      }
+    });
+
+    function showMenu() {
+      document.getElementById("menu-page").classList.remove("hidden");
+      document.getElementById("quiz-page").classList.add("hidden");
+      document.getElementById("report-page").classList.add("hidden");
+    }
+
+    function startQuiz(itemNum) {
+      currentItem = itemNum;
+      currentQuestionIndex = 0;
+      score = 0;
+      isChecked = false;
+      
+      document.getElementById("menu-page").classList.add("hidden");
+      document.getElementById("quiz-page").classList.remove("hidden");
+      document.getElementById("report-page").classList.add("hidden");
+      
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      isChecked = false;
+      const data = quizData[currentItem];
+      const question = data.questions[currentQuestionIndex];
+      const totalQs = data.questions.length;
+      
+      document.getElementById("category-label").innerText = "進階特訓 Item " + currentItem;
+      document.getElementById("progress-text").innerText = "第 " + (currentQuestionIndex + 1) + " / " + totalQs + " 題";
+      document.getElementById("question-title").innerText = question.q;
+      
+      const inputEl = document.getElementById("user-answer");
+      inputEl.value = "";
+      inputEl.disabled = false;
+      inputEl.placeholder = "請在此處輸入英文答案";
+      
+      const feedbackEl = document.getElementById("feedback-box");
+      feedbackEl.className = "feedback-box";
+      feedbackEl.style.display = "none";
+      
+      const submitBtn = document.getElementById("submit-btn");
+      submitBtn.innerText = "提交答案";
+      submitBtn.className = "action-btn";
+      
+      setTimeout(() => inputEl.focus(), 50);
+    }
+
+    function handleSubmit() {
+      const data = quizData[currentItem];
+      const question = data.questions[currentQuestionIndex];
+      const inputEl = document.getElementById("user-answer");
+      const feedbackEl = document.getElementById("feedback-box");
+      const submitBtn = document.getElementById("submit-btn");
+      
+      // 如果已經檢查完畢，此時點擊按鈕就是去下一題
+      if (isChecked) {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < data.questions.length) {
+          loadQuestion();
+        } else {
+          showReport();
+        }
+        return;
+      }
+      
+      const userAns = inputEl.value.trim().toLowerCase();
+      if (userAns === "") {
+        alert("請先輸入答案喔！");
+        return;
+      }
+      
+      isChecked = true;
+      inputEl.disabled = true;
+      
+      // 檢查是否完全吻合正確答案
+      const isCorrect = question.ans.map(a => a.toLowerCase()).includes(userAns);
+      
+      if (isCorrect) {
+        feedbackEl.innerText = "🌟 太厲害了！完全正確！";
+        feedbackEl.className = "feedback-box correct";
+        score++;
+      } else {
+        feedbackEl.innerText = "❌ 哎呀，不小心失手了。正確答案應該是： " + question.ans[0];
+        feedbackEl.className = "feedback-box wrong";
+      }
+      
+      submitBtn.innerText = "下一題 →";
+      submitBtn.className = "action-btn next-btn";
+    }
+
+    function showReport() {
+      document.getElementById("quiz-page").classList.add("hidden");
+      document.getElementById("report-page").classList.remove("hidden");
+      
+      const data = quizData[currentItem];
+      const totalQs = data.questions.length;
+      
+      document.getElementById("report-title").innerText = "🎉 挑戰完成！";
+      document.getElementById("report-score").innerText = score + " / " + totalQs;
+      document.getElementById("tips-content").innerText = data.tips;
+    }
+  </script>
+</body>
+</html>
