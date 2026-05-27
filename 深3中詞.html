@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ 足球神射手：打字挑戰 ⚽</title>
+    <style>
+        body {
+            background-color: #4CAF50;
+            font-family: 'Comic Sans MS', 'PingFang HK', '微軟正黑體', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            background-color: #ffffff;
+            border: 8px solid #ffffff;
+            border-radius: 15px;
+            max-width: 900px;
+            width: 100%;
+            padding: 20px 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            outline: 4px solid #fff;
+            outline-offset: -12px;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 50px,
+                rgba(240, 240, 240, 0.3) 50px,
+                rgba(240, 240, 240, 0.3) 100px
+            );
+        }
+
+        h1 {
+            text-align: center;
+            color: #2E7D32;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .stats-bar {
+            background-color: #E8F5E9;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 20px;
+            border: 2px dashed #4CAF50;
+        }
+
+        #quiz-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .question {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 20px;
+            line-height: 1.8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 6px solid #4CAF50;
+            transition: background-color 0.3s;
+        }
+
+        input[type="text"] {
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 2px solid #4CAF50;
+            background-color: #f9f9f9;
+            color: #333;
+            outline: none;
+            font-family: inherit;
+            width: 120px;
+            text-align: center;
+            margin: 0 5px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #FF9800;
+            background-color: #fff;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+
+        button {
+            font-size: 22px;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        #submit-btn {
+            background-color: #FF9800;
+            box-shadow: 0 6px 0 #F57C00;
+        }
+
+        #restart-btn {
+            background-color: #2196F3;
+            box-shadow: 0 6px 0 #1976D2;
+        }
+
+        @media (max-width: 600px) {
+            .question {
+                font-size: 18px;
+                padding: 10px 15px;
+            }
+            input[type="text"] {
+                font-size: 16px;
+                width: 100px;
+            }
+            button {
+                font-size: 18px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>⚽ 足球神射手：極限打字挑戰 ⚽</h1>
+        <p class="instructions">請根據句子嘅意思，喺空格輸入最適合嘅詞語！</p>
+
+        <div class="stats-bar" id="score-display">目前得分：0 / 36</div>
+
+        <div id="quiz-form">
+            </div>
+
+        <div class="buttons">
+            <button id="submit-btn" onclick="checkAnswers()">⚽ 射門！(提交)</button>
+            <button id="restart-btn" onclick="restartGame()">🔄 重新開始</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { ans: "細心", pre: "教練非常", post: "地檢查每一個足球，確保它們沒有漏氣。" },
+            { ans: "快捷", pre: "前鋒球員的動作十分", post: "，一下子就把球帶過了對手的防線。" },
+            { ans: "描繪", pre: "球評家在電視上生動地", post: "了剛才那個精彩的進球過程。" },
+            { ans: "度假", pre: "暑假時，小明一家到外地", post: "，還順道參觀了著名的足球場。" },
+            { ans: "不約而同", pre: "看到美斯進球，觀眾們", post: "地站起來歡呼。" },
+            { ans: "栩栩如生", pre: "足球雜誌上的球星海報印得", post: "，彷彿他就在我面前踢球一樣。" },
+            { ans: "遊戲", pre: "訓練結束後，教練讓我們玩了一個輕鬆的傳球", post: "。" },
+            { ans: "刺激", pre: "這場決賽雙方不斷進球，過程真的非常", post: "！" },
+            { ans: "懷舊", pre: "爺爺拿出一個舊皮球，跟我們分享他小時候踢球的", post: "故事。" },
+            { ans: "遊覽", pre: "我們到歐洲", post: "時，特地去了皇家馬德里的主場館參觀。" },
+            { ans: "設施", pre: "這個新建的體育館有很多先進的足球訓練", post: "。" },
+            { ans: "盡興", pre: "今天大家在球場上玩得非常", post: "，直到天黑才捨得回家。" },
+            { ans: "入神", pre: "弟弟看足球比賽看得十分", post: "，連媽媽叫他吃飯都沒有聽到。" },
+            { ans: "印象", pre: "守門員的精彩撲救，給觀眾留下了深刻的", post: "。" },
+            { ans: "模仿", pre: "小朋友在公園裡", post: "著偶像球星的招牌慶祝動作。" },
+            { ans: "觀察", pre: "比賽前，隊長仔細", post: "對手的陣型，尋找他們的弱點。" },
+            { ans: "滿臉通紅", pre: "踢完半場後，哥哥累得", post: "，不停地流汗。" },
+            { ans: "家喻戶曉", pre: "碧咸是一位", post: "的足球明星，連不看足球的人都認識他。" },
+            { ans: "精神", pre: "即使落後三球，球員們仍發揮不放棄的體育", post: "，奮力拼搏。" },
+            { ans: "發明", pre: "足球教練", post: "了一種新的戰術，讓球隊的進攻更有效率。" },
+            { ans: "認真", pre: "球員們非常", post: "地進行熱身運動，以免在比賽中受傷。" },
+            { ans: "認識", pre: "透過參加足球訓練班，我", post: "了很多志同道合的好朋友。" },
+            { ans: "研究", pre: "教練和隊長一起觀看錄影帶，", post: "下一場對手的踢法。" },
+            { ans: "驚訝", pre: "對方竟然在最後一分鐘射入一球，令全場觀眾感到十分", post: "。" },
+            { ans: "迎接", pre: "守門員張開雙手，準備", post: "飛過來的足球。" },
+            { ans: "禮物", pre: "爸爸送了一個印有世界盃標誌的足球給我作生日", post: "。" },
+            { ans: "聰明", pre: "這位中場球員十分", post: "，總能傳出極具威脅的直線球。" },
+            { ans: "聊天", pre: "休息時間，隊友們坐在草地上輕鬆地", post: "，分享剛才的趣事。" },
+            { ans: "偷偷", pre: "小狗", post: "地跑進了球場，把場邊的足球叼走了。" },
+            { ans: "慶祝", pre: "成功進球後，球員們開心地擁抱", post: "，全場觀眾也跟著歡呼。" },
+            { ans: "涼爽", pre: "秋天的傍晚天氣", post: "，最適合和朋友一起到公園踢足球。" },
+            { ans: "清澈", pre: "踢完球後，我們用", post: "的自來水洗臉，感覺十分舒服。" },
+            { ans: "散發", pre: "努力拼搏的球員身上，", post: "出自信的光芒。" },
+            { ans: "穿梭", pre: "翼鋒球員靈活地在對手之間", post: "，很快就帶球到底線傳中。" },
+            { ans: "凝望", pre: "主罰罰球的球員", post: "著龍門死角，深呼吸準備起腳。" },
+            { ans: "靜悄悄", pre: "比賽還沒開始，觀眾席上", post: "的，大家都在等待球員進場。" }
+        ];
+
+        const totalQuestions = quizData.length;
+
+        // 初始化遊戲 (直接執行)
+        function initGame() {
+            const formContainer = document.getElementById("quiz-form");
+            if (!formContainer) return;
+
+            // 生成題目
+            formContainer.innerHTML = "";
+            for (let i = 0; i < quizData.length; i++) {
+                const qNum = i + 1;
+                const q = quizData[i];
+                const questionHtml = '<div class="question" id="div-q' + qNum + '">' +
+                    qNum + '. ' + q.pre +
+                    '<input type="text" id="q' + qNum + '" autocomplete="off" placeholder="在此填寫">' +
+                    q.post +
+                    '</div>';
+                formContainer.innerHTML += questionHtml;
+            }
+        }
+
+        // 檢查答案
+        function checkAnswers() {
+            let score = 0;
+
+            for (let i = 0; i < quizData.length; i++) {
+                const qNum = i + 1;
+                let inputElement = document.getElementById('q' + qNum);
+                let questionDiv = document.getElementById('div-q' + qNum);
+                
+                if (!inputElement || !questionDiv) continue;
+
+                let userAnswer = inputElement.value.trim();
+
+                if (userAnswer === quizData[i].ans) {
+                    inputElement.style.backgroundColor = "#C8E6C9";
+                    inputElement.style.borderColor = "#2E7D32";
+                    inputElement.style.color = "#1B5E20";
+                    questionDiv.style.backgroundColor = "rgba(232, 245, 233, 0.95)";
+                    score++;
+                } else if (userAnswer !== "") {
+                    inputElement.style.backgroundColor = "#FFCDD2";
+                    inputElement.style.borderColor = "#C62828";
+                    inputElement.style.color = "#B71C1C";
+                    questionDiv.style.backgroundColor = "rgba(255, 235, 238, 0.95)";
+                }
+            }
+
+            const scoreDisplay = document.getElementById("score-display");
+            if (score === totalQuestions) {
+                scoreDisplay.innerHTML = "🏆 恭喜大滿貫！你得到了 " + score + " / " + totalQuestions + " 分！你是真正的足球神射手！";
+                scoreDisplay.style.color = "#1B5E20";
+                scoreDisplay.style.backgroundColor = "#C8E6C9";
+            } else {
+                scoreDisplay.innerHTML = "⚽ 射門完畢！你得到了 " + score + " / " + totalQuestions + " 分，把答錯的題目改過來吧！";
+                scoreDisplay.style.color = "#E65100";
+                scoreDisplay.style.backgroundColor = "#FFF3E0";
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 重新開始
+        function restartGame() {
+            for (let i = 0; i < quizData.length; i++) {
+                const qNum = i + 1;
+                let inputElement = document.getElementById('q' + qNum);
+                let questionDiv = document.getElementById('div-q' + qNum);
+                
+                if (!inputElement || !questionDiv) continue;
+
+                inputElement.value = "";
+                inputElement.style.backgroundColor = "#f9f9f9";
+                inputElement.style.borderColor = "#4CAF50";
+                inputElement.style.color = "#333";
+                questionDiv.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+            }
+            
+            const scoreDisplay = document.getElementById("score-display");
+            scoreDisplay.innerHTML = "目前得分：0 / " + totalQuestions;
+            scoreDisplay.style.color = "#2E7D32";
+            scoreDisplay.style.backgroundColor = "#E8F5E9";
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 取代 window.onload，強制直接執行生成畫面
+        initGame();
+    </script>
+</body>
+</html>
