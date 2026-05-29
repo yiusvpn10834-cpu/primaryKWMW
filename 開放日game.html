@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>小農夫守護農場 HTML Game</title>
+<style>
+  :root{
+    --bg1:#fff7d6;
+    --bg2:#dff7df;
+    --ink:#28513a;
+    --panel:#ffffffcc;
+    --accent:#66b86f;
+    --danger:#d86666;
+    --gold:#f5b642;
+    --sky:#cbefff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:"Arial Rounded MT Bold","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 20% 15%, #ffffff 0 8%, transparent 9%),
+      linear-gradient(180deg, var(--sky), var(--bg1) 45%, var(--bg2));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    user-select:none;
+  }
+  .wrap{
+    width:min(1000px,100%);
+    background:linear-gradient(180deg,#ffffffd9,#fffef4d9);
+    border:4px solid #fff;
+    border-radius:28px;
+    box-shadow:0 16px 40px #2c5f3e33;
+    overflow:hidden;
+  }
+  header{
+    padding:18px 22px 12px;
+    display:flex;
+    gap:14px;
+    align-items:center;
+    justify-content:space-between;
+    background:linear-gradient(90deg,#ffe6a7,#ddffd9);
+    border-bottom:3px dashed #9fd38d;
+  }
+  h1{
+    margin:0;
+    font-size:clamp(22px,4vw,38px);
+    letter-spacing:.04em;
+  }
+  .mini{
+    font-size:14px;
+    line-height:1.45;
+    opacity:.82;
+  }
+  .main{
+    display:grid;
+    grid-template-columns: 1fr 285px;
+    gap:16px;
+    padding:16px;
+  }
+  @media(max-width:850px){
+    .main{grid-template-columns:1fr}
+    aside{order:2}
+  }
+  .gameBox{
+    background:#fff;
+    border:3px solid #c7e8bc;
+    border-radius:22px;
+    padding:12px;
+    box-shadow:inset 0 0 0 4px #f9fff5;
+  }
+  .hud{
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .pill{
+    background:#f6fff4;
+    border:2px solid #c9ecc0;
+    border-radius:16px;
+    padding:8px 10px;
+    text-align:center;
+    font-weight:800;
+    min-height:46px;
+  }
+  .pill span{display:block;font-size:12px;font-weight:700;opacity:.7}
+  #gameCanvas{
+    width:100%;
+    height:auto;
+    aspect-ratio:16/10;
+    display:block;
+    border-radius:20px;
+    border:3px solid #8cc77e;
+    background:#eaf9ff;
+    touch-action:none;
+  }
+  .controls{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  button{
+    border:0;
+    border-radius:16px;
+    padding:11px 15px;
+    background:var(--accent);
+    color:white;
+    font-weight:900;
+    font-size:15px;
+    cursor:pointer;
+    box-shadow:0 5px 0 #3d8b49;
+  }
+  button:active{transform:translateY(3px);box-shadow:0 2px 0 #3d8b49}
+  button.secondary{background:#88a9ff;box-shadow:0 5px 0 #5573ca}
+  button.danger{background:#e78080;box-shadow:0 5px 0 #b34e4e}
+  button.gold{background:#f1aa34;box-shadow:0 5px 0 #be7620}
+  .touchPad{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+  }
+  .touchPad button{font-size:18px;padding:12px}
+  .shootBtn{grid-column:span 1}
+  aside{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .card{
+    background:var(--panel);
+    border:3px solid #d5efcc;
+    border-radius:22px;
+    padding:14px;
+    box-shadow:0 8px 18px #2c5f3e18;
+  }
+  .card h2{
+    margin:0 0 10px;
+    font-size:20px;
+  }
+  .rules{
+    font-size:14px;
+    line-height:1.6;
+  }
+  .rules b{color:#1f6d36}
+  .leaderboard{
+    margin:0;
+    padding:0;
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .leaderboard li{
+    display:grid;
+    grid-template-columns:30px 1fr 60px;
+    gap:7px;
+    align-items:center;
+    background:#fffdf0;
+    border:2px solid #ffe3a0;
+    border-radius:14px;
+    padding:8px;
+    font-size:14px;
+    font-weight:800;
+  }
+  .leaderboard small{
+    display:block;
+    font-weight:700;
+    opacity:.58;
+    font-size:11px;
+  }
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:#14382199;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    z-index:10;
+  }
+  .modal{
+    width:min(560px,100%);
+    background:#fffdf5;
+    border:5px solid #fff;
+    border-radius:28px;
+    padding:24px;
+    box-shadow:0 20px 60px #0005;
+    text-align:center;
+  }
+  .modal h2{
+    font-size:clamp(26px,5vw,42px);
+    margin:0 0 12px;
+  }
+  .modal p{
+    line-height:1.75;
+    margin:8px 0;
+  }
+  input{
+    width:min(360px,100%);
+    border:3px solid #bee7b5;
+    border-radius:16px;
+    font-size:20px;
+    padding:12px 14px;
+    text-align:center;
+    color:var(--ink);
+    font-weight:900;
+    margin:10px 0 14px;
+    outline:none;
+  }
+  .hidden{display:none!important}
+  .toast{
+    min-height:28px;
+    text-align:center;
+    font-size:16px;
+    font-weight:900;
+    color:#2a6b36;
+    margin-top:8px;
+  }
+  .kbd{
+    display:inline-block;
+    background:#fff;
+    border:2px solid #cfe9c6;
+    border-bottom-width:4px;
+    border-radius:8px;
+    padding:1px 7px;
+    margin:0 2px;
+    font-weight:900;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>🌽 小農夫守護農場 🥒</h1>
+      <div class="mini">兩關各 30 秒｜接農作物、避開蟲｜再用有機除蟲劑保護農場</div>
+    </div>
+    <button class="gold" id="openStartBtn">開始 / 重新開始</button>
+  </header>
+
+  <div class="main">
+    <section class="gameBox">
+      <div class="hud">
+        <div class="pill"><span>關卡</span><b id="levelText">準備</b></div>
+        <div class="pill"><span>時間</span><b id="timeText">30</b>s</div>
+        <div class="pill"><span>本關分數</span><b id="scoreText">0</b></div>
+        <div class="pill"><span>總分</span><b id="totalText">0</b></div>
+      </div>
+      <canvas id="gameCanvas" width="960" height="600" aria-label="HTML game canvas"></canvas>
+      <div class="toast" id="toast">輸入名字後開始遊戲！</div>
+      <div class="controls">
+        <button id="startBtn">開始遊戲</button>
+        <button class="secondary" id="nextBtn" disabled>下一關</button>
+        <button class="danger" id="restartBtn">重玩</button>
+      </div>
+      <div class="touchPad">
+        <button id="leftBtn">⬅️ 左</button>
+        <button id="shootBtn">💦 射擊</button>
+        <button id="rightBtn">右 ➡️</button>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card rules">
+        <h2>玩法</h2>
+        <p><b>第一關：農作物收成</b><br>
+        用籃接住 <b>🌽 粟米</b>、<b>🍉 西瓜</b>、<b>🥒 青瓜</b>。<br>
+        <b>🐛 有蟲</b>的不要接，接到會扣分。</p>
+        <p><b>第二關：害蟲射擊</b><br>
+        用 <b>有機除蟲劑</b> 射中 <b>芽蟲 / 青蟲 / 蛾蟲</b>，30 秒內盡量高分。</p>
+        <p>電腦：<span class="kbd">←</span><span class="kbd">→</span> 或 <span class="kbd">A</span><span class="kbd">D</span> 移動，<span class="kbd">Space</span> 射擊。</p>
+        <p>iPad：用下方按鈕或在畫面上左右拖動。</p>
+      </div>
+
+      <div class="card">
+        <h2>🏆 排行榜</h2>
+        <ol class="leaderboard" id="leaderboard"></ol>
+        <div class="controls" style="margin-top:12px">
+          <button class="danger" id="clearBoardBtn">清除排行榜</button>
+        </div>
+        <div class="mini" style="margin-top:8px">排行榜會儲存在同一部裝置、同一個瀏覽器。</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="overlay" id="startOverlay">
+  <div class="modal">
+    <h2>🌱 準備守護農場！</h2>
+    <p>輸入玩家名字，完成兩關後會自動加入排行榜。</p>
+    <input id="playerName" maxlength="12" placeholder="例如：Smart / Maggie" />
+    <p>第一關接收成，第二關打害蟲。每關限時 30 秒。</p>
+    <button id="modalStartBtn">開始第一關</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  const levelText = document.getElementById("levelText");
+  const timeText = document.getElementById("timeText");
+  const scoreText = document.getElementById("scoreText");
+  const totalText = document.getElementById("totalText");
+  const toast = document.getElementById("toast");
+  const leaderboardEl = document.getElementById("leaderboard");
+  const startOverlay = document.getElementById("startOverlay");
+  const playerNameInput = document.getElementById("playerName");
+
+  const STORAGE_KEY = "farmGuardianLeaderboard_v1";
+  const W = canvas.width, H = canvas.height;
+
+  let state = "menu";
+  let level = 0;
+  let playerName = "小農夫";
+  let levelScore = 0;
+  let totalScore = 0;
+  let timeLeft = 30;
+  let lastTime = 0;
+  let spawnTimer = 0;
+  let secondAcc = 0;
+  let objects = [];
+  let bullets = [];
+  let particles = [];
+  let keys = {};
+  let player = {x: W/2, y:H-70, w:130, h:54, speed:520, cooldown:0};
+  let messageTimer = 0;
+
+  const crops = [
+    {emoji:"🌽", name:"粟米", score:10, type:"good"},
+    {emoji:"🍉", name:"西瓜", score:12, type:"good"},
+    {emoji:"🥒", name:"青瓜", score:10, type:"good"},
+    {emoji:"🐛", name:"有蟲", score:-15, type:"bad"}
+  ];
+  const pests = [
+    {emoji:"🪲", name:"芽蟲", score:10, hp:1},
+    {emoji:"🐛", name:"青蟲", score:12, hp:1},
+    {emoji:"🦋", name:"蛾蟲", score:15, hp:1}
+  ];
+
+  function clamp(v,min,max){return Math.max(min, Math.min(max, v));}
+  function rand(min,max){return Math.random()*(max-min)+min;}
+  function nowDate(){
+    const d = new Date();
+    return `${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  }
+  function setToast(msg){ toast.textContent = msg; messageTimer = 1.4; }
+  function resetCore(){
+    levelScore = 0; timeLeft = 30; spawnTimer = 0; secondAcc = 0;
+    objects = []; bullets = []; particles = [];
+    player.x = W/2; player.cooldown = 0;
+    scoreText.textContent = levelScore;
+    timeText.textContent = timeLeft;
+    totalText.textContent = totalScore;
+  }
+  function startLevel(n){
+    level = n;
+    resetCore();
+    state = n === 1 ? "level1" : "level2";
+    levelText.textContent = n === 1 ? "第一關" : "第二關";
+    document.getElementById("nextBtn").disabled = true;
+    setToast(n === 1 ? "接住農作物，避開有蟲的！" : "用有機除蟲劑射害蟲！");
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+  function endLevel(){
+    if(state === "level1"){
+      totalScore += levelScore;
+      totalText.textContent = totalScore;
+      state = "between";
+      levelText.textContent = "過關";
+      document.getElementById("nextBtn").disabled = false;
+      setToast(`第一關完成！本關 ${levelScore} 分，按「下一關」。`);
+      drawBetween();
+    } else if(state === "level2"){
+      totalScore += levelScore;
+      totalText.textContent = totalScore;
+      state = "gameover";
+      levelText.textContent = "完成";
+      addLeaderboard(playerName, totalScore);
+      setToast(`完成兩關！總分 ${totalScore} 分，已加入排行榜。`);
+      drawGameOver();
+      renderLeaderboard();
+    }
+  }
+  function startGame(){
+    playerName = (playerNameInput.value || "小農夫").trim().slice(0,12) || "小農夫";
+    totalScore = 0;
+    startOverlay.classList.add("hidden");
+    startLevel(1);
+  }
+
+  function drawBackground(){
+    // sky
+    const grd = ctx.createLinearGradient(0,0,0,H);
+    grd.addColorStop(0,"#c9f0ff");
+    grd.addColorStop(.58,"#eafbc6");
+    grd.addColorStop(1,"#8fd175");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0,0,W,H);
+
+    // sun
+    ctx.beginPath(); ctx.arc(76,70,38,0,Math.PI*2); ctx.fillStyle="#ffe380"; ctx.fill();
+
+    // clouds
+    ctx.fillStyle="#ffffffcc";
+    for(const c of [[200,78],[250,55],[690,82],[755,62]]){
+      ctx.beginPath(); ctx.arc(c[0],c[1],26,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(c[0]+35,c[1]+5,31,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(c[0]-33,c[1]+9,21,0,Math.PI*2); ctx.fill();
+    }
+
+    // fields
+    ctx.fillStyle="#6dbb60"; ctx.fillRect(0,H-105,W,105);
+    ctx.strokeStyle="#4e9b44"; ctx.lineWidth=4;
+    for(let x=-30;x<W+60;x+=70){
+      ctx.beginPath(); ctx.moveTo(x,H); ctx.lineTo(x+120,H-105); ctx.stroke();
+    }
+    // fence
+    ctx.fillStyle="#d9a45a";
+    for(let x=0;x<W;x+=80){
+      ctx.fillRect(x,H-132,15,56);
+    }
+    ctx.fillRect(0,H-120,W,15);
+  }
+  function drawBasket(){
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.fillStyle="#bb7a36";
+    ctx.strokeStyle="#7c4a20";
+    ctx.lineWidth=6;
+    ctx.beginPath();
+    ctx.roundRect(-player.w/2, -player.h/2, player.w, player.h, 20);
+    ctx.fill(); ctx.stroke();
+    ctx.strokeStyle="#7c4a20";
+    ctx.lineWidth=8;
+    ctx.beginPath();
+    ctx.arc(0,-player.h/2, player.w*.38, Math.PI, 0);
+    ctx.stroke();
+    ctx.fillStyle="#f3c47b";
+    for(let x=-48;x<=48;x+=24){ ctx.fillRect(x,-18,10,36); }
+    ctx.restore();
+  }
+  function drawSprayer(){
+    ctx.save();
+    ctx.translate(player.x, player.y);
+    ctx.fillStyle="#77c8ff";
+    ctx.strokeStyle="#276f8d";
+    ctx.lineWidth=5;
+    ctx.beginPath();
+    ctx.roundRect(-48,-22,96,46,16);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle="#e8ffff";
+    ctx.fillRect(-18,-40,36,20);
+    ctx.strokeRect(-18,-40,36,20);
+    ctx.fillStyle="#3a944e";
+    ctx.beginPath();
+    ctx.roundRect(20,-50,74,18,8);
+    ctx.fill();
+    ctx.fillStyle="#245e33";
+    ctx.fillRect(82,-56,10,12);
+    ctx.font="24px sans-serif";
+    ctx.fillText("🌿", -12, 10);
+    ctx.restore();
+  }
+  function drawEmoji(item){
+    ctx.save();
+    ctx.font = `${item.size}px "Apple Color Emoji","Segoe UI Emoji",sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.translate(item.x, item.y);
+    if(item.rot) ctx.rotate(item.rot);
+    ctx.fillText(item.emoji, 0, 0);
+    ctx.restore();
+  }
+  function drawParticles(dt){
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.life -= dt;
+      p.x += p.vx*dt; p.y += p.vy*dt;
+      p.alpha = Math.max(0, p.life/p.maxLife);
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      if(p.life <= 0) particles.splice(i,1);
+    }
+  }
+  function burst(x,y,color="#fff176"){
+    for(let i=0;i<14;i++){
+      particles.push({
+        x,y,
+        vx:rand(-140,140), vy:rand(-160,80),
+        r:rand(3,8),
+        life:rand(.35,.7), maxLife:.7,
+        color
+      });
+    }
+  }
+  function drawTextPanel(title, body){
+    drawBackground();
+    ctx.fillStyle="#ffffffdd";
+    ctx.strokeStyle="#8cc77e";
+    ctx.lineWidth=6;
+    ctx.beginPath();
+    ctx.roundRect(170,130,620,300,30);
+    ctx.fill(); ctx.stroke();
+    ctx.textAlign="center";
+    ctx.fillStyle="#28513a";
+    ctx.font='900 52px "PingFang TC","Microsoft JhengHei",sans-serif';
+    ctx.fillText(title, W/2, 230);
+    ctx.font='800 28px "PingFang TC","Microsoft JhengHei",sans-serif';
+    const lines = body.split("\n");
+    lines.forEach((line,i)=>ctx.fillText(line,W/2, 295+i*48));
+  }
+  function drawBetween(){
+    drawTextPanel("第一關完成！", `本關：${levelScore} 分\n按「下一關」進入害蟲射擊`);
+  }
+  function drawGameOver(){
+    drawTextPanel("農場守護成功！", `${playerName} 總分：${totalScore} 分\n可以重玩挑戰排行榜`);
+  }
+
+  function updatePlayer(dt){
+    let dir = 0;
+    if(keys.ArrowLeft || keys.a || keys.A) dir -= 1;
+    if(keys.ArrowRight || keys.d || keys.D) dir += 1;
+    player.x += dir * player.speed * dt;
+    player.x = clamp(player.x, 70, W-70);
+    if(player.cooldown > 0) player.cooldown -= dt;
+  }
+
+  function spawnLevel1(){
+    const template = crops[Math.floor(Math.random()*crops.length)];
+    const item = {
+      ...template,
+      x: rand(45,W-45),
+      y: -40,
+      size: template.type === "bad" ? rand(38,50) : rand(44,58),
+      vy: rand(150,250) + Math.min(130, (30-timeLeft)*5),
+      rot: rand(-.3,.3),
+      r: 30
+    };
+    objects.push(item);
+  }
+  function updateLevel1(dt){
+    spawnTimer -= dt;
+    if(spawnTimer <= 0){
+      spawnLevel1();
+      spawnTimer = rand(.32,.62);
+    }
+    for(let i=objects.length-1;i>=0;i--){
+      const o = objects[i];
+      o.y += o.vy*dt;
+      o.rot += dt*1.4;
+      const caught = Math.abs(o.x-player.x) < (player.w/2+22) && Math.abs(o.y-player.y) < 42;
+      if(caught){
+        levelScore += o.score;
+        scoreText.textContent = levelScore;
+        if(o.type === "good"){
+          setToast(`接到${o.name}！+${o.score}`);
+          burst(o.x,o.y,"#ffe76d");
+        }else{
+          setToast(`哎呀！接到有蟲的！${o.score}`);
+          burst(o.x,o.y,"#ff8a80");
+        }
+        objects.splice(i,1);
+      } else if(o.y > H+60) {
+        objects.splice(i,1);
+      }
+    }
+  }
+  function drawLevel1(dt){
+    drawBackground();
+    ctx.textAlign="center";
+    for(const o of objects) drawEmoji(o);
+    drawBasket();
+    drawParticles(dt);
+    ctx.fillStyle="#ffffffdd";
+    ctx.font='900 24px "PingFang TC","Microsoft JhengHei",sans-serif';
+    ctx.fillText("接 🌽 🍉 🥒 ｜避開 🐛", W/2, 42);
+  }
+
+  function spawnLevel2(){
+    const template = pests[Math.floor(Math.random()*pests.length)];
+    const item = {
+      ...template,
+      x: rand(55,W-55),
+      y: rand(40,150),
+      size: rand(42,58),
+      vx: rand(-100,100),
+      vy: rand(25,65) + Math.min(65, (30-timeLeft)*2.5),
+      r: 28,
+      wobble: rand(0,Math.PI*2)
+    };
+    objects.push(item);
+  }
+  function shoot(){
+    if(state !== "level2" || player.cooldown > 0) return;
+    player.cooldown = .18;
+    bullets.push({x: player.x+72, y: player.y-54, vy: -620, r: 9});
+    bullets.push({x: player.x+86, y: player.y-54, vy: -650, r: 7});
+  }
+  function updateLevel2(dt){
+    spawnTimer -= dt;
+    if(spawnTimer <= 0){
+      spawnLevel2();
+      spawnTimer = rand(.38,.78);
+    }
+
+    for(let i=bullets.length-1;i>=0;i--){
+      const b = bullets[i];
+      b.y += b.vy * dt;
+      if(b.y < -30) bullets.splice(i,1);
+    }
+
+    for(let i=objects.length-1;i>=0;i--){
+      const o = objects[i];
+      o.wobble += dt*4;
+      o.x += (o.vx + Math.sin(o.wobble)*55) * dt;
+      o.y += o.vy * dt;
+      if(o.x < 30 || o.x > W-30) o.vx *= -1;
+
+      let hitIndex = -1;
+      for(let j=0;j<bullets.length;j++){
+        const b = bullets[j];
+        const dx = b.x-o.x, dy = b.y-o.y;
+        if(Math.hypot(dx,dy) < o.r + b.r){
+          hitIndex = j; break;
+        }
+      }
+      if(hitIndex >= 0){
+        bullets.splice(hitIndex,1);
+        levelScore += o.score;
+        scoreText.textContent = levelScore;
+        setToast(`射中${o.name}！+${o.score}`);
+        burst(o.x,o.y,"#b9ff9b");
+        objects.splice(i,1);
+      } else if(o.y > H-105){
+        levelScore -= 10;
+        scoreText.textContent = levelScore;
+        setToast(`${o.name}走入農田！-10`);
+        burst(o.x,H-110,"#ff8a80");
+        objects.splice(i,1);
+      }
+    }
+  }
+  function drawLevel2(dt){
+    drawBackground();
+    ctx.textAlign="center";
+    ctx.fillStyle="#ffffffdd";
+    ctx.font='900 24px "PingFang TC","Microsoft JhengHei",sans-serif';
+    ctx.fillText("射中 芽蟲 / 青蟲 / 蛾蟲 ｜不要讓害蟲走入農田", W/2, 42);
+    for(const o of objects) drawEmoji(o);
+    for(const b of bullets){
+      ctx.fillStyle="#8dff9a";
+      ctx.strokeStyle="#2d9d45";
+      ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle="#ffffff";
+      ctx.beginPath(); ctx.arc(b.x-3,b.y-3,b.r*.35,0,Math.PI*2); ctx.fill();
+    }
+    drawSprayer();
+    drawParticles(dt);
+  }
+
+  function tickTime(dt){
+    if(state !== "level1" && state !== "level2") return;
+    secondAcc += dt;
+    while(secondAcc >= 1){
+      secondAcc -= 1;
+      timeLeft -= 1;
+      timeText.textContent = timeLeft;
+      if(timeLeft <= 0){
+        timeLeft = 0;
+        timeText.textContent = 0;
+        endLevel();
+        return;
+      }
+    }
+  }
+
+  function loop(t){
+    if(state !== "level1" && state !== "level2") return;
+    const dt = Math.min(.033, (t-lastTime)/1000 || .016);
+    lastTime = t;
+    if(messageTimer > 0){
+      messageTimer -= dt;
+      if(messageTimer <= 0 && (state === "level1" || state === "level2")){
+        toast.textContent = state === "level1" ? "接農作物，不接有蟲的！" : "按 Space 或「射擊」噴有機除蟲劑！";
+      }
+    }
+    updatePlayer(dt);
+    tickTime(dt);
+    if(state === "level1"){
+      updateLevel1(dt);
+      drawLevel1(dt);
+      requestAnimationFrame(loop);
+    } else if(state === "level2"){
+      updateLevel2(dt);
+      drawLevel2(dt);
+      requestAnimationFrame(loop);
+    }
+  }
+
+  function loadBoard(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch(e){ return []; }
+  }
+  function saveBoard(board){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+  }
+  function addLeaderboard(name, score){
+    const board = loadBoard();
+    board.push({name, score, date: nowDate()});
+    board.sort((a,b)=>b.score-a.score);
+    saveBoard(board.slice(0,10));
+  }
+  function renderLeaderboard(){
+    const board = loadBoard();
+    leaderboardEl.innerHTML = "";
+    if(board.length === 0){
+      const li = document.createElement("li");
+      li.style.gridTemplateColumns = "1fr";
+      li.textContent = "暫時未有紀錄";
+      leaderboardEl.appendChild(li);
+      return;
+    }
+    board.forEach((r,i)=>{
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${i+1}</span><span>${escapeHtml(r.name)}<small>${escapeHtml(r.date)}</small></span><span>${r.score}</span>`;
+      leaderboardEl.appendChild(li);
+    });
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  // Buttons
+  document.getElementById("modalStartBtn").addEventListener("click", startGame);
+  document.getElementById("startBtn").addEventListener("click", () => {
+    if(state === "menu" || state === "gameover" || state === "between"){
+      startOverlay.classList.remove("hidden");
+      playerNameInput.focus();
+    }
+  });
+  document.getElementById("openStartBtn").addEventListener("click", () => {
+    startOverlay.classList.remove("hidden");
+    playerNameInput.focus();
+  });
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    totalScore = 0;
+    startOverlay.classList.remove("hidden");
+    playerNameInput.focus();
+  });
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    if(state === "between") startLevel(2);
+  });
+  document.getElementById("clearBoardBtn").addEventListener("click", () => {
+    if(confirm("確定清除排行榜？")){
+      localStorage.removeItem(STORAGE_KEY);
+      renderLeaderboard();
+    }
+  });
+  playerNameInput.addEventListener("keydown", e => {
+    if(e.key === "Enter") startGame();
+  });
+
+  // Keyboard
+  window.addEventListener("keydown", e => {
+    keys[e.key] = true;
+    if(e.code === "Space"){
+      e.preventDefault();
+      shoot();
+    }
+  });
+  window.addEventListener("keyup", e => keys[e.key] = false);
+
+  // Touch buttons
+  function holdButton(btn, key){
+    const down = e => { e.preventDefault(); keys[key] = true; };
+    const up = e => { e.preventDefault(); keys[key] = false; };
+    btn.addEventListener("pointerdown", down);
+    btn.addEventListener("pointerup", up);
+    btn.addEventListener("pointerleave", up);
+    btn.addEventListener("pointercancel", up);
+  }
+  holdButton(document.getElementById("leftBtn"), "ArrowLeft");
+  holdButton(document.getElementById("rightBtn"), "ArrowRight");
+  document.getElementById("shootBtn").addEventListener("pointerdown", e => { e.preventDefault(); shoot(); });
+
+  // Canvas drag control
+  canvas.addEventListener("pointermove", e => {
+    if(state !== "level1" && state !== "level2") return;
+    if(e.pointerType === "mouse" && e.buttons !== 1) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+    player.x = clamp((e.clientX - rect.left) * scaleX, 70, W-70);
+  });
+  canvas.addEventListener("pointerdown", e => {
+    if(state === "level2") shoot();
+    canvas.setPointerCapture(e.pointerId);
+  });
+
+  // Initial screen
+  renderLeaderboard();
+  drawTextPanel("小農夫守護農場", "第一關：接收成避開蟲\n第二關：用有機除蟲劑打害蟲");
+})();
+</script>
+</body>
+</html>
