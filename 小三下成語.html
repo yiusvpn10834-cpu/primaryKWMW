@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成語救救 Usahana 農場</title>
+<style>
+:root{--pink:#ffd6e8;--blue:#d9f0ff;--yellow:#fff2b8;--green:#ddf8dd;--purple:#eadcff;--hot:#ff5fa2;--ink:#333;--line:#8f6ed5}
+*{box-sizing:border-box}
+body{margin:0;padding:18px;font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:linear-gradient(135deg,#fff7fb,#f4fbff,#fffbea);color:var(--ink)}
+.app{max-width:1050px;margin:auto;background:white;border:5px solid var(--pink);border-radius:28px;padding:20px;box-shadow:0 8px 25px #0001}
+h1{margin:0;text-align:center;font-size:34px;color:#ff4f9a}.sub{text-align:center;font-size:18px;margin:8px 0 16px}
+.topbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0 16px}
+.stat{border:3px solid var(--line);border-radius:18px;padding:10px;text-align:center;font-size:20px;background:#fff}
+.modes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+button{border:4px solid #222;border-radius:18px;padding:13px 18px;font-size:22px;font-weight:700;background:white;cursor:pointer;box-shadow:3px 3px 0 #222}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #222}.active{background:var(--blue)}
+.game{border:4px dashed #ffaad0;border-radius:24px;padding:18px;min-height:430px;background:#fffdfd}
+.story{font-size:22px;line-height:1.5;background:var(--yellow);border:3px solid #ffd45c;border-radius:18px;padding:12px;margin-bottom:14px}
+.question{font-size:32px;text-align:center;margin:20px 0;color:#5b31b7;font-weight:800}.hint{text-align:center;font-size:22px;color:#666;margin-top:-8px;margin-bottom:12px}
+.options{display:grid;grid-template-columns:1fr;gap:12px;max-width:820px;margin:auto}.option{border:4px solid #333;border-radius:20px;padding:16px;font-size:24px;background:#fff;text-align:left}
+.option.good{background:#dff8df}.option.bad{background:#ffd9df}.feedback{min-height:54px;text-align:center;font-size:26px;font-weight:800;margin:14px}
+.flowers{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}.flower{font-size:38px;filter:grayscale(1);transition:.25s}.flower.on{filter:none;transform:scale(1.15)}
+.wrongbox{margin-top:15px;padding:12px;border:3px solid #b7a7ff;border-radius:18px;background:#f7f3ff;font-size:18px}
+.progress{height:24px;border:3px solid #222;border-radius:20px;overflow:hidden;background:#fff;margin:12px 0}.bar{height:100%;width:0%;background:linear-gradient(90deg,#93e6a8,#8dd8ff,#ffd47a)}
+.small{font-size:18px;color:#666}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>🌸 成語救救 Usahana 農場 🌸</h1>
+<div class="sub">幫花花配對正確成語，答啱花花就會開！</div>
+<div class="topbar"><div class="stat">⭐ 分數<br><b id="score">0</b></div><div class="stat">✅ 答對<br><b id="correct">0</b></div><div class="stat">❌ 答錯<br><b id="wrong">0</b></div><div class="stat">🎯 正確率<br><b id="rate">0%</b></div></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="modes">
+<button id="modeMeaning" class="active" onclick="setMode('meaning')">成語配意思</button>
+<button id="modeSentence" onclick="setMode('sentence')">例句選成語</button>
+<button id="modeGhost" onclick="setMode('ghost')">成語抓鬼</button>
+<button onclick="resetGame()">重新開始</button>
+</div>
+<div class="flowers" id="flowers"></div>
+<div class="game">
+<div class="story" id="story">🐰 Usahana 農場任務：讀題後，按下正確答案！</div>
+<div class="question" id="question"></div>
+<div class="hint" id="hint"></div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback"></div>
+<div style="text-align:center"><button onclick="nextQuestion()">下一題 ➜</button></div>
+<div class="wrongbox"><b>錯題紀錄：</b><div id="wrongList" class="small">暫時未有錯題，加油！</div></div>
+</div></div>
+<script>
+const idioms=[
+{w:"捨己為人",m:"犧牲自己的利益去幫助別人。",s:"消防員叔叔____，衝進火場救出了受困的市民。"},
+{w:"知足常樂",m:"懂得滿足的人，心中總是充滿快樂。",s:"雖然玩具不多，但弟弟明白____的道理，依然很開心。"},
+{w:"不勞而獲",m:"自己不付出勞動而佔有別人的勞動成果。",s:"我們應靠努力取得成績，不能有____的想法。"},
+{w:"不自量力",m:"不能正確估計自己的力量，過高估計自己。",s:"小螞蟻想獨自搬動大石頭，真是____。"},
+{w:"改過自新",m:"改正錯誤，重新做人。",s:"被老師提醒後，志明決定____，以後準時交功課。"},
+{w:"以身作則",m:"用自己的行動做出榜樣。",s:"班長每天專心聽講，____，同學都向他學習。"},
+{w:"七手八腳",m:"形容人多手雜，動作忙亂的樣子。",s:"書本掉了一地，同學們____地幫忙撿起來。"},
+{w:"爭分奪秒",m:"抓緊每一分每一秒，一刻也不耽誤。",s:"考試快到了，大家都在____地溫習。"},
+{w:"知難而退",m:"知道事情困難就退縮不前。",s:"面對難題，我們應努力思考，而不是____。"},
+{w:"腳踏實地",m:"做事認真、踏實、不馬虎。",s:"讀書要____，一步一個腳印，才能打好基礎。"},
+{w:"錦上添花",m:"好上加好，使美好的事物更加美好。",s:"姐姐贏了比賽，又獲最佳風度獎，真是____。"},
+{w:"磨杵成針",m:"只要有毅力，肯下苦功，再困難也能成功。",s:"只要有____的毅力天天練習，就一定能進步。"}];
+let mode="meaning",score=0,correct=0,wrong=0,total=0,current=null,answered=false,wrongItems=[];
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
+function setMode(m){mode=m;document.querySelectorAll(".modes button").forEach(b=>b.classList.remove("active"));if(m==="meaning")modeMeaning.classList.add("active");if(m==="sentence")modeSentence.classList.add("active");if(m==="ghost")modeGhost.classList.add("active");nextQuestion()}
+function makeFlowers(){flowers.innerHTML="";for(let i=0;i<12;i++){let f=document.createElement("span");f.className="flower";f.textContent="🌸";flowers.appendChild(f)}}
+function updateStats(){scoreEl=document.getElementById("score");scoreEl.textContent=score;correctEl=document.getElementById("correct");correctEl.textContent=correct;wrongEl=document.getElementById("wrong");wrongEl.textContent=wrong;rate.textContent=total?Math.round(correct/total*100)+"%":"0%";bar.style.width=Math.min(100,total/12*100)+"%";document.querySelectorAll(".flower").forEach((f,i)=>f.classList.toggle("on",i<correct));wrongList.innerHTML=wrongItems.length?wrongItems.map(x=>"• "+x).join("<br>"):"暫時未有錯題，加油！"}
+function nextQuestion(){answered=false;feedback.textContent="";const q=idioms[Math.floor(Math.random()*idioms.length)];current=q;let opts,qu,hi,st;if(mode==="meaning"){qu=q.w;hi="請選出正確意思";st="🌼 花花忘記了成語意思，幫牠找回來！";opts=shuffle([q.m,...shuffle(idioms.filter(x=>x.w!==q.w)).slice(0,2).map(x=>x.m)]).map(t=>({text:t,ok:t===q.m}))}else if(mode==="sentence"){qu=q.s;hi="請選出最合適的成語";st="🐰 句子缺少一個成語，快幫 Usahana 填上！";opts=shuffle([q.w,...shuffle(idioms.filter(x=>x.w!==q.w)).slice(0,2).map(x=>x.w)]).map(t=>({text:t,ok:t===q.w}))}else{const isCorrect=Math.random()>0.5;const fake=shuffle(idioms.filter(x=>x.w!==q.w))[0];const used=isCorrect?q.w:fake.w;qu=q.s.replace("____","「"+used+"」");hi="這句成語用得對嗎？";st="👻 成語小鬼混入句子！判斷它有冇用錯。";opts=[{text:"正確 ✅",ok:isCorrect},{text:"錯誤 ❌",ok:!isCorrect}]}
+story.textContent=st;question.textContent=qu;hint.textContent=hi;options.innerHTML="";opts.forEach(o=>{let b=document.createElement("button");b.className="option";b.textContent=o.text;b.onclick=()=>choose(b,o.ok);options.appendChild(b)})}
+function choose(btn,ok){if(answered)return;answered=true;total++;if(ok){score+=10;correct++;btn.classList.add("good");feedback.textContent="答啱！花花開了 🌸 +10分"}else{wrong++;btn.classList.add("bad");wrongItems.push(current.w+"：再溫意思／例句");feedback.textContent="差少少，再睇清楚題目 💪"}updateStats()}
+function resetGame(){score=0;correct=0;wrong=0;total=0;wrongItems=[];makeFlowers();updateStats();nextQuestion()}
+makeFlowers();updateStats();nextQuestion();
+</script>
+</body></html>
