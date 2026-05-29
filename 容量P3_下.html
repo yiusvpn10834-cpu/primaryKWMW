@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>容量互動練習</title>
+<style>
+  :root{--ink:#1f2937;--line:#111827;--green:#dcfce7;--blue:#dbeafe;--red:#fee2e2;--yellow:#fffbeb;--water:#a8b3bd}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fffaf3;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif}
+  .app{max-width:1080px;margin:18px auto;padding:18px;border:3px solid #111;border-radius:22px;background:white}
+  h1{margin:4px 0 10px;text-align:center;font-size:30px;letter-spacing:.08em}
+  .tabs,.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .tab,.btn{border:3px solid #111;border-radius:16px;background:white;padding:10px 18px;font-weight:800;font-size:18px;cursor:pointer;box-shadow:0 3px 0 #111}
+  .tab.active{background:#cfe8ff}.btn.main{background:#dcfce7}.btn.warn{background:#fff7ed}
+  .btn:active,.tab:active{transform:translateY(2px);box-shadow:0 1px 0 #111}
+  .progressWrap{height:22px;border:3px solid #111;border-radius:999px;overflow:hidden;margin:10px 0 18px;background:white}
+  .progress{height:100%;width:0;background:#86efac}
+  .meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:15px;margin-bottom:8px;color:#4b5563}
+  .qtitle{font-size:26px;font-weight:900;line-height:1.45;margin:12px 0 18px}
+  .stage{border:3px solid #111;border-radius:18px;padding:18px;min-height:230px;background:#fff;margin-bottom:18px}
+  .diagram{display:flex;justify-content:center;align-items:center;min-height:170px;width:100%;gap:16px;flex-wrap:wrap}
+  .cupRow{display:flex;align-items:flex-end;gap:16px;justify-content:center;flex-wrap:wrap}
+  .cupWrap{text-align:center;font-weight:800}
+  .capLabel{font-size:18px;margin-bottom:4px}
+  .measureWrap{display:flex;align-items:stretch;gap:8px;justify-content:center}
+  .scale{position:relative;width:56px;height:150px;font-size:12px;color:#111;font-weight:800}
+  .scaleLine{position:absolute;right:0;width:20px;border-top:2px solid #111}
+  .scaleLine.small{width:11px}
+  .scaleLabel{position:absolute;right:24px;transform:translateY(-50%);white-space:nowrap;font-size:12px}
+  .cup{width:100px;height:150px;border:3px solid #111;border-top:5px solid #111;border-radius:4px 4px 13px 13px;position:relative;background:#fff;margin:0 auto 6px;overflow:hidden}
+  .water{position:absolute;bottom:0;left:0;right:0;background:var(--water);background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.10) 0,rgba(0,0,0,.10) 4px,transparent 4px,transparent 10px)}
+  .ticks{position:absolute;left:0;top:0;right:0;bottom:0}
+  .tick{position:absolute;left:0;width:20px;border-top:2px solid #111}
+  .tick.small{width:11px}
+  .objectBox{display:flex;align-items:center;justify-content:center;border:3px solid #111;border-radius:16px;padding:16px;min-width:130px;min-height:110px;background:#fff;font-size:48px;text-align:center;font-weight:900}
+  .arrow{font-size:34px;font-weight:900}
+  .cupIcon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:54px;border:3px solid #111;border-radius:5px 5px 12px 12px;margin:2px;background:#fff}
+  .iconGroup{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:340px}
+  .labelCard{font-size:24px;font-weight:900;text-align:center}
+  .choiceGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;width:100%}
+  .choice{border:3px solid #111;border-radius:14px;padding:14px;font-size:22px;font-weight:800;background:white;cursor:pointer;text-align:center}
+  .choice.sel{background:#dbeafe}.choice.ok{background:#dcfce7}.choice.no{background:#fee2e2}
+  .answer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:24px;margin:8px 0}
+  input,select{border:3px solid #111;border-radius:12px;padding:10px;font-size:22px;text-align:center;background:white}
+  input{width:135px} select{font-weight:800}
+  .feedback{font-size:22px;font-weight:900;margin:10px 0}.okText{color:#15803d}.badText{color:#b91c1c}
+  .hint{border:3px dashed #f59e0b;background:var(--yellow);border-radius:16px;padding:14px;font-size:20px;line-height:1.55;margin-top:10px}
+  .hidden{display:none}.wrongBox{border-top:2px solid #e5e7eb;margin-top:14px;padding-top:12px;font-size:16px;line-height:1.6}
+  .formula{font-size:30px;font-weight:900;text-align:center;margin:16px 0}.small{font-size:16px;color:#4b5563}
+  @media(max-width:640px){.app{margin:0;border:0;border-radius:0}.qtitle{font-size:22px}.tab,.btn{font-size:16px;padding:9px 12px}.cup{width:82px;height:126px}.scale{height:126px}.objectBox{font-size:38px;min-width:108px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>容量互動練習</h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="tools">
+    <label>每次題數：
+      <select id="limit" onchange="restart()">
+        <option value="10">10</option>
+        <option value="15" selected>15</option>
+        <option value="20">20</option>
+        <option value="30">30</option>
+      </select>
+    </label>
+    <button class="btn warn" onclick="runSelfCheck()">自動檢查題庫</button>
+  </div>
+  <div class="progressWrap"><div class="progress" id="progress"></div></div>
+  <div class="meta">
+    <div>題目：<b id="count">0 / 0</b></div>
+    <div>答對：<b id="right">0</b>　答錯：<b id="wrong">0</b>　正確率：<b id="rate">0%</b></div>
+  </div>
+  <div class="qtitle" id="qtitle">按下方「重新出題」開始。</div>
+  <div class="stage" id="stage"></div>
+  <div class="answer" id="answer"></div>
+  <div>
+    <button class="btn main" onclick="check()">檢查答案</button>
+    <button class="btn" onclick="hint()">提示</button>
+    <button class="btn" onclick="next()">下一題</button>
+    <button class="btn" onclick="restart()">重新出題</button>
+  </div>
+  <div id="feedback"></div>
+  <div id="hint" class="hint hidden"></div>
+  <div class="wrongBox"><b>錯題紀錄：</b><div id="wrongList">暫時未有錯題。</div></div>
+</div>
+<script>
+const CATS=[["mixed","混合"],["unit","單位／量感"],["read","讀量杯"],["convert","單位換算"],["compare","比較／倒水"],["tool","選工具"],["word","文字題"]];
+const BANK=[{"t": "unit", "q": "一個茶杯的容量約是 300 ____。", "opts": ["mL", "L", "cm", "kg"], "ans": "mL", "h": "茶杯約數百毫升，用 mL。", "icon": "☕"}, {"t": "unit", "q": "一瓶大果汁的容量約是 2 ____。", "opts": ["mL", "L", "cm", "g"], "ans": "L", "h": "大瓶飲品通常用 L。", "icon": "🧃"}, {"t": "unit", "q": "一個浴缸的容量約是 200 ____。", "opts": ["mL", "L", "mm", "kg"], "ans": "L", "h": "浴缸很大，用 L。", "icon": "🛁"}, {"t": "unit", "q": "一滴眼藥水約是 1 ____。", "opts": ["mL", "L", "cm", "kg"], "ans": "mL", "h": "很少的液體用 mL。", "icon": "💧"}, {"t": "unit", "q": "一罐汽水約是 330 ____。", "opts": ["mL", "L", "m", "kg"], "ans": "mL", "h": "汽水罐約 330 mL。", "icon": "🥤"}, {"t": "unit", "q": "一個魚缸的容量約是 50 ____。", "opts": ["mL", "L", "cm", "g"], "ans": "L", "h": "魚缸容量較大，用 L。", "icon": "🐠"}, {"t": "unit", "q": "一匙藥水約是 5 ____。", "opts": ["mL", "L", "cm", "kg"], "ans": "mL", "h": "一匙藥水容量很小，用 mL。", "icon": "🥄"}, {"t": "unit", "q": "一個水桶約可盛水 10 ____。", "opts": ["mL", "L", "mm", "g"], "ans": "L", "h": "水桶容量大，用 L。", "icon": "🪣"}, {"t": "unit", "q": "一支細香水約是 50 ____。", "opts": ["mL", "L", "cm", "kg"], "ans": "mL", "h": "小瓶液體通常用 mL。", "icon": "🧴"}, {"t": "unit", "q": "一個湯煲約可盛水 5 ____。", "opts": ["mL", "L", "cm", "g"], "ans": "L", "h": "湯煲容量較大，用 L。", "icon": "🍲"}, {"t": "unit", "q": "一包紙包飲品約是 250 ____。", "opts": ["mL", "L", "mm", "kg"], "ans": "mL", "h": "紙包飲品約 250 mL。", "icon": "🧃"}, {"t": "unit", "q": "一個小魚缸約可盛水 18 ____。", "opts": ["mL", "L", "cm", "g"], "ans": "L", "h": "魚缸用升 L 較合適。", "icon": "🐠"}, {"t": "unit", "q": "一枝膠水約是 120 ____。", "opts": ["mL", "L", "m", "kg"], "ans": "mL", "h": "膠水是液體小容量，用 mL。", "icon": "🧴"}, {"t": "unit", "q": "一個游泳池的容量應用哪個單位較合適？", "opts": ["mL", "L", "cm", "g"], "ans": "L", "h": "很大的容量用 L。", "icon": "🏊"}, {"t": "unit", "q": "一個針筒可量度少量液體，常用單位是？", "opts": ["mL", "L", "kg", "cm"], "ans": "mL", "h": "針筒量少量液體，用 mL。", "icon": "💉"}, {"t": "unit", "q": "毫升的英文縮寫較標準是哪一個？", "opts": ["ml", "ML", "mL", "Ml"], "ans": "mL", "h": "毫升常寫作 mL，L 要大寫。", "icon": "mL"}, {"t": "unit", "q": "升的英文縮寫是哪一個？", "opts": ["l", "L", "ml", "M"], "ans": "L", "h": "升寫作 L。", "icon": "L"}, {"t": "unit", "q": "哪一樣通常用 mL 表示容量？", "opts": ["眼藥水", "浴缸", "魚缸", "水桶"], "ans": "眼藥水", "h": "少量液體用 mL。", "icon": "💧"}, {"t": "unit", "q": "哪一樣通常用 L 表示容量？", "opts": ["一滴藥水", "一匙糖漿", "魚缸", "一支筆"], "ans": "魚缸", "h": "魚缸容量大，用 L。", "icon": "🐠"}, {"t": "unit", "q": "以下哪個容量最大？", "opts": ["5 mL", "50 mL", "500 mL", "5 L"], "ans": "5 L", "h": "5 L = 5000 mL，最大。", "icon": "📏"}, {"t": "unit", "q": "以下哪個容量最小？", "opts": ["2 L", "200 mL", "20 mL", "2000 mL"], "ans": "20 mL", "h": "2 L = 2000 mL，所以 20 mL 最小。", "icon": "📏"}, {"t": "unit", "q": "一瓶洗手液約是 500 ____。", "opts": ["mL", "L", "cm", "kg"], "ans": "mL", "h": "洗手液瓶通常數百 mL。", "icon": "🧴"}, {"t": "unit", "q": "一支大水樽約是 1 ____。", "opts": ["mL", "L", "mm", "kg"], "ans": "L", "h": "大水樽約 1 L。", "icon": "🍼"}, {"t": "unit", "q": "一小杯咳藥水約是 10 ____。", "opts": ["mL", "L", "cm", "kg"], "ans": "mL", "h": "藥水小容量，用 mL。", "icon": "💊"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 1000, "val": 600, "top": "1 L", "step": 100}, "textAns": "600", "unit": "mL", "h": "先看量杯最高刻度 1 L，再按刻度讀水位：600 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 500, "val": 350, "top": "500 mL", "step": 50}, "textAns": "350", "unit": "mL", "h": "先看量杯最高刻度 500 mL，再按刻度讀水位：350 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 250, "val": 150, "top": "250 mL", "step": 25}, "textAns": "150", "unit": "mL", "h": "先看量杯最高刻度 250 mL，再按刻度讀水位：150 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 200, "val": 120, "top": "200 mL", "step": 20}, "textAns": "120", "unit": "mL", "h": "先看量杯最高刻度 200 mL，再按刻度讀水位：120 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 1000, "val": 800, "top": "1 L", "step": 100}, "textAns": "800", "unit": "mL", "h": "先看量杯最高刻度 1 L，再按刻度讀水位：800 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 500, "val": 250, "top": "500 mL", "step": 50}, "textAns": "250", "unit": "mL", "h": "先看量杯最高刻度 500 mL，再按刻度讀水位：250 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 1000, "val": 300, "top": "1 L", "step": 100}, "textAns": "300", "unit": "mL", "h": "先看量杯最高刻度 1 L，再按刻度讀水位：300 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 500, "val": 450, "top": "500 mL", "step": 50}, "textAns": "450", "unit": "mL", "h": "先看量杯最高刻度 500 mL，再按刻度讀水位：450 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 250, "val": 75, "top": "250 mL", "step": 25}, "textAns": "75", "unit": "mL", "h": "先看量杯最高刻度 250 mL，再按刻度讀水位：75 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 200, "val": 60, "top": "200 mL", "step": 20}, "textAns": "60", "unit": "mL", "h": "先看量杯最高刻度 200 mL，再按刻度讀水位：60 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 1000, "val": 950, "top": "1 L", "step": 100}, "textAns": "950", "unit": "mL", "h": "先看量杯最高刻度 1 L，再按刻度讀水位：950 mL。"}, {"t": "read", "q": "量杯中的水是多少？", "cup": {"cap": 500, "val": 100, "top": "500 mL", "step": 50}, "textAns": "100", "unit": "mL", "h": "先看量杯最高刻度 500 mL，再按刻度讀水位：100 mL。"}, {"t": "read", "q": "以下量杯共有多少水？", "cups": [{"cap": 500, "val": 300, "top": "500 mL", "step": 50}, {"cap": 500, "val": 150, "top": "500 mL", "step": 50}], "textAns": "450", "unit": "mL", "h": "300 + 150 = 450 mL。"}, {"t": "read", "q": "以下量杯共有多少水？", "cups": [{"cap": 1000, "val": 500, "top": "1 L", "step": 100}, {"cap": 500, "val": 250, "top": "500 mL", "step": 50}, {"cap": 250, "val": 100, "top": "250 mL", "step": 25}], "textAns": "850", "unit": "mL", "h": "500 + 250 + 100 = 850 mL。"}, {"t": "read", "q": "以下量杯共有多少水？", "cups": [{"cap": 1000, "val": 700, "top": "1 L", "step": 100}, {"cap": 1000, "val": 400, "top": "1 L", "step": 100}], "textAns": "1100", "unit": "mL", "h": "700 + 400 = 1100 mL。"}, {"t": "read", "q": "以下量杯共有多少水？", "cups": [{"cap": 500, "val": 450, "top": "500 mL", "step": 50}, {"cap": 250, "val": 125, "top": "250 mL", "step": 25}], "textAns": "575", "unit": "mL", "h": "450 + 125 = 575 mL。"}, {"t": "read", "q": "以下量杯共有多少水？", "cups": [{"cap": 1000, "val": 900, "top": "1 L", "step": 100}, {"cap": 500, "val": 350, "top": "500 mL", "step": 50}], "textAns": "1250", "unit": "mL", "h": "900 + 350 = 1250 mL。"}, {"t": "read", "q": "以下量杯共有多少水？", "cups": [{"cap": 200, "val": 80, "top": "200 mL", "step": 20}, {"cap": 200, "val": 160, "top": "200 mL", "step": 20}, {"cap": 200, "val": 40, "top": "200 mL", "step": 20}], "textAns": "280", "unit": "mL", "h": "80 + 160 + 40 = 280 mL。"}, {"t": "read", "q": "哪一個量杯盛水最多？請填 A / B / C。", "cups": [{"label": "A", "cap": 500, "val": 350, "top": "500 mL", "step": 50}, {"label": "B", "cap": 250, "val": 200, "top": "250 mL", "step": 25}, {"label": "C", "cap": 1000, "val": 500, "top": "1 L", "step": 100}], "textAns": "C", "h": "A=350 mL，B=200 mL，C=500 mL，所以 C 最多。"}, {"t": "read", "q": "哪一個量杯盛水最少？請填 A / B / C。", "cups": [{"label": "A", "cap": 500, "val": 100, "top": "500 mL", "step": 50}, {"label": "B", "cap": 250, "val": 150, "top": "250 mL", "step": 25}, {"label": "C", "cap": 1000, "val": 300, "top": "1 L", "step": 100}], "textAns": "A", "h": "A=100 mL，B=150 mL，C=300 mL，所以 A 最少。"}, {"t": "convert", "q": "2 L 125 mL = ____ mL", "textAns": "2125", "h": "2 L = 2000 mL；2000+125=2125。"}, {"t": "convert", "q": "7 L 68 mL = ____ mL", "textAns": "7068", "h": "7 L = 7000 mL；7000+68=7068，記得補 0。"}, {"t": "convert", "q": "9 L 5 mL = ____ mL", "textAns": "9005", "h": "9 L = 9000 mL；9000+5=9005。"}, {"t": "convert", "q": "34 L = ____ mL", "textAns": "34000", "h": "34×1000=34000。"}, {"t": "convert", "q": "5000 mL = ____ L", "textAns": "5", "h": "1000 mL = 1 L，所以 5000 mL = 5 L。"}, {"t": "convert", "q": "1 L 40 mL = ____ mL", "textAns": "1040", "h": "1000+40=1040。"}, {"t": "convert", "q": "8 L 800 mL = ____ mL", "textAns": "8800", "h": "8000+800=8800。"}, {"t": "convert", "q": "3 L 6 mL = ____ mL", "textAns": "3006", "h": "3000+6=3006，記得補 0。"}, {"t": "convert", "q": "6 L 90 mL = ____ mL", "textAns": "6090", "h": "6000+90=6090。"}, {"t": "convert", "q": "4 L 500 mL = ____ mL", "textAns": "4500", "h": "4000+500=4500。"}, {"t": "convert", "q": "12 L = ____ mL", "textAns": "12000", "h": "12×1000=12000。"}, {"t": "convert", "q": "2 L 9 mL = ____ mL", "textAns": "2009", "h": "2000+9=2009。"}, {"t": "convert", "q": "10 L 10 mL = ____ mL", "textAns": "10010", "h": "10000+10=10010。"}, {"t": "convert", "q": "2019 mL = ____ L ____ mL", "splitAns": ["2", "19"], "h": "2019=2000+19，所以是 2 L 19 mL。"}, {"t": "convert", "q": "3400 mL = ____ L ____ mL", "splitAns": ["3", "400"], "h": "3400=3000+400，所以是 3 L 400 mL。"}, {"t": "convert", "q": "1250 mL = ____ L ____ mL", "splitAns": ["1", "250"], "h": "1250=1000+250，所以是 1 L 250 mL。"}, {"t": "convert", "q": "7068 mL = ____ L ____ mL", "splitAns": ["7", "68"], "h": "7068=7000+68，所以是 7 L 68 mL。"}, {"t": "convert", "q": "9005 mL = ____ L ____ mL", "splitAns": ["9", "5"], "h": "9005=9000+5，所以是 9 L 5 mL。"}, {"t": "convert", "q": "4500 mL = ____ L ____ mL", "splitAns": ["4", "500"], "h": "4500=4000+500，所以是 4 L 500 mL。"}, {"t": "convert", "q": "8800 mL = ____ L ____ mL", "splitAns": ["8", "800"], "h": "8800=8000+800，所以是 8 L 800 mL。"}, {"t": "convert", "q": "6090 mL = ____ L ____ mL", "splitAns": ["6", "90"], "h": "6090=6000+90，所以是 6 L 90 mL。"}, {"t": "compare", "q": "滿茶壺剛好倒滿 2 個杯子；滿水壺剛好倒滿 6 個杯子。水壺比茶壺大多少個杯子的容量？", "visualCups": [["茶壺", 2], ["水壺", 6]], "textAns": "4", "unit": "", "h": "水壺=6 杯，茶壺=2 杯，6-2=4 杯。"}, {"t": "compare", "q": "滿水瓶剛好倒滿 5 個杯子。水瓶容量是 1 L，每個杯子的容量是多少 mL？", "visualCups": [["水瓶", 5]], "textAns": "200", "unit": "mL", "h": "1 L = 1000 mL；1000 ÷ 5 = 200 mL。"}, {"t": "compare", "q": "滿水壺剛好倒滿 8 個杯子，滿茶壺剛好倒滿 3 個杯子。水壺比茶壺多多少個杯子的容量？", "visualCups": [["水壺", 8], ["茶壺", 3]], "textAns": "5", "unit": "", "h": "8-3=5 杯。"}, {"t": "compare", "q": "滿壺水剛好倒滿 4 個碗。一個碗的容量是 250 mL。滿壺水有多少 mL？", "visualCups": [["水壺", 4]], "textAns": "1000", "unit": "mL", "h": "4×250=1000 mL。"}, {"t": "compare", "q": "滿盆水可倒滿 6 個小杯；滿小鍋可倒滿 2 個小杯。滿盆水是小鍋的幾倍？", "visualCups": [["盆", 6], ["小鍋", 2]], "textAns": "3", "unit": "", "h": "6÷2=3 倍。"}, {"t": "compare", "q": "A 可倒滿 4 個杯子，B 可倒滿 7 個杯子。哪個容量較大？", "opts": ["A", "B", "一樣大", "不能判斷"], "ans": "B", "h": "同一種杯子作單位，7 杯比 4 杯多，所以 B 較大。"}, {"t": "compare", "q": "容器 A 的水全部倒入容器 B，B 還有空位。哪個容器容量較大？", "opts": ["A", "B", "一樣大", "不能判斷"], "ans": "B", "h": "B 還有空位，代表 B 容量較大。"}, {"t": "compare", "q": "容器 A 的水全部倒入容器 B，剛好注滿 B。哪個容器容量較大？", "opts": ["A", "B", "一樣大", "不能判斷"], "ans": "一樣大", "h": "剛好注滿，兩個容量相等。"}, {"t": "compare", "q": "容器 A 的水全部倒入容器 B，水滿瀉。哪個容器容量較大？", "opts": ["A", "B", "一樣大", "不能判斷"], "ans": "A", "h": "B 裝不下 A 的水，代表 A 較大。"}, {"t": "compare", "q": "容器 P 盛滿水倒入 Q，Q 還有空位。以下哪項正確？", "opts": ["P 的容量較大", "Q 的容量較大", "P 和 Q 一樣大", "無法比較"], "ans": "Q 的容量較大", "h": "Q 還有空位，所以 Q>P。"}, {"t": "compare", "q": "容器 R 盛滿水倒入 P，P 剛好滿。以下哪項正確？", "opts": ["R 的容量較大", "P 的容量較大", "R 和 P 一樣大", "無法比較"], "ans": "R 和 P 一樣大", "h": "剛好滿，即 R=P。"}, {"t": "compare", "q": "容器 X 盛滿水倒入 Y，Y 水滿瀉。以下哪項正確？", "opts": ["X 的容量較大", "Y 的容量較大", "X 和 Y 一樣大", "無法比較"], "ans": "X 的容量較大", "h": "Y 裝不下 X 的水，所以 X 較大。"}, {"t": "compare", "q": "A 可盛 1 L，B 可盛 750 mL。哪個容量較大？", "opts": ["A", "B", "一樣大", "不能判斷"], "ans": "A", "h": "1 L = 1000 mL，大於 750 mL。"}, {"t": "compare", "q": "A 可盛 500 mL，B 可盛 0.5 L。哪個容量較大？", "opts": ["A", "B", "一樣大", "不能判斷"], "ans": "一樣大", "h": "0.5 L = 500 mL。"}, {"t": "compare", "q": "A 量杯有 350 mL，B 量杯有 500 mL，C 量杯有 200 mL。由少至多排列。", "order": ["C", "A", "B"], "h": "200 < 350 < 500，所以 C、A、B。"}, {"t": "compare", "q": "A 量杯有 1 L，B 量杯有 750 mL，C 量杯有 1200 mL。由多至少排列。", "order": ["C", "A", "B"], "h": "1 L=1000 mL；1200 > 1000 > 750，所以 C、A、B。"}, {"t": "compare", "q": "A 有 2 L，B 有 1800 mL，C 有 2500 mL。由少至多排列。", "order": ["B", "A", "C"], "h": "A=2000 mL，所以 1800 < 2000 < 2500。"}, {"t": "compare", "q": "A 有 600 mL，B 有 1 L，C 有 900 mL。由多至少排列。", "order": ["B", "C", "A"], "h": "1 L = 1000 mL，所以 B、C、A。"}, {"t": "tool", "q": "量度一瓶沐浴露的容量，最適合用哪種工具？", "opts": ["針筒", "2 L 量杯", "體重計", "直尺"], "ans": "2 L 量杯", "h": "沐浴露容量較大，用量杯。"}, {"t": "tool", "q": "量度一滴藥水的容量，最適合用哪種工具？", "opts": ["針筒", "水桶", "體重計", "5 L 量杯"], "ans": "針筒", "h": "一滴藥水很少，用針筒較準。"}, {"t": "tool", "q": "量度一個花瓶可盛多少水，最適合用哪種工具？", "opts": ["1 L 量杯", "直尺", "體重計", "溫度計"], "ans": "1 L 量杯", "h": "容量用量杯量度。"}, {"t": "tool", "q": "量度一個水桶容量，較適合用哪種工具？", "opts": ["5 L 量杯", "針筒", "湯匙", "直尺"], "ans": "5 L 量杯", "h": "水桶容量大，用 5 L 量杯。"}, {"t": "tool", "q": "量度一碗湯的容量，最合適用哪種工具？", "opts": ["500 mL 量杯", "體重計", "直尺", "溫度計"], "ans": "500 mL 量杯", "h": "湯碗約數百 mL。"}, {"t": "tool", "q": "量度魚缸的容量，最不適合用哪種工具？", "opts": ["針筒", "5 L 量杯", "水桶", "1 L 量杯"], "ans": "針筒", "h": "魚缸容量大，針筒太細。"}, {"t": "tool", "q": "量度一杯果汁的容量，最適合用哪種工具？", "opts": ["量杯", "直尺", "體重計", "時鐘"], "ans": "量杯", "h": "液體容量用量杯。"}, {"t": "tool", "q": "量度一瓶洗手液用了多少，最適合用哪種工具？", "opts": ["量杯", "溫度計", "間尺", "磅"], "ans": "量杯", "h": "洗手液是液體，用量杯。"}, {"t": "tool", "q": "量度一支針藥水的少量液體，最適合用哪種工具？", "opts": ["針筒", "水桶", "5 L 量杯", "體重計"], "ans": "針筒", "h": "少量液體用針筒。"}, {"t": "tool", "q": "量度一個大湯煲的容量，較適合用哪種工具？", "opts": ["5 L 量杯", "針筒", "湯匙", "尺"], "ans": "5 L 量杯", "h": "湯煲容量大，用較大的量杯。"}, {"t": "tool", "q": "量度一小匙糖漿，較適合用哪種工具？", "opts": ["針筒", "水桶", "5 L 量杯", "直尺"], "ans": "針筒", "h": "少量糖漿適合用針筒。"}, {"t": "tool", "q": "量度浴缸容量，以下哪個較適合？", "opts": ["1 L 或 5 L 量杯", "針筒", "溫度計", "體重計"], "ans": "1 L 或 5 L 量杯", "h": "浴缸容量要用量杯多次量度。"}, {"t": "word", "q": "媽媽為 18 人準備飲品，每人喝汽水一杯。汽水 A 一瓶可倒滿 4 杯，最少要買幾瓶汽水 A？", "textAns": "5", "unit": "", "h": "18÷4=4 餘 2，餘下也要多買一瓶，所以 5 瓶。"}, {"t": "word", "q": "媽媽為 18 人準備飲品，每人喝汽水一杯。汽水 B 一瓶可倒滿 5 杯，最少要買幾瓶汽水 B？", "textAns": "4", "unit": "", "h": "18÷5=3 餘 3，餘下也要多買一瓶，所以 4 瓶。"}, {"t": "word", "q": "清潔液 A 原有 500 mL，還餘 125 mL。用了多少 mL？", "textAns": "375", "unit": "mL", "h": "500-125=375 mL。"}, {"t": "word", "q": "清潔液 B 原有 5 L，還餘 3 L 600 mL。用了多少 mL？", "textAns": "1400", "unit": "mL", "h": "5 L=5000 mL；3 L 600 mL=3600 mL；5000-3600=1400 mL。"}, {"t": "word", "q": "小花水瓶有 1 L 水，喝剩 400 mL。她喝了多少 mL？", "textAns": "600", "unit": "mL", "h": "1 L=1000 mL；1000-400=600 mL。"}, {"t": "word", "q": "小強水瓶有 750 mL 水，喝剩 350 mL。他喝了多少 mL？", "textAns": "400", "unit": "mL", "h": "750-350=400 mL。"}, {"t": "word", "q": "一桶水剛好盛滿 5 L 量杯一次、2 L 量杯兩次。水桶容量是多少 L？", "textAns": "9", "unit": "L", "h": "5+2+2=9 L。"}, {"t": "word", "q": "有橙汁 1350 mL，每個杯子可盛 250 mL。把全部橙汁倒入杯中，最少需要多少個杯子？", "textAns": "6", "unit": "", "h": "1350÷250=5 餘 100，所以要 6 個杯。"}, {"t": "word", "q": "有果汁 900 mL，每個杯子可盛 200 mL。最少需要多少個杯子？", "textAns": "5", "unit": "", "h": "900÷200=4 餘 100，所以要 5 個杯。"}, {"t": "word", "q": "一壺水可倒滿 3 個小碗。一個大盆可盛滿 6 個小碗。一個大盆的容量是一壺水的幾倍？", "textAns": "2", "unit": "", "h": "6÷3=2 倍。"}, {"t": "word", "q": "一瓶果汁有 2 L，喝了 750 mL，還餘多少 mL？", "textAns": "1250", "unit": "mL", "h": "2 L=2000 mL；2000-750=1250 mL。"}, {"t": "word", "q": "一個水壺有 1 L 200 mL 水，倒出 450 mL，還餘多少 mL？", "textAns": "750", "unit": "mL", "h": "1 L 200 mL=1200 mL；1200-450=750 mL。"}, {"t": "word", "q": "三瓶水各有 500 mL，共有多少 L？", "textAns": "1.5", "unit": "L", "h": "500×3=1500 mL=1.5 L。"}, {"t": "word", "q": "四瓶果汁各有 250 mL，共有多少 mL？", "textAns": "1000", "unit": "mL", "h": "250×4=1000 mL。"}, {"t": "word", "q": "一個杯可盛 200 mL，1 L 水可倒滿多少個杯？", "textAns": "5", "unit": "", "h": "1 L=1000 mL；1000÷200=5。"}, {"t": "word", "q": "有 2 L 牛奶，每盒倒入 300 mL。最少需要多少個盒才可裝完？", "textAns": "7", "unit": "", "h": "2000÷300=6 餘 200，所以要 7 個盒。"}, {"t": "word", "q": "一瓶洗手液有 800 mL，用去 250 mL，再用去 150 mL，還餘多少 mL？", "textAns": "400", "unit": "mL", "h": "800-250-150=400 mL。"}, {"t": "word", "q": "一個大樽可盛 2 L，小樽可盛 500 mL。大樽容量是小樽的幾倍？", "textAns": "4", "unit": "", "h": "2 L=2000 mL；2000÷500=4。"}, {"t": "word", "q": "一個魚缸已有 12 L 水，再加入 8 L 水，共有多少 L？", "textAns": "20", "unit": "L", "h": "12+8=20 L。"}, {"t": "word", "q": "一個魚缸可盛 30 L 水，現有 18 L，還可加入多少 L？", "textAns": "12", "unit": "L", "h": "30-18=12 L。"}, {"t": "word", "q": "一瓶藥水有 60 mL，每次喝 5 mL，可喝多少次？", "textAns": "12", "unit": "", "h": "60÷5=12 次。"}, {"t": "word", "q": "一包飲品 250 mL，6 包共有多少 L？", "textAns": "1.5", "unit": "L", "h": "250×6=1500 mL=1.5 L。"}, {"t": "word", "q": "水壺有 900 mL 水，倒入 3 個相同杯後剛好倒完。每個杯是多少 mL？", "textAns": "300", "unit": "mL", "h": "900÷3=300 mL。"}, {"t": "word", "q": "有 3 L 水，倒入每個 400 mL 的杯子，最少需要多少個杯？", "textAns": "8", "unit": "", "h": "3000÷400=7 餘 200，所以要 8 個杯。"}];
+let mode="mixed", quiz=[], i=0, right=0, wrong=0, chosen="", wrongLog=[];
+
+function initTabs(){document.getElementById("tabs").innerHTML=CATS.map(([id,name])=>`<button class="tab ${id===mode?'active':''}" onclick="setMode('${id}')">${name}</button>`).join("");}
+function setMode(m){mode=m;initTabs();restart();}
+function pick(){let pool=mode==="mixed"?BANK:BANK.filter(x=>x.t===mode);let n=Number(document.getElementById("limit")?.value||15);return [...pool].sort(()=>Math.random()-.5).slice(0,Math.min(n,pool.length));}
+function restart(){quiz=pick();i=0;right=0;wrong=0;chosen="";wrongLog=[];render();stats();}
+function next(){if(!quiz.length)restart();else{i=(i+1)%quiz.length;chosen="";render();stats();}}
+function stats(){
+  document.getElementById("count").textContent=quiz.length?`${i+1} / ${quiz.length}`:"0 / 0";
+  document.getElementById("right").textContent=right; document.getElementById("wrong").textContent=wrong;
+  const done=right+wrong; document.getElementById("rate").textContent=done?Math.round(right/done*100)+"%":"0%";
+  document.getElementById("progress").style.width=quiz.length?((i+1)/quiz.length*100)+"%":"0%";
+  document.getElementById("wrongList").innerHTML=wrongLog.length?wrongLog.map((x,n)=>`${n+1}. ${escapeHTML(x)}`).join("<br>"):"暫時未有錯題。";
+}
+function render(){
+  const q=quiz[i]||BANK[0]; chosen="";
+  document.getElementById("qtitle").textContent=q.q;
+  document.getElementById("feedback").innerHTML="";
+  document.getElementById("hint").classList.add("hidden"); document.getElementById("hint").textContent=q.h||"先圈關鍵字，再統一單位。";
+  document.getElementById("stage").innerHTML=diagram(q);
+  document.getElementById("answer").innerHTML=answerUI(q);
+}
+function cupHTML(c){
+  const cap=c.cap,val=c.val,pct=Math.max(0,Math.min(100,val/cap*100)),divisions=10,step=c.step||(cap/divisions);
+  let scale="",ticks="";
+  for(let k=0;k<=divisions;k++){
+    const y=100-(k/divisions*100), labelVal=k*step;
+    scale += `<span class="scaleLine" style="top:${y}%"></span><span class="scaleLabel" style="top:${y}%">${labelVal}</span>`;
+    ticks += `<span class="tick" style="top:${y}%"></span>`;
+    if(k<divisions){const ym=100-((k+0.5)/divisions*100);scale+=`<span class="scaleLine small" style="top:${ym}%"></span>`;ticks+=`<span class="tick small" style="top:${ym}%"></span>`;}
+  }
+  return `<div class="cupWrap"><div class="capLabel">${c.label?escapeHTML(c.label)+"　":""}${escapeHTML(c.top||cap+" mL")}</div><div class="measureWrap"><div class="scale">${scale}</div><div class="cup"><div class="ticks">${ticks}</div><div class="water" style="height:${pct}%"></div></div></div>${c.label?`<div>${escapeHTML(c.label)}</div>`:""}</div>`;
+}
+function cups(n){return `<div class="iconGroup">${Array.from({length:n},()=>`<span class="cupIcon"></span>`).join("")}</div>`}
+function diagram(q){
+  if(q.cup)return `<div class="diagram">${cupHTML(q.cup)}</div>`;
+  if(q.cups)return `<div class="diagram cupRow">${q.cups.map(cupHTML).join("")}</div>`;
+  if(q.visualCups)return `<div class="diagram">${q.visualCups.map(([name,n],idx)=>`<div class="objectBox"><div><div class="labelCard">${escapeHTML(name)}</div><div style="font-size:20px">剛好倒滿 ${n} 個杯子</div>${cups(n)}</div></div>${idx<q.visualCups.length-1?'<div class="arrow">比較</div>':''}`).join("")}</div>`;
+  if(q.t==="convert")return `<div class="formula">1 L = 1000 mL</div><div class="small" style="text-align:center">記得補零：例如 2 L 19 mL = 2019 mL。</div>`;
+  if(q.t==="unit")return `<div class="diagram"><div class="objectBox">${escapeHTML(q.icon||"💧")}</div></div>`;
+  if(q.t==="tool")return `<div class="diagram"><div class="objectBox">💧</div><div class="arrow">用咩量度？</div><div class="objectBox">💉 / 量杯 / 水桶</div></div>`;
+  if(q.t==="compare")return `<div class="diagram"><div class="objectBox">容器 A</div><div class="arrow">倒水</div><div class="objectBox">容器 B</div></div>`;
+  return `<div class="diagram"><div class="objectBox">💧</div><div class="arrow">容量</div><div class="objectBox">🥤</div></div>`;
+}
+function answerUI(q){
+  if(q.opts)return `<div class="choiceGrid">${q.opts.map(o=>`<button class="choice" onclick="choose(this,'${jsAttr(o)}')">${escapeHTML(o)}</button>`).join("")}</div>`;
+  if(q.order)return `答案：<input id="a1" placeholder="第1個"><input id="a2" placeholder="第2個"><input id="a3" placeholder="第3個">`;
+  if(q.splitAns)return `答案：<input id="s1" placeholder="L"> L　<input id="s2" placeholder="mL"> mL`;
+  return `答案：<input id="textAns" placeholder="輸入答案"> ${q.unit?`<b>${escapeHTML(q.unit)}</b>`:""}`;
+}
+function choose(el,val){chosen=val;document.querySelectorAll(".choice").forEach(x=>x.classList.remove("sel"));el.classList.add("sel");}
+function norm(x){return String(x||"").trim().replace(/\s/g,"").replace(/[，。]/g,"").toUpperCase();}
+function numNorm(x){return norm(x).replace("１","1").replace("２","2").replace("３","3").replace("４","4").replace("５","5").replace("６","6").replace("７","7").replace("８","8").replace("９","9").replace("０","0");}
+function check(){
+  const q=quiz[i];let ok=false;
+  if(q.opts)ok=norm(chosen)===norm(q.ans);
+  else if(q.order){const arr=[1,2,3].map(n=>norm(document.getElementById("a"+n)?.value)).filter(Boolean);ok=JSON.stringify(arr)===JSON.stringify(q.order.map(norm));}
+  else if(q.splitAns)ok=numNorm(document.getElementById("s1")?.value)===numNorm(q.splitAns[0])&&numNorm(document.getElementById("s2")?.value)===numNorm(q.splitAns[1]);
+  else ok=numNorm(document.getElementById("textAns")?.value)===numNorm(q.textAns);
+  markChoices(q);
+  if(ok){right++;document.getElementById("feedback").innerHTML=`<div class="feedback okText">✅ 答對！</div>`;}
+  else{wrong++;wrongLog.push(q.q+"　答案："+correctText(q));document.getElementById("feedback").innerHTML=`<div class="feedback badText">❌ 未啱，先睇清楚問咩，再統一單位。</div>`;hint();}
+  stats();
+}
+function markChoices(q){if(!q.opts)return;document.querySelectorAll(".choice").forEach(el=>{if(norm(el.textContent)===norm(q.ans))el.classList.add("ok");else if(el.classList.contains("sel"))el.classList.add("no");});}
+function correctText(q){if(q.opts)return q.ans;if(q.order)return q.order.join("，");if(q.splitAns)return q.splitAns[0]+" L "+q.splitAns[1]+" mL";return q.textAns+(q.unit?" "+q.unit:"");}
+function hint(){document.getElementById("hint").classList.remove("hidden");}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function jsAttr(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
+function runSelfCheck(){
+  const errors=[];
+  BANK.forEach((q,idx)=>{
+    if(!q.t||!q.q)errors.push(idx+": 缺少類別或題目");
+    if(q.opts && !q.opts.includes(q.ans))errors.push(idx+": 選擇題答案不在選項內");
+    if(!q.opts && !q.textAns && !q.splitAns && !q.order)errors.push(idx+": 沒有答案欄位");
+    if(q.splitAns && q.splitAns.length!==2)errors.push(idx+": 換算題答案格式錯");
+    if(q.cup && !(q.cup.val<=q.cup.cap))errors.push(idx+": 量杯水位大於容量");
+    if(q.cups)q.cups.forEach((c,j)=>{if(c.val>c.cap)errors.push(idx+": 第"+j+"個量杯水位大於容量");});
+  });
+  document.getElementById("feedback").innerHTML = errors.length
+    ? `<div class="feedback badText">⚠️ 題庫檢查發現：<br>${errors.map(escapeHTML).join("<br>")}</div>`
+    : `<div class="feedback okText">✅ 題庫結構檢查通過：共 ${BANK.length} 題。</div>`;
+}
+initTabs();restart();
+</script>
+</body>
+</html>
