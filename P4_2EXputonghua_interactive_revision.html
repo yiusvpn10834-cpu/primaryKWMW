@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rosita 普通話筆試互動溫習</title>
+  <style>
+    :root{
+      --blue:#86c8ff;
+      --deep:#2e77b8;
+      --pink:#ff8fc3;
+      --yellow:#fff4b8;
+      --mint:#c9f3e6;
+      --paper:#fffdf7;
+      --ink:#243447;
+      --soft:#eef8ff;
+      --wrong:#ff6685;
+      --ok:#33b37a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, #ffffff 0 14px, transparent 15px),
+        radial-gradient(circle at 85% 18%, #ffffff 0 18px, transparent 19px),
+        linear-gradient(135deg,#eaf7ff 0%,#fff7fb 52%,#f3fbff 100%);
+      min-height:100vh;
+    }
+    .wrap{max-width:1060px;margin:0 auto;padding:22px}
+    .hero{
+      position:relative;
+      border:4px solid #b9e3ff;
+      border-radius:32px;
+      background:rgba(255,255,255,.88);
+      box-shadow:0 12px 36px rgba(69,130,180,.16);
+      padding:22px 22px 18px;
+      overflow:hidden;
+    }
+    .hero:before,.hero:after{
+      content:"☁️  ✦  ☁️  ♡  ✦  ☁️";
+      position:absolute;
+      color:#9bcfff;
+      opacity:.75;
+      font-size:28px;
+      letter-spacing:10px;
+      white-space:nowrap;
+    }
+    .hero:before{top:4px;left:22px}
+    .hero:after{bottom:2px;right:20px}
+    h1{
+      margin:10px 0 6px;
+      text-align:center;
+      color:var(--deep);
+      font-size:clamp(28px,5vw,46px);
+      letter-spacing:1px;
+      line-height:1.15;
+    }
+    .sub{
+      text-align:center;
+      color:#467eac;
+      font-size:18px;
+      font-weight:800;
+      margin-bottom:16px;
+    }
+    .mascot{
+      text-align:center;
+      font-size:46px;
+      line-height:1;
+      margin-top:-2px;
+    }
+    .cloud-card{
+      background:rgba(255,255,255,.94);
+      border:2px dashed #b8ddff;
+      border-radius:26px;
+      padding:16px;
+      margin-top:18px;
+      box-shadow:0 8px 24px rgba(100,170,220,.12);
+    }
+    .controls{
+      display:grid;
+      grid-template-columns: repeat(4,minmax(150px,1fr));
+      gap:12px;
+      align-items:end;
+    }
+    label{display:block;font-size:14px;font-weight:900;color:#3d6f9d;margin-bottom:6px}
+    select, input[type=text]{
+      width:100%;
+      border:2px solid #b8ddff;
+      border-radius:16px;
+      padding:13px 14px;
+      font-size:18px;
+      outline:none;
+      background:white;
+      color:var(--ink);
+    }
+    select:focus,input[type=text]:focus{border-color:#5db3f5;box-shadow:0 0 0 4px rgba(111,190,255,.18)}
+    button{
+      border:none;
+      border-radius:18px;
+      padding:13px 18px;
+      font-size:18px;
+      font-weight:900;
+      cursor:pointer;
+      color:#fff;
+      background:linear-gradient(135deg,#62b9ff,#7b8cff);
+      box-shadow:0 7px 0 #4e91c7;
+      transition:transform .05s ease, box-shadow .05s ease, filter .15s;
+    }
+    button:hover{filter:brightness(1.03)}
+    button:active{transform:translateY(4px);box-shadow:0 3px 0 #4e91c7}
+    button.secondary{background:linear-gradient(135deg,#ff9eca,#ff82b6);box-shadow:0 7px 0 #d96b99}
+    button.soft{background:linear-gradient(135deg,#7fdcbf,#49b58f);box-shadow:0 7px 0 #3a9978}
+    button.ghost{
+      background:#fff;
+      color:var(--deep);
+      border:2px solid #b8ddff;
+      box-shadow:none;
+    }
+    button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.3)}
+    .quiz{
+      display:none;
+      margin-top:18px;
+      padding:22px;
+      border-radius:28px;
+      background:rgba(255,255,255,.96);
+      border:3px solid #cbeaff;
+      box-shadow:0 12px 32px rgba(69,130,180,.14);
+    }
+    .topline{
+      display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 13px;border-radius:999px;background:#eef8ff;border:1.8px solid #b8ddff;
+      color:#316f9e;font-weight:900;
+    }
+    .bar{
+      height:14px;background:#e5f4ff;border-radius:999px;overflow:hidden;flex:1;min-width:160px;border:1px solid #c6e8ff;
+    }
+    .bar > div{height:100%;background:linear-gradient(90deg,#7bc6ff,#ff9eca);width:0%}
+    .mode-title{
+      font-size:20px;
+      font-weight:1000;
+      color:#ff6da8;
+      margin:6px 0 10px;
+    }
+    .question-box{
+      text-align:center;
+      padding:28px 18px;
+      border-radius:26px;
+      background:
+        radial-gradient(circle at 14% 14%,rgba(255,244,184,.55) 0 42px,transparent 43px),
+        radial-gradient(circle at 90% 72%,rgba(204,242,255,.65) 0 48px,transparent 49px),
+        #fffdfa;
+      border:2px dashed #d3eaff;
+      min-height:170px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:8px;
+    }
+    .big{
+      font-size:clamp(36px,7vw,70px);
+      font-weight:900;
+      letter-spacing:2px;
+      color:#24425d;
+      line-height:1.25;
+    }
+    .pinyin-big{
+      font-size:clamp(32px,6vw,60px);
+      font-weight:900;
+      color:#1f6eaa;
+      line-height:1.35;
+      word-break:break-word;
+    }
+    .hint{
+      font-size:16px;
+      color:#5f7891;
+      font-weight:700;
+    }
+    .answer-area{margin-top:16px;display:grid;grid-template-columns:1fr auto;gap:12px}
+    .feedback{
+      min-height:64px;
+      padding:14px;
+      margin-top:14px;
+      border-radius:18px;
+      font-size:18px;
+      font-weight:900;
+      display:none;
+    }
+    .feedback.ok{display:block;background:#edfff7;color:#14744e;border:2px solid #94e8c8}
+    .feedback.no{display:block;background:#fff0f4;color:#ae2448;border:2px solid #ffc0d1}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .tone-wrap{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:8px}
+    .tone-syl{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:16px;background:#f5fbff;border:1.8px solid #b8ddff;
+      font-size:26px;font-weight:900;color:#285980;
+    }
+    .tone-syl select{width:84px;font-size:16px;padding:8px}
+    .summary{
+      display:none;
+      padding:22px;
+      border-radius:28px;
+      background:rgba(255,255,255,.96);
+      border:3px solid #ffd0e5;
+      margin-top:18px;
+      box-shadow:0 12px 32px rgba(180,69,130,.12);
+    }
+    .score{
+      font-size:clamp(34px,6vw,58px);
+      font-weight:1000;text-align:center;color:#ff6da8;margin:10px 0;
+    }
+    .wrong-list{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px;
+    }
+    .wrong-item{
+      padding:12px;border-radius:16px;background:#f7fbff;border:1.7px solid #cbeaff;
+      font-weight:800;
+    }
+    .tips{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:18px;
+    }
+    .tip{
+      padding:14px;border-radius:22px;background:rgba(255,255,255,.9);border:2px solid #cbeaff;
+    }
+    .tip h3{margin:0 0 8px;color:#2e77b8}
+    .tip p{margin:5px 0;line-height:1.65;font-weight:700}
+    details{
+      margin-top:18px;background:rgba(255,255,255,.95);border:2px solid #cbeaff;border-radius:24px;padding:12px 16px;
+    }
+    summary{font-size:20px;font-weight:1000;color:#2e77b8;cursor:pointer}
+    .search-row{margin:12px 0}
+    table{width:100%;border-collapse:separate;border-spacing:0;font-size:16px;overflow:hidden;border-radius:18px}
+    th,td{padding:10px;border-bottom:1px solid #d9efff;text-align:left}
+    th{background:#eaf7ff;color:#2e77b8}
+    tr:nth-child(even) td{background:#fbfdff}
+    .cat-tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#fff1ba;color:#8b6b00;font-weight:900;font-size:13px}
+    .footer-note{text-align:center;color:#6a7e91;margin:18px 0 6px;font-weight:700}
+    @media(max-width:760px){
+      .controls{grid-template-columns:1fr}
+      .answer-area{grid-template-columns:1fr}
+      .hero{padding:18px 12px}
+      .quiz{padding:16px}
+      .big{font-size:42px}
+      .pinyin-big{font-size:38px}
+    }
+    @media print{
+      body{background:white}
+      .controls,.actions,.answer-area,details,.footer-note{display:none!important}
+      .hero,.quiz,.summary{box-shadow:none;border-color:#9ccff5}
+      .quiz,.summary{display:block}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="mascot">☁️🐶🎀</div>
+      <h1>Rosita 普通話筆試互動溫習</h1>
+      <div class="sub">拼音寫文字｜文字寫拼音｜文字填聲調</div>
+
+      <div class="cloud-card">
+        <div class="controls">
+          <div>
+            <label for="category">題庫範圍</label>
+            <select id="category"></select>
+          </div>
+          <div>
+            <label for="mode">練習模式</label>
+            <select id="mode">
+              <option value="mixed">混合模式</option>
+              <option value="py2zh">拼音 → 寫文字</option>
+              <option value="zh2py">文字 → 寫拼音</option>
+              <option value="tone">文字/無聲調拼音 → 填聲調</option>
+            </select>
+          </div>
+          <div>
+            <label for="amount">題數</label>
+            <select id="amount">
+              <option value="10">10 題快測</option>
+              <option value="20" selected>20 題練習</option>
+              <option value="999">全題庫</option>
+            </select>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="startBtn">開始溫習 ✨</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quiz" id="quiz">
+      <div class="topline">
+        <span class="pill" id="qCount">第 1 題</span>
+        <div class="bar"><div id="progress"></div></div>
+        <span class="pill" id="scorePill">得分 0</span>
+      </div>
+
+      <div class="mode-title" id="modeTitle"></div>
+      <div class="question-box" id="questionBox"></div>
+
+      <div class="answer-area" id="answerArea">
+        <input id="answerInput" type="text" autocomplete="off" placeholder="請在這裡作答"/>
+        <button id="checkBtn">檢查答案</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="actions">
+        <button id="nextBtn" class="soft" disabled>下一題 ➜</button>
+        <button id="showBtn" class="secondary">顯示答案</button>
+        <button id="stopBtn" class="ghost">結束並看成績</button>
+      </div>
+    </section>
+
+    <section class="summary" id="summary">
+      <h2 style="text-align:center;color:#2e77b8;margin:0;">完成啦！</h2>
+      <div class="score" id="finalScore"></div>
+      <div id="finalMsg" class="sub"></div>
+      <div class="actions" style="justify-content:center">
+        <button id="redoWrongBtn" class="secondary">錯題重做</button>
+        <button id="restartBtn">再做一次</button>
+        <button class="ghost" onclick="window.print()">列印結果</button>
+      </div>
+      <div id="wrongWrap"></div>
+    </section>
+
+    <section class="tips">
+      <div class="tip">
+        <h3>🌟 筆試技巧</h3>
+        <p>見拼音寫字：先讀出聲，再想詞語類別。</p>
+        <p>見文字寫拼音：可以用數字聲調，例如 <b>pu3 er3</b>。</p>
+      </div>
+      <div class="tip">
+        <h3>🎵 聲調標法</h3>
+        <p>有 <b>a</b> 先標 a；冇 a 搵 <b>o / e</b>。</p>
+        <p><b>iu / ui</b> 標後面：liú、shuǐ。</p>
+      </div>
+      <div class="tip">
+        <h3>☁️ 易錯位</h3>
+        <p><b>渴 kě</b> ≠ <b>喝 hē</b></p>
+        <p>兒化音：春卷兒、包圓兒、事兒、有空兒。</p>
+      </div>
+    </section>
+
+    <details>
+      <summary>打開完整詞語庫 / 搜尋詞語</summary>
+      <div class="search-row"><input id="searchBox" type="text" placeholder="搜尋中文、拼音或類別，例如：蝦餃 / xia / 禮貌"/></div>
+      <div style="overflow:auto">
+        <table id="wordTable">
+          <thead><tr><th>類別</th><th>詞語</th><th>拼音</th><th>無聲調拼音</th><th>聲調</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+
+    <div class="footer-note">建議每日 10 題：先做「拼音 → 寫文字」，再做「文字 → 寫拼音」，最後做「填聲調」。</div>
+  </div>
+
+<script>
+const WORDS = [
+  {
+    "cat": "飲茶點心",
+    "zh": "普洱",
+    "py": "pǔ ěr"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "叉燒包",
+    "py": "chā shāo bāo"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "腸粉",
+    "py": "cháng fěn"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "蘿蔔糕",
+    "py": "luó bo gāo"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "蝦餃",
+    "py": "xiā jiǎo"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "燒賣",
+    "py": "shāo mài"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "排骨",
+    "py": "pái gǔ"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "春卷兒",
+    "py": "chūn juǎnr"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "包圓兒",
+    "py": "bāo yuánr"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "叉燒酥",
+    "py": "chā shāo sū"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "潮州粉果",
+    "py": "cháo zhōu fěn guǒ"
+  },
+  {
+    "cat": "飲茶點心",
+    "zh": "奶皇包",
+    "py": "nǎi huáng bāo"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "視藝班",
+    "py": "shì yì bān"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "鋼琴",
+    "py": "gāng qín"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "歌詠團",
+    "py": "gē yǒng tuán"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "湊巧",
+    "py": "còu qiǎo"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "童軍",
+    "py": "tóng jūn"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "花式跳繩組",
+    "py": "huā shì tiào shéng zǔ"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "鍛鍊",
+    "py": "duàn liàn"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "總算",
+    "py": "zǒng suàn"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "課外活動",
+    "py": "kè wài huó dòng"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "奧數班",
+    "py": "ào shù bān"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "園藝班",
+    "py": "yuán yì bān"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "電腦編程班",
+    "py": "diàn nǎo biān chéng bān"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "話劇組",
+    "py": "huà jù zǔ"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "小提琴課",
+    "py": "xiǎo tí qín kè"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "有時間",
+    "py": "yǒu shí jiān"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "有空兒",
+    "py": "yǒu kòngr"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "趕巧",
+    "py": "gǎn qiǎo"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "碰巧",
+    "py": "pèng qiǎo"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "真巧哇",
+    "py": "zhēn qiǎo wa"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "乒乓球",
+    "py": "pīng pāng qiú"
+  },
+  {
+    "cat": "課外活動",
+    "zh": "吉他",
+    "py": "jí tā"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "擔心",
+    "py": "dān xīn"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "頭痛",
+    "py": "tóu tòng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "頭疼",
+    "py": "tóu téng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "喉嚨",
+    "py": "hóu lóng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "嗓子",
+    "py": "sǎng zi"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "操勞",
+    "py": "cāo láo"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "渴",
+    "py": "kě"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "口渴",
+    "py": "kǒu kě"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "喝",
+    "py": "hē"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "白開水",
+    "py": "bái kāi shuǐ"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "開水",
+    "py": "kāi shuǐ"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "涼白開",
+    "py": "liáng bái kāi"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "看病",
+    "py": "kàn bìng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "多喝水",
+    "py": "duō hē shuǐ"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "吃清淡的食物",
+    "py": "chī qīng dàn de shí wù"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "覆診",
+    "py": "fù zhěn"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "着涼",
+    "py": "zháo liáng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "肚子疼",
+    "py": "dù zi téng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "肚子痛",
+    "py": "dù zi tòng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "拉肚子",
+    "py": "lā dù zi"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "腹瀉",
+    "py": "fù xiè"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "吐",
+    "py": "tù"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "想吐",
+    "py": "xiǎng tù"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "上吐下瀉",
+    "py": "shàng tù xià xiè"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "打噴嚏",
+    "py": "dǎ pēn tì"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "鼻子不通氣兒",
+    "py": "bí zi bù tōng qìr"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "嗓子疼",
+    "py": "sǎng zi téng"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "嗓子都啞了",
+    "py": "sǎng zi dōu yǎ le"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "臉色灰白",
+    "py": "liǎn sè huī bái"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "難受",
+    "py": "nán shòu"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "量體溫",
+    "py": "liáng tǐ wēn"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "試表",
+    "py": "shì biǎo"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "忌口",
+    "py": "jì kǒu"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "看門診",
+    "py": "kàn mén zhěn"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "急診室",
+    "py": "jí zhěn shì"
+  },
+  {
+    "cat": "看病與身體",
+    "zh": "病假條兒",
+    "py": "bìng jià tiáor"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "阿姨",
+    "py": "ā yí"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "請",
+    "py": "qǐng"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "用茶",
+    "py": "yòng chá"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "請用茶",
+    "py": "qǐng yòng chá"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "禮貌",
+    "py": "lǐ mào"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "事兒",
+    "py": "shìr"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "糕點",
+    "py": "gāo diǎn"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "招待",
+    "py": "zhāo dài"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "不好意思",
+    "py": "bù hǎo yì si"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "在家",
+    "py": "zài jiā"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "待會兒",
+    "py": "dài huìr"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "稍等",
+    "py": "shāo děng"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "泡茶",
+    "py": "pào chá"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "沏茶",
+    "py": "qī chá"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "請慢用",
+    "py": "qǐng màn yòng"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "聊聊天",
+    "py": "liáo liao tiān"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "談談天",
+    "py": "tán tan tiān"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "別見外",
+    "py": "bié jiàn wài"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "不打擾你了",
+    "py": "bù dǎ rǎo nǐ le"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "打擾了",
+    "py": "dǎ rǎo le"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "慢走",
+    "py": "màn zǒu"
+  },
+  {
+    "cat": "禮貌招待",
+    "zh": "有空兒來坐",
+    "py": "yǒu kòngr lái zuò"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "高個子",
+    "py": "gāo gè zi"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "矮個子",
+    "py": "ǎi gè zi"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "小胖子",
+    "py": "xiǎo pàng zi"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "劉海兒",
+    "py": "liú hǎir"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "扎麻花辮兒",
+    "py": "zā má huā biànr"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "鬈髮",
+    "py": "quán fà"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "平頭",
+    "py": "píng tóu"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "小四眼兒",
+    "py": "xiǎo sì yǎnr"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "酒窩兒",
+    "py": "jiǔ wōr"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "身材",
+    "py": "shēn cái"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "身材矮小",
+    "py": "shēn cái ǎi xiǎo"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "身材高大",
+    "py": "shēn cái gāo dà"
+  },
+  {
+    "cat": "外貌身形",
+    "zh": "高高的個兒",
+    "py": "gāo gāo de gèr"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "可不是",
+    "py": "kě bú shì"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "就是",
+    "py": "jiù shì"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "要不",
+    "py": "yào bù"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "要不然",
+    "py": "yào bu rán"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "不然",
+    "py": "bù rán"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "得",
+    "py": "děi"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "兩",
+    "py": "liǎng"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "倆",
+    "py": "liǎ"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "伎倆",
+    "py": "jì liǎng"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "屋",
+    "py": "wū"
+  },
+  {
+    "cat": "語言重點",
+    "zh": "房",
+    "py": "fáng"
+  }
+];
+
+const toneMap = {
+  "ā":["a","1"],"á":["a","2"],"ǎ":["a","3"],"à":["a","4"],
+  "ē":["e","1"],"é":["e","2"],"ě":["e","3"],"è":["e","4"],
+  "ī":["i","1"],"í":["i","2"],"ǐ":["i","3"],"ì":["i","4"],
+  "ō":["o","1"],"ó":["o","2"],"ǒ":["o","3"],"ò":["o","4"],
+  "ū":["u","1"],"ú":["u","2"],"ǔ":["u","3"],"ù":["u","4"],
+  "ǖ":["v","1"],"ǘ":["v","2"],"ǚ":["v","3"],"ǜ":["v","4"],
+  "ü":["v","5"]
+};
+
+function parsePinyin(str){
+  const cleaned = (str||"")
+    .toLowerCase()
+    .normalize("NFC")
+    .replace(/[，,；;、/|]+/g," ")
+    .replace(/[’']/g,"")
+    .trim();
+  if(!cleaned) return [];
+  return cleaned.split(/\s+/).map(syl=>{
+    let base="", tone="";
+    for(const ch of syl){
+      if(toneMap[ch]){
+        base += toneMap[ch][0];
+        tone = toneMap[ch][1];
+      }else if(/[1-5]/.test(ch)){
+        tone = ch;
+      }else if(/[a-zü:]/.test(ch)){
+        base += (ch==="ü" ? "v" : ch).replace("u:","v");
+      }
+    }
+    if(!tone) tone = "5";
+    return {base, tone};
+  });
+}
+
+function toneless(py){
+  return parsePinyin(py).map(x=>x.base.replace(/v/g,"ü")).join(" ");
+}
+function tones(py){
+  return parsePinyin(py).map(x=>x.tone).join("");
+}
+function normalZh(s){
+  return (s||"").replace(/\s+/g,"").replace(/[，。！？、,.!?；;：「」『』“”"']/g,"").trim();
+}
+function compareZh(input, zh){
+  return normalZh(input) === normalZh(zh);
+}
+function comparePinyin(input, expected){
+  const a = parsePinyin(input);
+  const e = parsePinyin(expected);
+  if(a.length !== e.length) return false;
+  for(let i=0;i<e.length;i++){
+    if(a[i].base !== e[i].base) return false;
+    const at = a[i].tone === "0" ? "5" : a[i].tone;
+    const et = e[i].tone === "0" ? "5" : e[i].tone;
+    if(at !== et) return false;
+  }
+  return true;
+}
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function escapeHtml(s){
+  return (s+"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+}
+
+const cats = ["全部", ...Array.from(new Set(WORDS.map(w=>w.cat)))];
+const categoryEl = document.getElementById("category");
+categoryEl.innerHTML = cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+
+let quizList = [], index = 0, score = 0, current = null, currentMode = "mixed", checked = false, wrongBank = [];
+
+const quiz = document.getElementById("quiz");
+const summary = document.getElementById("summary");
+const qCount = document.getElementById("qCount");
+const scorePill = document.getElementById("scorePill");
+const progress = document.getElementById("progress");
+const modeTitle = document.getElementById("modeTitle");
+const questionBox = document.getElementById("questionBox");
+const answerArea = document.getElementById("answerArea");
+const answerInput = document.getElementById("answerInput");
+const feedback = document.getElementById("feedback");
+const checkBtn = document.getElementById("checkBtn");
+const nextBtn = document.getElementById("nextBtn");
+const showBtn = document.getElementById("showBtn");
+
+document.getElementById("startBtn").addEventListener("click", startQuiz);
+document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+document.getElementById("showBtn").addEventListener("click", showAnswer);
+document.getElementById("stopBtn").addEventListener("click", endQuiz);
+document.getElementById("restartBtn").addEventListener("click", startQuiz);
+document.getElementById("redoWrongBtn").addEventListener("click", redoWrong);
+answerInput.addEventListener("keydown", e=>{ if(e.key==="Enter") checkAnswer(); });
+
+function selectedPool(){
+  const cat = categoryEl.value;
+  return cat === "全部" ? WORDS : WORDS.filter(w=>w.cat===cat);
+}
+function startQuiz(){
+  const amount = parseInt(document.getElementById("amount").value,10);
+  const pool = selectedPool();
+  quizList = shuffle(pool).slice(0, Math.min(amount, pool.length));
+  if(!quizList.length) return;
+  index = 0; score = 0; wrongBank = [];
+  summary.style.display = "none";
+  quiz.style.display = "block";
+  renderQuestion();
+  window.scrollTo({top: quiz.offsetTop - 12, behavior:"smooth"});
+}
+function renderQuestion(){
+  checked = false;
+  current = quizList[index];
+  currentMode = document.getElementById("mode").value;
+  if(currentMode === "mixed"){
+    const modes = ["py2zh","zh2py","tone"];
+    currentMode = modes[Math.floor(Math.random()*modes.length)];
+  }
+  qCount.textContent = `第 ${index+1} / ${quizList.length} 題`;
+  scorePill.textContent = `得分 ${score}`;
+  progress.style.width = `${(index/quizList.length)*100}%`;
+  feedback.className = "feedback";
+  feedback.style.display = "none";
+  feedback.innerHTML = "";
+  nextBtn.disabled = true;
+  checkBtn.disabled = false;
+  answerInput.value = "";
+  answerArea.style.display = "grid";
+  answerInput.style.display = "block";
+  checkBtn.style.display = "block";
+
+  if(currentMode === "py2zh"){
+    modeTitle.textContent = "拼音 → 寫文字";
+    questionBox.innerHTML = `
+      <div class="hint">請根據拼音寫出正確中文字</div>
+      <div class="pinyin-big">${escapeHtml(current.py)}</div>
+      <div class="hint">類別：${escapeHtml(current.cat)}</div>`;
+    answerInput.placeholder = "例如：普洱";
+    setTimeout(()=>answerInput.focus(),80);
+  }else if(currentMode === "zh2py"){
+    modeTitle.textContent = "文字 → 寫拼音";
+    questionBox.innerHTML = `
+      <div class="hint">請寫出普通話拼音，可用聲調符號或數字聲調</div>
+      <div class="big">${escapeHtml(current.zh)}</div>
+      <div class="hint">例：pǔ ěr 或 pu3 er3；輕聲可不加數字或填 5</div>`;
+    answerInput.placeholder = "例如：pu3 er3";
+    setTimeout(()=>answerInput.focus(),80);
+  }else{
+    modeTitle.textContent = "文字 / 無聲調拼音 → 填聲調";
+    const parts = parsePinyin(current.py);
+    questionBox.innerHTML = `
+      <div class="hint">請為每個音節選聲調</div>
+      <div class="big">${escapeHtml(current.zh)}</div>
+      <div class="tone-wrap">
+        ${parts.map((p,i)=>`
+          <label class="tone-syl">
+            <span>${escapeHtml(p.base.replace(/v/g,"ü"))}</span>
+            <select class="toneSelect" data-i="${i}">
+              <option value="">？</option>
+              <option value="1">1聲 ˉ</option>
+              <option value="2">2聲 ˊ</option>
+              <option value="3">3聲 ˇ</option>
+              <option value="4">4聲 ˋ</option>
+              <option value="5">輕聲</option>
+            </select>
+          </label>
+        `).join("")}
+      </div>
+      <div class="hint">提示：輕聲選「輕聲」，例如 zi / si / bo。</div>`;
+    answerInput.style.display = "none";
+    answerArea.style.gridTemplateColumns = "1fr";
+  }
+}
+function checkAnswer(){
+  if(checked) return;
+  let ok = false;
+  if(currentMode === "py2zh"){
+    ok = compareZh(answerInput.value, current.zh);
+  }else if(currentMode === "zh2py"){
+    ok = comparePinyin(answerInput.value, current.py);
+  }else{
+    const selected = Array.from(document.querySelectorAll(".toneSelect")).map(s=>s.value || "?").join("");
+    ok = selected === tones(current.py);
+  }
+  checked = true;
+  checkBtn.disabled = true;
+  nextBtn.disabled = false;
+  if(ok){
+    score++;
+    feedback.className = "feedback ok";
+    feedback.innerHTML = `✅ 答對！<br><b>${escapeHtml(current.zh)}</b> — ${escapeHtml(current.py)}`;
+  }else{
+    wrongBank.push({...current, mode: currentMode});
+    feedback.className = "feedback no";
+    feedback.innerHTML = `❌ 再記一次：<br><b>${escapeHtml(current.zh)}</b> — ${escapeHtml(current.py)}<br><span style="font-weight:700">無聲調：${escapeHtml(toneless(current.py))}｜聲調：${escapeHtml(tones(current.py))}</span>`;
+  }
+  feedback.style.display = "block";
+  scorePill.textContent = `得分 ${score}`;
+  progress.style.width = `${((index+1)/quizList.length)*100}%`;
+}
+function showAnswer(){
+  if(!current) return;
+  feedback.className = "feedback no";
+  feedback.innerHTML = `📌 正確答案：<br><b>${escapeHtml(current.zh)}</b> — ${escapeHtml(current.py)}<br><span style="font-weight:700">無聲調：${escapeHtml(toneless(current.py))}｜聲調：${escapeHtml(tones(current.py))}</span>`;
+  feedback.style.display = "block";
+  nextBtn.disabled = false;
+  checkBtn.disabled = true;
+  checked = true;
+}
+function nextQuestion(){
+  if(index < quizList.length-1){
+    index++;
+    renderQuestion();
+  }else{
+    endQuiz();
+  }
+}
+function endQuiz(){
+  quiz.style.display = "none";
+  summary.style.display = "block";
+  progress.style.width = "100%";
+  document.getElementById("finalScore").textContent = `${score} / ${quizList.length}`;
+  const pct = Math.round(score / quizList.length * 100);
+  document.getElementById("finalMsg").textContent = pct >= 90 ? "好叻！可以轉做混合模式挑戰。" : pct >= 70 ? "不錯！重做錯題就會更穩陣。" : "先重做錯題，再每次 10 題慢慢加強。";
+  renderWrong();
+  window.scrollTo({top: summary.offsetTop - 12, behavior:"smooth"});
+}
+function renderWrong(){
+  const wrap = document.getElementById("wrongWrap");
+  if(!wrongBank.length){
+    wrap.innerHTML = `<div class="feedback ok" style="display:block;text-align:center">🎉 今次沒有錯題！</div>`;
+    return;
+  }
+  wrap.innerHTML = `<h3 style="color:#2e77b8">錯題清單</h3>
+    <div class="wrong-list">${wrongBank.map(w=>`
+      <div class="wrong-item">
+        <span class="cat-tag">${escapeHtml(w.cat)}</span><br>
+        <b>${escapeHtml(w.zh)}</b><br>
+        ${escapeHtml(w.py)}<br>
+        <small>無聲調：${escapeHtml(toneless(w.py))}｜聲調：${escapeHtml(tones(w.py))}</small>
+      </div>`).join("")}</div>`;
+}
+function redoWrong(){
+  if(!wrongBank.length){
+    alert("今次沒有錯題，可以再開新一輪練習！");
+    return;
+  }
+  quizList = shuffle(wrongBank);
+  index = 0; score = 0;
+  wrongBank = [];
+  summary.style.display = "none";
+  quiz.style.display = "block";
+  renderQuestion();
+}
+function renderTable(){
+  const tbody = document.querySelector("#wordTable tbody");
+  const kw = (document.getElementById("searchBox")?.value || "").toLowerCase().trim();
+  const rows = WORDS.filter(w=>{
+    const blob = `${w.cat} ${w.zh} ${w.py} ${toneless(w.py)} ${tones(w.py)}`.toLowerCase();
+    return !kw || blob.includes(kw);
+  }).map(w=>`<tr>
+    <td><span class="cat-tag">${escapeHtml(w.cat)}</span></td>
+    <td><b>${escapeHtml(w.zh)}</b></td>
+    <td>${escapeHtml(w.py)}</td>
+    <td>${escapeHtml(toneless(w.py))}</td>
+    <td>${escapeHtml(tones(w.py))}</td>
+  </tr>`).join("");
+  tbody.innerHTML = rows;
+}
+document.getElementById("searchBox").addEventListener("input", renderTable);
+renderTable();
+</script>
+</body>
+</html>
