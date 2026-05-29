@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>小小菜園點點闖關｜K2-小二 iPad Game</title>
+<style>
+  :root{
+    --deep:#235238;
+    --green:#51b85f;
+    --lime:#dcf8d5;
+    --sky:#c9f3ff;
+    --cream:#fff8df;
+    --gold:#f6ad3f;
+    --red:#ea6969;
+    --blue:#61a9ff;
+    --purple:#9a7bf1;
+    --white:#fffdf5;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+  body{
+    font-family:"Arial Rounded MT Bold","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    color:var(--deep);
+    background:
+      radial-gradient(circle at 12% 11%, #fff 0 42px, transparent 44px),
+      radial-gradient(circle at 82% 15%, #fff9 0 36px, transparent 38px),
+      linear-gradient(180deg,#bdefff 0%,#f2fdff 32%,#fff1be 58%,#ddf7d7 100%);
+    user-select:none;
+    touch-action:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:12px;
+  }
+  .app{
+    width:min(1180px,100%);
+    height:min(820px,100%);
+    min-height:650px;
+    background:#fffdf4ed;
+    border:5px solid white;
+    border-radius:30px;
+    box-shadow:0 20px 55px #1c673733;
+    overflow:hidden;
+    display:grid;
+    grid-template-rows:auto 1fr;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 16px;
+    background:linear-gradient(90deg,#ffe8a7,#e4ffd7,#d9f4ff);
+    border-bottom:4px dashed #a9d99e;
+  }
+  h1{
+    margin:0;
+    font-size:clamp(24px,4vw,42px);
+    letter-spacing:.03em;
+    line-height:1.1;
+  }
+  .subtitle{
+    margin-top:4px;
+    font-size:clamp(13px,1.9vw,17px);
+    font-weight:850;
+    opacity:.74;
+  }
+  .main{
+    min-height:0;
+    display:grid;
+    grid-template-columns:1fr 300px;
+    gap:12px;
+    padding:12px;
+  }
+  @media(max-width:900px){
+    body{padding:8px}
+    .app{height:100%;min-height:0}
+    .main{grid-template-columns:1fr}
+    .side{display:none}
+  }
+  .gamePanel{
+    min-width:0;
+    min-height:0;
+    background:#fff;
+    border:4px solid #bde8b4;
+    border-radius:26px;
+    padding:10px;
+    display:grid;
+    grid-template-rows:auto auto 1fr auto;
+  }
+  .hud{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .pill{
+    min-height:58px;
+    border-radius:18px;
+    border:3px solid #c7ecc1;
+    background:#f6fff2;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    font-weight:950;
+    font-size:clamp(18px,2.8vw,29px);
+    text-align:center;
+    padding:5px;
+  }
+  .pill small{
+    display:block;
+    font-size:12px;
+    opacity:.62;
+    margin-bottom:2px;
+  }
+  .taskBar{
+    min-height:62px;
+    border-radius:20px;
+    border:4px solid #ffe08d;
+    background:#fff8d8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    text-align:center;
+    font-size:clamp(20px,3vw,34px);
+    font-weight:950;
+    padding:8px 10px;
+    margin-bottom:8px;
+  }
+  .taskIcon{
+    font-size:clamp(34px,5vw,56px);
+    line-height:1;
+  }
+  .playArea{
+    position:relative;
+    min-height:0;
+    overflow:hidden;
+    border:4px solid #86c878;
+    border-radius:24px;
+    background:
+      radial-gradient(circle at 20% 18%, #fff8 0 44px, transparent 47px),
+      linear-gradient(180deg,#c8f1ff 0%,#f1ffe4 55%,#79cc6c 56%,#6fc162 100%);
+  }
+  .sun{
+    position:absolute;
+    top:24px;
+    left:30px;
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#ffe37d;
+    box-shadow:0 0 0 12px #ffe37d55;
+  }
+  .row{
+    position:absolute;
+    left:-30px;
+    right:-30px;
+    height:80px;
+    bottom:0;
+    background:repeating-linear-gradient(115deg,#5baa4e 0 18px,#78cc67 18px 48px);
+    border-top:4px solid #4d9c45;
+  }
+  .item{
+    position:absolute;
+    width:98px;
+    height:98px;
+    border-radius:50%;
+    border:5px solid white;
+    background:#ffffffeb;
+    box-shadow:0 8px 0 #00000013, 0 9px 20px #2352382b;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:62px;
+    cursor:pointer;
+    transform:translate(-50%,-50%) scale(1);
+    animation:popIn .22s ease-out;
+  }
+  .item:active{transform:translate(-50%,-50%) scale(.92)}
+  .item.good{background:#f3fff0}
+  .item.pest{background:#fff5ee}
+  .item.friend{background:#f4fbff}
+  @keyframes popIn{
+    from{transform:translate(-50%,-50%) scale(.3);opacity:0}
+    to{transform:translate(-50%,-50%) scale(1);opacity:1}
+  }
+  .floatText{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    font-size:38px;
+    font-weight:950;
+    pointer-events:none;
+    animation:floatUp .8s ease-out forwards;
+    text-shadow:0 3px 0 white;
+  }
+  @keyframes floatUp{
+    to{transform:translate(-50%,-145%);opacity:0}
+  }
+  .toast{
+    min-height:42px;
+    margin-top:8px;
+    border-radius:18px;
+    border:3px solid #ffe08d;
+    background:#fff9dc;
+    font-size:clamp(17px,2.4vw,24px);
+    font-weight:950;
+    text-align:center;
+    padding:7px 12px;
+  }
+  .bottomControls{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-top:8px;
+  }
+  button{
+    border:0;
+    border-radius:18px;
+    padding:12px 14px;
+    min-height:52px;
+    color:white;
+    background:var(--green);
+    box-shadow:0 6px 0 #2e8438;
+    font-size:clamp(16px,2.4vw,22px);
+    font-weight:950;
+    cursor:pointer;
+  }
+  button:active{transform:translateY(4px);box-shadow:0 2px 0 #2e8438}
+  button.orange{background:var(--gold);box-shadow:0 6px 0 #b66c16}
+  button.blue{background:var(--blue);box-shadow:0 6px 0 #286fc2}
+  button.red{background:var(--red);box-shadow:0 6px 0 #aa3c3c}
+  button.purple{background:var(--purple);box-shadow:0 6px 0 #664bb2}
+  button:disabled{filter:grayscale(.8);opacity:.55}
+  .side{
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card{
+    background:#fffffff0;
+    border:4px solid #d3efca;
+    border-radius:24px;
+    padding:13px;
+    box-shadow:0 10px 20px #1e6d3a15;
+  }
+  .card h2{
+    margin:0 0 8px;
+    font-size:22px;
+  }
+  .rules{
+    font-size:15.5px;
+    line-height:1.58;
+    font-weight:780;
+  }
+  .rules p{margin:7px 0}
+  .leaderboard{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .leaderboard li{
+    display:grid;
+    grid-template-columns:30px 1fr 58px;
+    align-items:center;
+    gap:7px;
+    background:#fffdf0;
+    border:3px solid #ffe2a1;
+    border-radius:15px;
+    padding:7px;
+    font-weight:950;
+    font-size:14px;
+  }
+  .leaderboard small{
+    display:block;
+    font-size:11px;
+    opacity:.62;
+    font-weight:800;
+  }
+  .overlay{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    background:#103f2299;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
+  .modal{
+    width:min(650px,100%);
+    background:#fffdf2;
+    border:6px solid white;
+    border-radius:34px;
+    padding:24px;
+    text-align:center;
+    box-shadow:0 24px 70px #0006;
+  }
+  .modal h2{
+    margin:0 0 8px;
+    font-size:clamp(31px,6vw,54px);
+  }
+  .modal p{
+    margin:8px 0;
+    font-size:clamp(17px,2.8vw,23px);
+    line-height:1.55;
+    font-weight:880;
+  }
+  input{
+    display:block;
+    width:min(440px,100%);
+    margin:10px auto 13px;
+    border:4px solid #bde9b4;
+    border-radius:20px;
+    padding:14px 18px;
+    font-size:clamp(22px,4vw,34px);
+    font-weight:950;
+    text-align:center;
+    color:var(--deep);
+    outline:none;
+    background:#fff;
+  }
+  .choice{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:12px 0;
+  }
+  .choice button{
+    color:#245238;
+    background:#f7fff2;
+    border:4px solid #bde9b4;
+    box-shadow:none;
+    min-height:76px;
+  }
+  .choice button.selected{
+    background:#ffe69b;
+    border-color:#f2a936;
+  }
+  .hidden{display:none!important}
+  .tiny{
+    font-size:13px;
+    line-height:1.45;
+    opacity:.72;
+    font-weight:780;
+    margin-top:7px;
+  }
+  .msg{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:#ffffff8a;
+    padding:20px;
+  }
+  .msgBox{
+    background:#fffdf2;
+    border:6px solid white;
+    outline:5px solid #86c878;
+    border-radius:32px;
+    padding:24px 38px;
+    min-width:min(620px,86%);
+    box-shadow:0 15px 45px #24523833;
+  }
+  .msgBox h2{
+    margin:0 0 12px;
+    font-size:clamp(36px,6vw,66px);
+  }
+  .msgBox p{
+    margin:6px 0;
+    font-size:clamp(24px,4vw,38px);
+    font-weight:950;
+    line-height:1.45;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>🌱 小小菜園點點闖關</h1>
+      <div class="subtitle">開放日 iPad 版｜大圖案｜直接點選｜K2 至小二都啱玩</div>
+    </div>
+    <button class="orange" id="openStart">開始</button>
+  </header>
+
+  <main class="main">
+    <section class="gamePanel">
+      <div class="hud">
+        <div class="pill"><small>回合</small><span id="roundText">準備</span></div>
+        <div class="pill"><small>時間</small><span><b id="timeText">25</b>s</span></div>
+        <div class="pill"><small>分數</small><span id="scoreText">0</span></div>
+        <div class="pill"><small>星星</small><span id="starText">0 ⭐</span></div>
+      </div>
+
+      <div class="taskBar">
+        <span class="taskIcon" id="taskIcon">🌻</span>
+        <span id="taskText">輸入名字後開始！</span>
+      </div>
+
+      <div class="playArea" id="playArea">
+        <div class="sun"></div>
+        <div class="row"></div>
+        <div class="msg" id="introMsg">
+          <div class="msgBox">
+            <h2>準備開始！</h2>
+            <p>看清任務，再點圖案</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast">玩法：慢慢睇清楚，只點任務要求的圖案！</div>
+
+      <div class="bottomControls">
+        <button id="restartBtn">重新開始</button>
+        <button class="orange" id="nextBtn" disabled>下一回合</button>
+        <button class="blue" id="fullscreenBtn">全螢幕</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="card rules">
+        <h2>🎮 新遊戲模式</h2>
+        <p><b>第 1 回合：收成點點樂</b><br>只點蔬果：🌽 🍉 🥒 🥕<br>不要點小蟲或好朋友。</p>
+        <p><b>第 2 回合：害蟲點點樂</b><br>只點害蟲：🐛 🪲 🐌<br>不要點蔬果或好朋友。</p>
+        <p><b>更適合 K2-小二：</b><br>不用拖、不用射擊，只需看任務再點；新版已調慢，適合 K2 小朋友慢慢玩。</p>
+      </div>
+
+      <div class="card">
+        <h2>🏆 排行榜</h2>
+        <ol class="leaderboard" id="leaderboard"></ol>
+        <button class="red" id="clearBtn" style="width:100%;margin-top:10px">清除排行榜</button>
+        <div class="tiny">排行榜儲存在這部 iPad 的瀏覽器。</div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>🌻 歡迎來到菜園！</h2>
+    <p>請輸入玩家名字：</p>
+    <input id="nameInput" maxlength="12" placeholder="例如：Smart / Maggie" autocomplete="off" />
+
+    <p>選擇難度：</p>
+    <div class="choice">
+      <button id="easyMode" class="selected">K2 / K3<br>輕鬆版</button>
+      <button id="normalMode">小一 / 小二<br>挑戰版</button>
+    </div>
+
+    <button class="orange" id="playBtn" style="width:min(430px,100%)">開始第 1 回合</button>
+    <div class="tiny">建議 iPad 橫向玩。老師／家長可按「全螢幕」變成攤位遊戲感覺。</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const playArea = document.getElementById("playArea");
+  const introMsg = document.getElementById("introMsg");
+  const overlay = document.getElementById("overlay");
+  const nameInput = document.getElementById("nameInput");
+
+  const roundText = document.getElementById("roundText");
+  const timeText = document.getElementById("timeText");
+  const scoreText = document.getElementById("scoreText");
+  const starText = document.getElementById("starText");
+  const taskIcon = document.getElementById("taskIcon");
+  const taskText = document.getElementById("taskText");
+  const toast = document.getElementById("toast");
+  const nextBtn = document.getElementById("nextBtn");
+  const leaderboard = document.getElementById("leaderboard");
+
+  const STORAGE = "garden_tap_challenge_open_day_v2";
+
+  const crops = [
+    {emoji:"🌽", name:"粟米", type:"crop"},
+    {emoji:"🍉", name:"西瓜", type:"crop"},
+    {emoji:"🥒", name:"青瓜", type:"crop"},
+    {emoji:"🥕", name:"甘筍", type:"crop"}
+  ];
+  const pests = [
+    {emoji:"🐛", name:"青蟲", type:"pest"},
+    {emoji:"🪲", name:"芽蟲", type:"pest"},
+    {emoji:"🐌", name:"蝸牛", type:"pest"}
+  ];
+  const friends = [
+    {emoji:"🐞", name:"瓢蟲", type:"friend"},
+    {emoji:"🦋", name:"蝴蝶", type:"friend"},
+    {emoji:"🐝", name:"蜜蜂", type:"friend"}
+  ];
+
+  const config = {
+    // 慢速開放日版：K2 小朋友都有足夠時間睇清楚再點
+    easy:   {duration:40, itemCount:4, correct:10, wrong:-1, refreshMs:2800, size:118},
+    normal: {duration:35, itemCount:6, correct:10, wrong:-3, refreshMs:2200, size:106}
+  };
+
+  let difficulty = "easy";
+  let playerName = "小朋友";
+  let state = "menu";
+  let round = 0;
+  let score = 0;
+  let roundScore = 0;
+  let stars = 0;
+  let timeLeft = 25;
+  let timerId = null;
+  let refreshId = null;
+
+  function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function sample(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function today(){
+    const d = new Date();
+    return `${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  }
+  function clearItems(){
+    [...playArea.querySelectorAll(".item,.floatText,.msg")].forEach(el => {
+      if(el.id !== "introMsg") el.remove();
+    });
+  }
+  function showMessage(title, line1, line2=""){
+    clearItems();
+    const msg = document.createElement("div");
+    msg.className = "msg";
+    msg.innerHTML = `<div class="msgBox"><h2>${escapeHtml(title)}</h2><p>${escapeHtml(line1)}</p>${line2 ? `<p>${escapeHtml(line2)}</p>` : ""}</div>`;
+    playArea.appendChild(msg);
+  }
+  function popText(x,y,text,good=true){
+    const p = document.createElement("div");
+    p.className = "floatText";
+    p.style.left = x + "%";
+    p.style.top = y + "%";
+    p.style.color = good ? "#168b35" : "#d33b3b";
+    p.textContent = text;
+    playArea.appendChild(p);
+    setTimeout(()=>p.remove(),850);
+  }
+  function updateHud(){
+    roundText.textContent = round === 1 ? "第 1 回合" : round === 2 ? "第 2 回合" : "準備";
+    timeText.textContent = timeLeft;
+    scoreText.textContent = score;
+    starText.textContent = `${stars} ⭐`;
+  }
+  function setTask(){
+    if(round === 1){
+      taskIcon.textContent = "🧺";
+      taskText.textContent = "任務：只點蔬果！🌽 🍉 🥒 🥕";
+    }else if(round === 2){
+      taskIcon.textContent = "🌿";
+      taskText.textContent = "任務：只點害蟲！🐛 🪲 🐌";
+    }else{
+      taskIcon.textContent = "🌻";
+      taskText.textContent = "輸入名字後開始！";
+    }
+  }
+  function startGame(){
+    playerName = (nameInput.value || "小朋友").trim().slice(0,12) || "小朋友";
+    overlay.classList.add("hidden");
+    score = 0;
+    stars = 0;
+    startRound(1);
+  }
+  function startRound(n){
+    stopTimers();
+    state = "playing";
+    round = n;
+    roundScore = 0;
+    timeLeft = config[difficulty].duration;
+    nextBtn.disabled = true;
+    introMsg.classList.add("hidden");
+    setTask();
+    updateHud();
+    clearItems();
+    toast.textContent = round === 1 ? "只點蔬果，不要點蟲和好朋友！" : "只點害蟲，不要點蔬果和好朋友！";
+    makeBoard();
+    timerId = setInterval(tick,1000);
+    refreshId = setInterval(makeBoard, config[difficulty].refreshMs);
+  }
+  function stopTimers(){
+    if(timerId) clearInterval(timerId);
+    if(refreshId) clearInterval(refreshId);
+    timerId = null;
+    refreshId = null;
+  }
+  function tick(){
+    if(state !== "playing") return;
+    timeLeft -= 1;
+    if(timeLeft <= 0){
+      timeLeft = 0;
+      updateHud();
+      finishRound();
+      return;
+    }
+    updateHud();
+  }
+  function makeBoard(){
+    if(state !== "playing") return;
+    clearItems();
+
+    const c = config[difficulty];
+    const taskType = round === 1 ? "crop" : "pest";
+    const allWrong = round === 1 ? [...pests, ...friends] : [...crops, ...friends];
+
+    let items = [];
+    const correctCount = difficulty === "easy" ? 3 : 4;
+    for(let i=0;i<correctCount;i++){
+      items.push(taskType === "crop" ? sample(crops) : sample(pests));
+    }
+    while(items.length < c.itemCount){
+      items.push(sample(allWrong));
+    }
+    items = items.sort(()=>Math.random()-.5);
+
+    // non-overlapping-ish grid positions
+    const positions = [];
+    const cols = difficulty === "easy" ? 3 : 4;
+    const rows = difficulty === "easy" ? 2 : 2;
+    for(let r=0;r<rows;r++){
+      for(let col=0;col<cols;col++){
+        positions.push({
+          x: 18 + col * (64/(cols-1 || 1)) + randInt(-4,4),
+          y: 28 + r * 35 + randInt(-5,5)
+        });
+      }
+    }
+
+    items.forEach((it,i)=>{
+      const pos = positions[i] || {x:randInt(15,85), y:randInt(24,72)};
+      const el = document.createElement("button");
+      el.className = `item ${it.type === "crop" ? "good" : it.type === "pest" ? "pest" : "friend"}`;
+      el.style.left = pos.x + "%";
+      el.style.top = pos.y + "%";
+      el.style.width = c.size + "px";
+      el.style.height = c.size + "px";
+      el.style.fontSize = Math.round(c.size * .62) + "px";
+      el.textContent = it.emoji;
+      el.setAttribute("aria-label", it.name);
+      el.addEventListener("pointerdown", e=>{
+        e.preventDefault();
+        answer(it, pos.x, pos.y, el);
+      }, {passive:false});
+      playArea.appendChild(el);
+    });
+  }
+  function answer(item,x,y,el){
+    if(state !== "playing") return;
+    const target = round === 1 ? "crop" : "pest";
+    const good = item.type === target;
+    if(good){
+      score += config[difficulty].correct;
+      roundScore += config[difficulty].correct;
+      toast.textContent = `答對！${item.name} +${config[difficulty].correct}`;
+      popText(x,y,`+${config[difficulty].correct}`,true);
+    }else{
+      score += config[difficulty].wrong;
+      roundScore += config[difficulty].wrong;
+      if(round === 1){
+        toast.textContent = item.type === "pest" ? "有蟲，唔好收！" : "好朋友，唔好點呀～";
+      }else{
+        toast.textContent = item.type === "crop" ? "呢個係蔬果，唔係害蟲！" : "好朋友，唔好噴呀～";
+      }
+      popText(x,y,String(config[difficulty].wrong),false);
+    }
+    score = Math.max(0, score);
+    roundScore = Math.max(0, roundScore);
+    updateHud();
+
+    el.style.pointerEvents = "none";
+    el.style.opacity = ".2";
+    el.style.transform = "translate(-50%,-50%) scale(.65)";
+  }
+  function finishRound(){
+    stopTimers();
+    clearItems();
+    state = round === 1 ? "between" : "over";
+
+    if(roundScore >= 120) stars += 3;
+    else if(roundScore >= 70) stars += 2;
+    else if(roundScore >= 30) stars += 1;
+    updateHud();
+
+    if(round === 1){
+      showMessage("第 1 回合完成！", `本回合：${roundScore} 分`, "按「下一回合」繼續");
+      toast.textContent = `好叻！第 1 回合 ${roundScore} 分。`;
+      nextBtn.disabled = false;
+    }else{
+      addBoard(playerName, score, stars);
+      renderBoard();
+      showMessage("任務完成！", `${playerName}：${score} 分`, `${stars} ⭐`);
+      toast.textContent = `完成！總分 ${score}，已加入排行榜。`;
+      nextBtn.disabled = true;
+    }
+  }
+  function loadBoard(){
+    try{return JSON.parse(localStorage.getItem(STORAGE)) || []}
+    catch(e){return []}
+  }
+  function saveBoard(b){localStorage.setItem(STORAGE,JSON.stringify(b))}
+  function addBoard(name,score,stars){
+    const b = loadBoard();
+    b.push({name,score,stars,date:today()});
+    b.sort((a,b)=>b.score-a.score || b.stars-a.stars);
+    saveBoard(b.slice(0,10));
+  }
+  function renderBoard(){
+    const b = loadBoard();
+    leaderboard.innerHTML = "";
+    if(!b.length){
+      const li = document.createElement("li");
+      li.style.gridTemplateColumns = "1fr";
+      li.textContent = "未有紀錄";
+      leaderboard.appendChild(li);
+      return;
+    }
+    b.forEach((r,i)=>{
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${i+1}</span><span>${escapeHtml(r.name)}<small>${escapeHtml(r.date)}｜${r.stars} ⭐</small></span><span>${r.score}</span>`;
+      leaderboard.appendChild(li);
+    });
+  }
+
+  document.getElementById("playBtn").addEventListener("click", startGame);
+  document.getElementById("openStart").addEventListener("click",()=>overlay.classList.remove("hidden"));
+  document.getElementById("restartBtn").addEventListener("click",()=>overlay.classList.remove("hidden"));
+  document.getElementById("nextBtn").addEventListener("click",()=>{ if(state === "between") startRound(2); });
+  document.getElementById("clearBtn").addEventListener("click",()=>{
+    if(confirm("確定清除排行榜？")){
+      localStorage.removeItem(STORAGE);
+      renderBoard();
+    }
+  });
+  document.getElementById("fullscreenBtn").addEventListener("click",async()=>{
+    try{
+      if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    }catch(e){
+      toast.textContent = "如不能全螢幕，可用 Safari 加到主畫面。";
+    }
+  });
+  nameInput.addEventListener("keydown",e=>{ if(e.key === "Enter") startGame(); });
+
+  document.getElementById("easyMode").addEventListener("click",()=>{
+    difficulty = "easy";
+    document.getElementById("easyMode").classList.add("selected");
+    document.getElementById("normalMode").classList.remove("selected");
+  });
+  document.getElementById("normalMode").addEventListener("click",()=>{
+    difficulty = "normal";
+    document.getElementById("normalMode").classList.add("selected");
+    document.getElementById("easyMode").classList.remove("selected");
+  });
+
+  renderBoard();
+  updateHud();
+  setTask();
+})();
+</script>
+</body>
+</html>
