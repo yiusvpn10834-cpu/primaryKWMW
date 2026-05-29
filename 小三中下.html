@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中文學習中心 Ultimate</title>
+<style>
+:root{
+  --bg1:#f7f3ea;--bg2:#eaf6f4;--bg3:#f2f0fb;
+  --ink:#2f3437;--muted:#6d746f;--paper:#fffdf8;
+  --tea:#d8c3a5;--sage:#9eb89a;--aqua:#7fc7c9;--lav:#c9c3e6;
+  --line:#38413d;--good:#dff1df;--bad:#f9ded8;--gold:#f2d27a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:16px;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, #fff8e8 0, transparent 35%),
+    radial-gradient(circle at bottom right, #e7f7f6 0, transparent 35%),
+    linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+  color:var(--ink);
+}
+.app{max-width:1200px;margin:auto;background:rgba(255,253,248,.96);border:2px solid #e6dccd;border-radius:28px;padding:18px;box-shadow:0 16px 40px #00000018}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid #eadfce;padding-bottom:12px}
+h1{font-size:32px;margin:0;color:#35413b;letter-spacing:.5px}
+.sub{color:var(--muted);font-size:17px;margin-top:5px}
+.logo{width:68px;height:68px;border-radius:20px;background:linear-gradient(135deg,var(--tea),var(--aqua));display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:inset 0 0 0 4px #fff8}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.stat{border:2px solid #d6cdbf;border-radius:18px;text-align:center;padding:10px;background:#fff;box-shadow:0 4px 12px #0000000b;font-size:16px}
+.stat b{font-size:26px;color:#35524a}
+.menu{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+button{border:2px solid var(--line);border-radius:16px;background:white;padding:12px 14px;font-size:19px;font-weight:800;box-shadow:3px 3px 0 var(--line);cursor:pointer;color:var(--ink);font-family:inherit}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+.active{background:#dff2f2}
+.card{border:2px solid #dfd5c8;border-radius:24px;padding:16px;background:#fff;min-height:510px;box-shadow:0 5px 18px #00000010}
+.story{background:#f8f1df;border-left:8px solid var(--tea);border-radius:16px;padding:13px 14px;font-size:21px;line-height:1.45;margin-bottom:12px}
+.question{text-align:center;font-size:30px;color:#33443f;font-weight:900;margin:16px 0;line-height:1.4}
+.hint{text-align:center;font-size:19px;color:var(--muted);margin:6px 0 14px}
+.options{display:grid;gap:12px;max-width:960px;margin:auto}
+.option{font-size:22px;text-align:left;line-height:1.4;background:white}
+.good{background:var(--good)!important}.bad{background:var(--bad)!important}
+.feedback{min-height:48px;text-align:center;font-size:24px;font-weight:900;margin:12px;color:#365e57}
+.wordbank{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.pill{border:2px solid #b9d5d3;border-radius:999px;padding:8px 13px;background:#eff8f7;font-size:18px;font-weight:800;color:#415753}
+.sortbox{display:grid;gap:10px;max-width:940px;margin:auto}
+.sortitem{display:flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:16px;padding:12px;background:#fff;font-size:21px;line-height:1.35;box-shadow:3px 3px 0 var(--line)}
+.sortitem span{background:#edf5ef;border-radius:12px;padding:4px 10px;font-weight:900;min-width:42px;text-align:center}
+.wrongbox{margin-top:14px;border:2px solid #d0c7df;border-radius:18px;background:#faf8ff;padding:12px;font-size:16px;max-height:150px;overflow:auto}
+.small{font-size:17px;color:var(--muted);line-height:1.45}
+.footer{text-align:center;margin-top:12px}
+.toolbar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.modeTag{display:inline-block;background:#f1eadf;border-radius:999px;padding:5px 12px;margin-left:6px;font-size:16px;color:#5c5144}
+@media(max-width:880px){.menu{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:28px}.question{font-size:25px}button{font-size:18px}}
+@media(max-width:520px){body{padding:8px}.app{padding:12px}.menu{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <h1>中文學習中心 Ultimate <span class="modeTag">中性版</span></h1>
+      <div class="sub">不供詞填充100題・段落排序・標點符號・修辭・詞義辨析・成語運用・Boss混合挑戰</div>
+    </div>
+    <div class="logo">文</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">分數<br><b id="score">0</b></div>
+    <div class="stat">答對<br><b id="correct">0</b></div>
+    <div class="stat">答錯<br><b id="wrong">0</b></div>
+    <div class="stat">正確率<br><b id="rate">0%</b></div>
+    <div class="stat">題庫<br><b id="count">0</b></div>
+  </div>
+
+  <div class="menu">
+    <button id="mCloze" class="active" onclick="setMode('cloze')">不供詞填充100題</button>
+    <button id="mIdiom" onclick="setMode('idiom')">成語運用</button>
+    <button id="mSort" onclick="setMode('sort')">段落排序</button>
+    <button id="mPunc" onclick="setMode('punc')">標點符號</button>
+    <button id="mRhet" onclick="setMode('rhet')">修辭判斷</button>
+    <button id="mWord" onclick="setMode('word')">詞義辨析</button>
+    <button id="mBoss" onclick="setMode('boss')">Boss 混合關</button>
+    <button onclick="resetGame()">重新開始</button>
+  </div>
+
+  <div class="card">
+    <div class="story" id="story"></div>
+    <div class="question" id="question"></div>
+    <div class="hint" id="hint"></div>
+    <div class="wordbank" id="wordbank"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="toolbar">
+      <button onclick="nextQuestion()">下一題</button>
+      <button onclick="reviewWrong()">錯題重做</button>
+    </div>
+    <div class="wrongbox"><b>錯題紀錄：</b><div id="wrongList" class="small">暫時未有錯題，加油！</div></div>
+  </div>
+</div>
+
+<script>
+const DATA = {"cloze": [{"q": "齊白石是中國____著名畫家。", "a": "近代"}, {"q": "聽到爺爺____的消息，大家都很難過。", "a": "去世"}, {"q": "他畫蝦的____越來越好。", "a": "技巧"}, {"q": "哥哥彈琴的手法十分____。", "a": "純熟"}, {"q": "這張相片十分____，每個人都看得很清楚。", "a": "清晰"}, {"q": "畫家連小昆蟲的____也畫得很仔細。", "a": "細節"}, {"q": "這篇作文的____很有趣。", "a": "題材"}, {"q": "妹妹____努力練習跳舞，從不偷懶。", "a": "一直"}, {"q": "他畫的小狗____，好像真的會跑出來。", "a": "栩栩如生"}, {"q": "演員把角色演得____，觀眾都拍手叫好。", "a": "惟妙惟肖"}, {"q": "只要____觀察，就會發現生活中有很多有趣的事。", "a": "用心"}, {"q": "小明得到老師鼓勵，____更努力讀書。", "a": "從此"}, {"q": "這幅畫看起來很____，一點也不自然。", "a": "死板"}, {"q": "舞台上的木偶做得____，十分有趣。", "a": "活生生"}, {"q": "火警鐘響起後，大家____離開課室。", "a": "立刻"}, {"q": "蝦的外殼很____，看起來透明。", "a": "薄"}, {"q": "小兔子在草地上____地跳來跳去。", "a": "活蹦亂跳"}, {"q": "他有____的意志，不會輕易放棄。", "a": "堅定"}, {"q": "弟弟皺起眉頭，心中充滿____。", "a": "疑惑"}, {"q": "你____幫我一起整理書架嗎？", "a": "願意"}, {"q": "姐姐很____幫助同學。", "a": "樂意"}, {"q": "他閱讀的書類型十分____。", "a": "廣泛"}, {"q": "只要有____，再難的事也能完成。", "a": "意志"}, {"q": "比爾長大後____了著名的電腦公司。", "a": "創立"}, {"q": "那隻小貓又____又可愛。", "a": "瘦小"}, {"q": "班長做事很____，老師十分信任他。", "a": "負責"}, {"q": "請把書本放回原來的____。", "a": "位置"}, {"q": "我們下星期要____，所以今天要收拾東西。", "a": "搬家"}, {"q": "媽媽叫我____房間。", "a": "整理"}, {"q": "她的____很甜美，令人感到親切。", "a": "笑容"}, {"q": "百科全書內容____，甚麼知識都有。", "a": "包羅萬象"}, {"q": "弟弟很喜歡這本漫畫，拿在手裏____。", "a": "愛不釋手"}, {"q": "同學遇到困難時，我們應該主動____他。", "a": "幫助"}, {"q": "____下雨，小貓都會躲在屋簷下。", "a": "每當"}, {"q": "聽到這首歌，我____地跟着唱起來。", "a": "情不自禁"}, {"q": "大家都很緊張，只有他____。", "a": "無動於衷"}, {"q": "我們不應該____弱小的同學。", "a": "欺負"}, {"q": "你跟不聽勸的人說道理，簡直是____。", "a": "對牛彈琴"}, {"q": "觀眾聽音樂聽得____。", "a": "如痴如醉"}, {"q": "星期日，我和家人到公園____。", "a": "遊玩"}, {"q": "我們一起____美麗的風景。", "a": "欣賞"}, {"q": "你明白這個詞語的____嗎？", "a": "意思"}, {"q": "妹妹在人群中____，想找媽媽。", "a": "東張西望"}, {"q": "我____今天是星期五，原來是星期四。", "a": "以為"}, {"q": "媽媽____才回到家。", "a": "剛才"}, {"q": "小鳥的歌聲十分____。", "a": "動聽"}, {"q": "這些草莓又紅又____。", "a": "鮮嫩"}, {"q": "哥哥對科學很有____。", "a": "興趣"}, {"q": "小貓____躺在窗邊睡覺。", "a": "終日"}, {"q": "老師的____令我明白做人要誠實。", "a": "教誨"}, {"q": "看見舊照片，爸爸十分____。", "a": "感慨"}, {"q": "媽媽在衣服上____了一顆鈕扣。", "a": "縫"}, {"q": "孩子夜了還未回家，媽媽十分____。", "a": "擔憂"}, {"q": "哥哥長大後要____到外地讀書。", "a": "離家"}, {"q": "我們要____父母的養育之恩。", "a": "報答"}, {"q": "這份____我會永遠記在心裏。", "a": "恩情"}, {"q": "小華輸了比賽後，整天____。", "a": "悶悶不樂"}, {"q": "成功不能只____運氣，還要努力。", "a": "靠"}, {"q": "運動員為夢想不斷____。", "a": "奮鬥"}, {"q": "新校長今天正式____。", "a": "上任"}, {"q": "同學們在校門外____校車。", "a": "等待"}, {"q": "看到妹妹可愛的樣子，我____笑了。", "a": "不禁"}, {"q": "這位歌手非常有名，可以說是____。", "a": "家喻戶曉"}, {"q": "畫家連小小的____也觀察得很仔細。", "a": "細物"}, {"q": "爸爸出差三天後終於____。", "a": "歸來"}, {"q": "朋友送我一本書作為生日____品。", "a": "贈"}, {"q": "李白乘舟____欲行。", "a": "將"}, {"q": "他____到圖書館借書。", "a": "欲"}, {"q": "忽聞岸上____聲。", "a": "踏歌"}, {"q": "桃花____水深千尺。", "a": "潭"}, {"q": "這份友情____金錢可以相比。", "a": "不及"}, {"q": "小船停泊在河____邊。", "a": "岸"}, {"q": "熱心的____一起幫忙清理道路。", "a": "村民"}, {"q": "大家跟着音樂的____拍手。", "a": "節拍"}, {"q": "朋友離開時，我們在車站____。", "a": "送別"}, {"q": "他們之間有____。", "a": "深厚感情"}, {"q": "姐姐學畫多年，畫畫____很高。", "a": "技巧"}, {"q": "這道題的____很特別。", "a": "題材"}, {"q": "小鳥在枝頭唱歌，聲音____。", "a": "動聽"}, {"q": "這本書令我學到很多知識，我看得____。", "a": "如痴如醉"}, {"q": "這次失敗後，他____要更加努力。", "a": "從此"}, {"q": "爸爸的話使我深受____。", "a": "教誨"}, {"q": "她____地照顧生病的弟弟。", "a": "用心"}, {"q": "窗戶上的玻璃很____。", "a": "薄"}, {"q": "妹妹以為媽媽走失了，急得____。", "a": "東張西望"}, {"q": "老師問問題時，他____，沒有任何反應。", "a": "無動於衷"}, {"q": "哥哥收到禮物後，____地笑了。", "a": "情不自禁"}, {"q": "這位畫家的作品____，題材很多。", "a": "廣泛"}, {"q": "小朋友聽故事聽得____。", "a": "如痴如醉"}, {"q": "這幅馬畫得____，像真的一樣。", "a": "栩栩如生"}, {"q": "妹妹學會自己____書包。", "a": "整理"}, {"q": "我們要____時間溫習。", "a": "爭分奪秒"}, {"q": "做人要____，不可只想走捷徑。", "a": "腳踏實地"}, {"q": "消防員____，救出受困的人。", "a": "捨己為人"}, {"q": "弟弟懂得____，所以每天都很開心。", "a": "知足常樂"}, {"q": "想得到好成績，不能____。", "a": "不勞而獲"}, {"q": "面對困難，我們不應____。", "a": "知難而退"}, {"q": "只要有毅力，就能____。", "a": "磨杵成針"}], "sortQs": [{"title": "小畫家觀察金魚", "lines": ["放學後，雅文走到魚缸前，仔細觀察金魚的動作。", "她發現金魚游動時，尾巴像扇子一樣輕輕擺動。", "回到座位後，她把看到的樣子畫在圖畫紙上。", "老師看見後稱讚她觀察細心，畫得十分生動。"], "tip": "先寫背景，再寫發現，然後寫行動，最後寫結果。"}, {"title": "圖書館小幫手", "lines": ["星期三，小俊到圖書館幫忙整理圖書。", "他先把散亂的故事書放回正確的位置。", "接着，他幫同學找一本關於昆蟲的書。", "老師稱讚他做事認真，是一位負責任的小幫手。"], "tip": "先介紹人物做甚麼，再寫過程，最後寫評價。"}, {"title": "校園環保活動", "lines": ["今天早會後，老師帶同學到操場進行清潔活動。", "大家分工合作，有人掃地，有人撿起膠樽。", "不久，操場變得乾淨整潔。", "同學們明白到保持環境清潔是每個人的責任。"], "tip": "先寫活動開始，再寫分工，最後寫結果和感受。"}, {"title": "生日派對", "lines": ["上星期六，欣欣在家裏舉行生日派對。", "朋友們送上禮物，並一起唱生日歌。", "欣欣吹熄蠟燭後，大家分享美味的蛋糕。", "這次派對令她十分難忘。"], "tip": "按時間順序：首先、接着、最後。"}, {"title": "幫助同學", "lines": ["小息時，樂兒看見同學跌倒了。", "她立刻走上前扶起同學，並陪他到醫療室。", "同學向樂兒道謝，老師也稱讚她樂於助人。", "樂兒明白到幫助別人是一件快樂的事。"], "tip": "先寫事情發生，再寫處理方法，最後寫感受。"}, {"title": "種植活動", "lines": ["星期五下午，同學們到校園花圃種植幼苗。", "老師先示範怎樣把泥土鬆開。", "大家小心地把幼苗放進泥土裏，再輕輕澆水。", "幾星期後，幼苗長高了，同學們都很有成功感。"], "tip": "按活動步驟排列。"}, {"title": "照顧小狗", "lines": ["爸爸帶回一隻受傷的小狗。", "妹妹每天替牠準備清水和食物。", "過了幾天，小狗漸漸恢復精神。", "一家人看見牠活蹦亂跳，都感到十分高興。"], "tip": "先寫原因，再寫照顧，最後寫結果。"}, {"title": "勤力練琴", "lines": ["朗朗初學鋼琴時，常常彈錯音。", "他沒有放棄，每天都用心練習。", "慢慢地，他的技巧越來越純熟。", "最後，他在音樂比賽中得到好成績。"], "tip": "先寫困難，再寫努力，最後寫成果。"}], "puncQs": [{"q": "爸爸說____我們今天一起去公園吧____", "a": "：「」", "opts": ["：「」", "；", "·"]}, {"q": "我最喜歡看____哈利·波特____。", "a": "《》", "opts": ["《》", "「」", "？"]}, {"q": "比爾____蓋茨創立了著名的電腦公司。", "a": "·", "opts": ["·", "；", "！"]}, {"q": "早上，我做功課____中午，我去游泳____黃昏，我回家吃飯。", "a": "；；", "opts": ["；；", "？？", "《》"]}, {"q": "今天的天氣真好____", "a": "！", "opts": ["！", "《》", "·"]}, {"q": "媽媽問____你完成家課了嗎____", "a": "：「？」", "opts": ["：「？」", "《》", "；"]}, {"q": "弟弟高興地說____我得獎了____", "a": "：「！」", "opts": ["：「！」", "·", "；"]}, {"q": "我正在閱讀____世界百科全書____。", "a": "《》", "opts": ["《》", "「」", "·"]}, {"q": "米高____佐敦是一位著名運動員。", "a": "·", "opts": ["·", "；", "？"]}, {"q": "今天，爸爸煮飯____媽媽洗衣服____我整理房間。", "a": "；；", "opts": ["；；", "《》", "：「」"]}], "rhetQs": [{"q": "小鳥在枝頭唱歌。", "a": "擬人", "opts": ["比喻", "擬人", "誇張"]}, {"q": "這本書像一扇窗戶，讓我看到不同的世界。", "a": "比喻", "opts": ["比喻", "排比", "反問"]}, {"q": "雷聲一響，嚇得我的心從口裏跳出來。", "a": "誇張", "opts": ["誇張", "對偶", "擬物"]}, {"q": "這裏綠水環抱青山，大海連着藍天，秋葉接着春花。", "a": "排比", "opts": ["排比", "反問", "比喻"]}, {"q": "舉頭望明月，低頭思故鄉。", "a": "對偶", "opts": ["對偶", "誇張", "擬人"]}, {"q": "糖果怎麼能吃這麼多？", "a": "反問", "opts": ["反問", "比喻", "排比"]}, {"q": "這杯熱巧克力像一個溫暖的擁抱。", "a": "擬物", "opts": ["擬物", "擬人", "對偶"]}, {"q": "花兒在風中笑彎了腰。", "a": "擬人", "opts": ["擬人", "對偶", "反問"]}, {"q": "他的聲音大得全世界都聽見。", "a": "誇張", "opts": ["誇張", "排比", "比喻"]}, {"q": "天上的白雲好像一朵朵棉花。", "a": "比喻", "opts": ["比喻", "反問", "對偶"]}, {"q": "我們要愛護校園，保持整潔，珍惜資源。", "a": "排比", "opts": ["排比", "誇張", "擬物"]}, {"q": "你怎能不珍惜時間呢？", "a": "反問", "opts": ["反問", "比喻", "擬人"]}], "wordQs": [{"q": "妹妹第一次坐飛機，心裏既興奮又____。", "a": "驚奇", "opts": ["驚奇", "驚恐", "驚慌"]}, {"q": "火警鐘突然響起，大家不要____，要冷靜離開。", "a": "驚慌", "opts": ["驚慌", "驚奇", "欺騙"]}, {"q": "壞人用假消息____老人家，十分可惡。", "a": "欺騙", "opts": ["欺騙", "欺負", "完成"]}, {"q": "哥哥做事很細心，終於____了這個模型。", "a": "完成", "opts": ["完全", "完成", "完美"]}, {"q": "這幅畫沒有缺少任何部分，是一幅____的作品。", "a": "完整", "opts": ["完整", "完全", "思想"]}, {"q": "姐姐離家讀書後，媽媽十分____她。", "a": "思念", "opts": ["思念", "思考", "意思"]}, {"q": "做數學題時，要先____清楚才下筆。", "a": "思考", "opts": ["思考", "思念", "欺壓"]}, {"q": "小弟弟看見大狗時感到十分____。", "a": "驚恐", "opts": ["驚恐", "驚奇", "完美"]}, {"q": "這個計劃想得很周到，十分____。", "a": "完美", "opts": ["完美", "完成", "完全"]}, {"q": "我們要有正確的____，才會做正確的事。", "a": "思想", "opts": ["思想", "思念", "欺詐"]}, {"q": "他常常____年幼的同學，老師批評了他。", "a": "欺負", "opts": ["欺負", "欺騙", "欺壓"]}, {"q": "這件事____不是我做的。", "a": "完全", "opts": ["完全", "完成", "完整"]}], "idiomQs": [{"q": "消防員衝進火場救人，表現出____的精神。", "a": "捨己為人", "opts": ["捨己為人", "不勞而獲", "知難而退"]}, {"q": "弟弟玩具不多，但天天快樂，因為他懂得____。", "a": "知足常樂", "opts": ["知足常樂", "七手八腳", "不自量力"]}, {"q": "想有好成績，就不可有____的想法。", "a": "不勞而獲", "opts": ["不勞而獲", "磨杵成針", "錦上添花"]}, {"q": "小螞蟻想搬起大石，真是____。", "a": "不自量力", "opts": ["不自量力", "腳踏實地", "以身作則"]}, {"q": "犯錯後願意改正，就是____。", "a": "改過自新", "opts": ["改過自新", "知難而退", "錦上添花"]}, {"q": "班長用行動做榜樣，真是____。", "a": "以身作則", "opts": ["以身作則", "不勞而獲", "七手八腳"]}, {"q": "大家忙亂地收拾課室，樣子____。", "a": "七手八腳", "opts": ["七手八腳", "知足常樂", "腳踏實地"]}, {"q": "考試快到，大家都____地溫習。", "a": "爭分奪秒", "opts": ["爭分奪秒", "不自量力", "知難而退"]}, {"q": "遇到困難就放棄，就是____。", "a": "知難而退", "opts": ["知難而退", "磨杵成針", "以身作則"]}, {"q": "讀書要一步一步來，做到____。", "a": "腳踏實地", "opts": ["腳踏實地", "不勞而獲", "七手八腳"]}, {"q": "姐姐獲獎後又得到表揚，真是____。", "a": "錦上添花", "opts": ["錦上添花", "知難而退", "不自量力"]}, {"q": "只要有毅力，天天練習，就能____。", "a": "磨杵成針", "opts": ["磨杵成針", "不勞而獲", "知足常樂"]}]};
+let mode="cloze", score=0, correct=0, wrong=0, total=0, wrongItems=[], wrongPool=[];
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
+function datasetCount(){return DATA.cloze.length+DATA.sortQs.length+DATA.puncQs.length+DATA.rhetQs.length+DATA.wordQs.length+DATA.idiomQs.length}
+function setMode(m){
+ mode=m; document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+ const map={cloze:"mCloze",idiom:"mIdiom",sort:"mSort",punc:"mPunc",rhet:"mRhet",word:"mWord",boss:"mBoss"};
+ document.getElementById(map[m]).classList.add("active"); nextQuestion();
+}
+function update(){
+ score.textContent=window.score ?? 0;
+ document.getElementById("score").textContent=scoreVal;
+}
+let scoreVal=0, correctVal=0, wrongVal=0;
+function refresh(){
+ document.getElementById("score").textContent=scoreVal;
+ document.getElementById("correct").textContent=correctVal;
+ document.getElementById("wrong").textContent=wrongVal;
+ document.getElementById("rate").textContent=total?Math.round(correctVal/total*100)+"%":"0%";
+ document.getElementById("count").textContent=datasetCount();
+ document.getElementById("wrongList").innerHTML=wrongItems.length?wrongItems.slice(-35).map(x=>"• "+x).join("<br>"):"暫時未有錯題，加油！";
+}
+function renderOptions(opts, ans, label){
+ options.className="options"; options.innerHTML="";
+ shuffle(opts).forEach(o=>{
+  const b=document.createElement("button"); b.className="option"; b.textContent=o;
+  b.onclick=()=>choose(b,o===ans,label+"｜"+question.textContent+"｜答案："+ans, {q:question.textContent,a:ans,label:label});
+  options.appendChild(b);
+ });
+}
+function makeCloze(q=null){
+ if(!q) q=DATA.cloze[Math.floor(Math.random()*DATA.cloze.length)];
+ let wrongs=shuffle(DATA.cloze.map(x=>x.a).filter(x=>x!==q.a)).slice(0,3);
+ story.textContent="不供詞填充：沒有詞語表，要靠句意選出最準確詞語。";
+ question.textContent=q.q; hint.textContent="先讀完整句，再想：這裏要填人物、動作、感受，還是形容詞？";
+ wordbank.innerHTML="<span class='pill'>100題題庫</span><span class='pill'>答錯會進入錯題重做</span>";
+ renderOptions([q.a,...wrongs],q.a,"不供詞填充");
+}
+function makeNormal(arr, storyText, hintText, label){
+ const q=arr[Math.floor(Math.random()*arr.length)];
+ story.textContent=storyText; question.textContent=q.q; hint.textContent=hintText; wordbank.innerHTML="";
+ renderOptions(q.opts,q.a,label);
+}
+function makeSort(){
+ const q=DATA.sortQs[Math.floor(Math.random()*DATA.sortQs.length)];
+ story.textContent="段落排序：按合理次序排列句子。";
+ question.textContent=q.title; hint.textContent=q.tip;
+ wordbank.innerHTML="<span class='pill'>請按正確次序選 1 → 2 → 3 → 4</span>";
+ options.className="sortbox"; options.innerHTML="";
+ let picked=[]; const shuffled=shuffle(q.lines);
+ shuffled.forEach(line=>{
+  const b=document.createElement("button"); b.className="sortitem"; b.innerHTML="<span>□</span>"+line;
+  b.onclick=()=>{
+   if(picked.includes(line))return;
+   picked.push(line); b.querySelector("span").textContent=picked.length; b.style.background="#f5fbf8";
+   if(picked.length===q.lines.length){
+    const ok=picked.every((x,i)=>x===q.lines[i]);
+    choose(b,ok,"段落排序｜"+q.title+"｜正確次序："+q.lines.join(" → "), {q:q.title,a:q.lines.join(" → "),label:"段落排序"});
+    options.className="options";
+   }
+  };
+  options.appendChild(b);
+ });
+}
+function nextQuestion(){
+ feedback.textContent=""; wordbank.innerHTML=""; options.innerHTML="";
+ let actual=mode; if(mode==="boss") actual=shuffle(["cloze","idiom","sort","punc","rhet","word"])[0];
+ if(actual==="cloze") makeCloze();
+ if(actual==="idiom") makeNormal(DATA.idiomQs,"成語運用：選出最合適的成語。","留意句子情境，不要只看表面字。","成語運用");
+ if(actual==="punc") makeNormal(DATA.puncQs,"標點符號：選出最合適的標點。","人名用 ·，書名用《》，說話用：「」。","標點符號");
+ if(actual==="rhet") makeNormal(DATA.rhetQs,"修辭判斷：看看句子用了哪一種修辭手法。","比喻有「像、好像、彷彿」；擬人是把物件當人寫。","修辭判斷");
+ if(actual==="word") makeNormal(DATA.wordQs,"詞義辨析：選出最準確的詞語。","留意每個詞的意思和用法。","詞義辨析");
+ if(actual==="sort") makeSort();
+}
+function choose(btn, ok, wrongText, wrongObj){
+ total++;
+ if(ok){scoreVal+=10;correctVal++;btn.classList.add("good");feedback.textContent="答啱！+10分";}
+ else{wrongVal++;btn.classList.add("bad");wrongItems.push(wrongText); if(wrongObj) wrongPool.push(wrongObj); feedback.textContent="差少少，已加入錯題紀錄。";}
+ refresh();
+}
+function reviewWrong(){
+ if(!wrongPool.length){feedback.textContent="暫時未有錯題可以重做。";return;}
+ const item=wrongPool.shift();
+ story.textContent="錯題重做：再試一次。";
+ question.textContent=item.q; hint.textContent="回想剛才錯在哪裏。"; wordbank.innerHTML="";
+ if(item.label==="不供詞填充") renderOptions([item.a,...shuffle(DATA.cloze.map(x=>x.a).filter(x=>x!==item.a)).slice(0,3)], item.a, "錯題重做");
+ else {
+   // fallback: choose a normal new question if old option set is unavailable
+   feedback.textContent="這類錯題已記錄，請按下一題繼續練習。";
+ }
+}
+function resetGame(){scoreVal=0;correctVal=0;wrongVal=0;total=0;wrongItems=[];wrongPool=[];refresh();nextQuestion();}
+refresh();nextQuestion();
+</script>
+</body>
+</html>
