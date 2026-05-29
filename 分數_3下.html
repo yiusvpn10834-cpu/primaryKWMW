@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>分數互動練習</title>
+<style>
+  :root{
+    --ink:#263238; --muted:#6b7280; --line:#d7dde3; --soft:#f6f8fb;
+    --ok:#188a42; --bad:#c62828; --warn:#b7791f; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+    background:linear-gradient(180deg,#f7fbff,#fff); color:var(--ink);
+  }
+  header{
+    padding:18px 18px 14px; border-bottom:1px solid var(--line); background:#fff; position:sticky; top:0; z-index:10;
+  }
+  h1{margin:0; font-size:26px; letter-spacing:.08em; text-align:center}
+  .subtitle{text-align:center; color:var(--muted); margin-top:6px; font-size:14px}
+  main{max-width:980px; margin:0 auto; padding:16px}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 18px rgba(0,0,0,.04); margin-bottom:14px}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  button,.pill{
+    border:1px solid var(--line); background:#fff; color:var(--ink); padding:10px 14px; border-radius:999px; cursor:pointer;
+    font-size:15px; transition:.15s; user-select:none;
+  }
+  button:hover{transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.06)}
+  button.primary{background:#263238;color:#fff;border-color:#263238}
+  button.good{background:#e9f7ee;border-color:#bde5cc}
+  button.danger{background:#fff1f1;border-color:#ffd2d2}
+  select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:white;font-size:15px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stat{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+  .stat b{font-size:22px;display:block}
+  .question-title{font-size:20px; font-weight:700; line-height:1.5; margin:4px 0 12px}
+  .tag{display:inline-block;font-size:13px;color:#555;background:#eef2f6;border:1px solid #d9e2ec;padding:4px 8px;border-radius:999px;margin-right:6px}
+  .work{border:1px dashed #c5ced7;border-radius:12px;padding:12px;background:#fcfdff;margin:12px 0}
+  .answer-area{margin-top:14px}
+  input[type="text"], input[type="number"]{
+    font-size:18px;padding:10px;border:1px solid var(--line);border-radius:10px;max-width:150px;text-align:center;background:#fff;
+  }
+  .fracInput{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 6px;}
+  .fracInput input{width:90px}
+  .barline{height:2px;background:#222;width:90px;margin:3px 0}
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+  .option{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer;min-height:48px}
+  .option.selected{outline:3px solid #90caf9}
+  .option.correct{background:#e9f7ee;border-color:#72c58f}
+  .option.wrong{background:#fff1f1;border-color:#ef9a9a}
+  .feedback{font-size:18px;font-weight:700;margin-top:12px}
+  .feedback.ok{color:var(--ok)}
+  .feedback.bad{color:var(--bad)}
+  .hint{color:#455a64;background:#f1f7fb;border-left:5px solid #90caf9;padding:10px 12px;border-radius:8px;margin-top:10px;line-height:1.55}
+  .svgbox{width:100%; overflow:auto; text-align:center}
+  svg{max-width:100%; height:auto;}
+  .small{font-size:13px;color:var(--muted)}
+  .wrongList{line-height:1.6}
+  .hidden{display:none}
+  .kbd{font-family:ui-monospace,Menlo,monospace;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;padding:2px 5px}
+  @media (max-width:650px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    header{position:static}
+    h1{font-size:22px}
+  }
+  @media print{
+    header,.controls,.answer-area button,.noPrint{display:none!important}
+    body{background:white}
+    .panel{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>分數互動練習</h1>
+  <div class="subtitle">題型：陰影分數｜分數讀法｜比較｜排序｜同分母加減｜文字題｜圖像推理</div>
+</header>
+<main>
+  <section class="panel controls">
+    <div class="row">
+      <label>練習模式：
+        <select id="mode">
+          <option value="mixed">混合題庫</option>
+          <option value="shade">陰影佔幾分之幾</option>
+          <option value="read">分數讀法</option>
+          <option value="compare">分數比較／大小</option>
+          <option value="order">排列分數</option>
+          <option value="calc">同分母加減</option>
+          <option value="word">文字應用題</option>
+        </select>
+      </label>
+      <label>每次題數：
+        <select id="limit">
+          <option>10</option><option selected>15</option><option>20</option><option>30</option><option>50</option>
+        </select>
+      </label>
+      <button class="primary" onclick="startPractice()">開始／重新出題</button>
+      <button onclick="nextQuestion()">跳下一題</button>
+      <button onclick="showHint()">提示</button>
+      <button class="danger" onclick="resetAll()">清除紀錄</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="stats">
+      <div class="stat"><span>題目</span><b id="progress">0/0</b></div>
+      <div class="stat"><span>答對</span><b id="correct">0</b></div>
+      <div class="stat"><span>答錯</span><b id="wrong">0</b></div>
+      <div class="stat"><span>正確率</span><b id="rate">0%</b></div>
+    </div>
+  </section>
+
+  <section class="panel" id="questionPanel">
+    <div class="small">按「開始／重新出題」開始。答案可以用數字；分數題請分別輸入分子和分母。</div>
+  </section>
+
+  <section class="panel noPrint">
+    <h3>錯題紀錄</h3>
+    <div id="wrongList" class="wrongList small">暫時未有錯題。</div>
+  </section>
+</main>
+
+<script>
+const BANK = [
+  // shade / identify
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"rect", parts:8, shaded:[0,1,2], ans:["3","8"], hint:"先數全圖平均分成幾份做分母，再數陰影有幾份做分子。"},
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"rect", parts:10, shaded:[0,1,2,3,4,5], ans:["6","10"], hint:"分母是全部格數，不是剩下的格數。"},
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"rect", parts:12, shaded:[0,2,4,6,8], ans:["5","12"], hint:"陰影不一定連在一起，都要全部數。"},
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"circle", parts:8, shaded:[0,1,2,3,4], ans:["5","8"], hint:"圓形被平均分成 8 份，陰影有 5 份。"},
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"circle", parts:6, shaded:[0,1], ans:["2","6"], hint:"今題不用約分，照圖寫出幾分之幾。"},
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"rect", parts:16, shaded:[0,1,2,3,4,5,6,7,8], ans:["9","16"], hint:"先確認每一格大小相同。"},
+  {type:"shade", title:"下圖陰影部分佔全圖的幾分之幾？", shape:"rect", parts:9, shaded:[0,3,6], ans:["3","9"], hint:"9 格中有 3 格陰影。"},
+  {type:"shade", title:"下圖中沒有陰影的部分佔全圖的幾分之幾？", shape:"rect", parts:8, shaded:[0,1,2,3,4], ans:["3","8"], hint:"題目問『沒有陰影』，要數空白格。", askBlank:true},
+  {type:"shade", title:"下圖中沒有陰影的部分佔全圖的幾分之幾？", shape:"circle", parts:10, shaded:[0,1,2,3], ans:["6","10"], hint:"全圖 10 份，陰影 4 份，所以空白 6 份。", askBlank:true},
+
+  // read
+  {type:"read", title:"把分數讀出來：", frac:["3","8"], ans:"八分之三", hint:"讀法是：分母先讀，再讀分子。"},
+  {type:"read", title:"把分數讀出來：", frac:["5","12"], ans:"十二分之五", hint:"不是『五分之十二』，分母 12 要先讀。"},
+  {type:"read", title:"把分數讀出來：", frac:["7","9"], ans:"九分之七", hint:"下面的數是分母，要先讀。"},
+  {type:"read", title:"把讀法寫成分數：四分之三", ans:["3","4"], hint:"『四分之三』即分母 4，分子 3。"},
+  {type:"read", title:"把讀法寫成分數：十一分之八", ans:["8","11"], hint:"先聽到的十一是分母。"},
+  {type:"read", title:"把讀法寫成分數：十七分之五", ans:["5","17"], hint:"分子是 5，分母是 17。"},
+
+  // compare
+  {type:"compare", title:"比較大小，選出正確符號。", left:["5","12"], right:["10","12"], ans:"<", hint:"同分母比較，分子越大，分數越大。"},
+  {type:"compare", title:"比較大小，選出正確符號。", left:["8","9"], right:["8","15"], ans:">", hint:"同分子比較，分母越小，每份越大。"},
+  {type:"compare", title:"比較大小，選出正確符號。", left:["3","7"], right:["3","5"], ans:"<", hint:"同分子時，分母 5 比 7 小，所以 3/5 較大。"},
+  {type:"compare", title:"比較大小，選出正確符號。", left:["13","15"], right:["15","15"], ans:"<", hint:"15/15 等於 1，比 13/15 大。"},
+  {type:"compare", title:"比較大小，選出正確符號。", left:["8","8"], right:["3","3"], ans:"=", hint:"8/8 和 3/3 都等於 1。"},
+  {type:"compare", title:"以下哪個分數最大？", options:["5/12","10/12","7/12","1"], ans:"1", hint:"1 等於 12/12，比其他十二分之幾大。"},
+  {type:"compare", title:"以下哪個分數最小？", options:["8/17","8/9","8/8","8/15"], ans:"8/17", hint:"同分子比較，分母越大，分數越小。"},
+  {type:"compare", title:"如果 ★/17 小於 5/17，★ 不可能是多少？", options:["6","4","2","1"], ans:"6", hint:"同分母，分子要小於 5 才會小於 5/17。"},
+  {type:"compare", title:"選出正確句子。", options:["11/11 = 11","1/4 = 4","8/9 讀作九分之八","5/6 讀作五分之六"], ans:"8/9 讀作九分之八", hint:"分數讀法是分母先讀。"},
+  {type:"compare", title:"哪一個較大？", options:["半個蛋糕","三分之一個蛋糕"], ans:"半個蛋糕", hint:"1/2 大過 1/3。"},
+
+  // order
+  {type:"order", title:"把以下分數由大至小排列。", items:["8/11","5/11","1"], ans:["1","8/11","5/11"], hint:"1 等於 11/11，所以最大。"},
+  {type:"order", title:"把以下分數由小至大排列。", items:["2/11","6/11","8/11"], ans:["2/11","6/11","8/11"], hint:"同分母，分子小的較小。"},
+  {type:"order", title:"把以下分數由小至大排列。", items:["5/16","3/16","3/26"], ans:["3/26","3/16","5/16"], hint:"先比同分子：3/26 小於 3/16；再比 3/16 和 5/16。"},
+  {type:"order", title:"把以下分數由大至小排列。", items:["8/14","8/19","11/14"], ans:["11/14","8/14","8/19"], hint:"11/14 大於 8/14；同分子 8 時，14 分母較小，所以 8/14 較大。"},
+  {type:"order", title:"把以下分數由小至大排列。", items:["15/16","1","15/17","5/17"], ans:["5/17","15/17","15/16","1"], hint:"1 最大；15/17 小於 15/16。"},
+  {type:"order", title:"把以下分數由大至小排列。", items:["2/5","4/10","8/20"], ans:["2/5","4/10","8/20"], hint:"這三個分數大小相同，任何等值順序也可；這裡照題目順序輸入。", acceptEquivalent:true},
+
+  // calc
+  {type:"calc", title:"計算：3/8 + 2/8 = ?", ans:["5","8"], hint:"同分母加法：分母不變，只加分子。"},
+  {type:"calc", title:"計算：2/10 + 3/10 + 5/10 = ?", ans:["10","10"], also:["1"], hint:"分母不變：2+3+5=10，所以是 10/10，也可以寫 1。"},
+  {type:"calc", title:"計算：4/12 + 5/12 = ?", ans:["9","12"], hint:"分母 12 不變，4+5=9。"},
+  {type:"calc", title:"計算：2/12 + 5/12 + 4/12 = ?", ans:["11","12"], hint:"分母不變，分子 2+5+4。"},
+  {type:"calc", title:"計算：7/8 - 2/8 = ?", ans:["5","8"], hint:"同分母減法：分母不變，只減分子。"},
+  {type:"calc", title:"計算：1 - 5/8 = ?", ans:["3","8"], hint:"1 可以看成 8/8；8/8 - 5/8 = 3/8。"},
+  {type:"calc", title:"計算：9/9 - 4/9 = ?", ans:["5","9"], hint:"9/9 等於 1，分母仍然是 9。"},
+  {type:"calc", title:"計算：12/12 - 7/12 = ?", ans:["5","12"], hint:"12-7=5，分母 12 不變。"},
+  {type:"calc", title:"計算：5/15 + 4/15 = ?", ans:["9","15"], hint:"同分母加法，分母不變。"},
+  {type:"calc", title:"計算：11/17 - 5/17 = ?", ans:["6","17"], hint:"11-5=6，分母 17 不變。"},
+
+  // word
+  {type:"word", title:"一盒糖果共有 15 粒，家明吃了 6 粒，心言吃了 4 粒。兩人共吃了全部的幾分之幾？", ans:["10","15"], hint:"先把吃了的粒數相加：6+4=10；全部是 15 粒。"},
+  {type:"word", title:"一瓶牛奶分成 8 等份。志偉喝了 1/8，小明喝了 5/8，美恩喝了 2/8。他們共喝了幾分之幾瓶？", ans:["8","8"], also:["1"], hint:"1/8+5/8+2/8=8/8，即 1 瓶。"},
+  {type:"word", title:"可兒有蘋果批 7/9 個，婉雯有蘋果批 5/9 個。可兒比婉雯多幾分之幾個？", ans:["2","9"], hint:"7/9 - 5/9 = 2/9。"},
+  {type:"word", title:"一包手工紙有 50 張，子琪分得 13/50，小雲分得 17/50，家文分得 9/50。誰分得最多？", textAns:"小雲", hint:"同分母比較分子，17 最大。"},
+  {type:"word", title:"農場有 9 隻動物，兔佔 2/9，鴨佔 4/9，雞佔 3/9。雞和鴨共佔全部動物的幾分之幾？", ans:["7","9"], hint:"題目問雞和鴨，不包括兔：3/9+4/9。"},
+  {type:"word", title:"農場有 9 隻動物，兔佔 2/9，鴨佔 4/9，雞佔 3/9。雞比鴨少佔全部動物的幾分之幾？", ans:["1","9"], hint:"鴨 4/9，雞 3/9，相差 1/9。"},
+  {type:"word", title:"媽媽做了一打三文治，其中雞蛋三文治佔全部的 1/4。雞蛋三文治有多少件？", textAns:"3", hint:"一打是 12 件，12 的四分之一是 3。"},
+  {type:"word", title:"王太太買了 14 對襪子，其中 3/14 是短的，11/14 是長的。短襪比長襪少多少對？", textAns:"8", hint:"長襪 11 對，短襪 3 對，相差 8 對。"},
+  {type:"word", title:"杯中有水 1 升，飲了 1/8 升，餘下多少升？", ans:["7","8"], hint:"1 升可看成 8/8 升。"},
+  {type:"word", title:"哥哥分得 3/9 盒朱古力，妹妹分得 2/9 盒，弟弟分得 4/9 盒。三人共分得多少盒？", ans:["9","9"], also:["1"], hint:"3/9+2/9+4/9=9/9=1。"},
+];
+
+let quiz=[], idx=0, correct=0, wrong=0, current=null, selected=null, wrongItems=[];
+
+function fracHTML(n,d){return `<span class="fracInput" style="font-size:20px"><span>${n}</span><span class="barline"></span><span>${d}</span></span>`}
+function norm(s){return String(s).trim().replace(/\s+/g,'').replace(/[，。]/g,'').replace('＞','>').replace('＜','<').replace('＝','=');}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+function startPractice(){
+  const mode=document.getElementById('mode').value;
+  const limit=parseInt(document.getElementById('limit').value,10);
+  let pool = mode==='mixed'? BANK : BANK.filter(q=>q.type===mode);
+  quiz = shuffle(pool).slice(0, Math.min(limit,pool.length));
+  idx=0; correct=0; wrong=0; wrongItems=[]; current=null; selected=null;
+  renderQuestion(); updateStats(); renderWrong();
+}
+function nextQuestion(){
+  if(!quiz.length){startPractice();return;}
+  idx++;
+  if(idx>=quiz.length){finish();return;}
+  renderQuestion(); updateStats();
+}
+function finish(){
+  document.getElementById('questionPanel').innerHTML = `<h2>完成！</h2><p class="question-title">今次做了 ${quiz.length} 題，答對 ${correct} 題。</p><p>可以查看下方錯題紀錄，再按「開始／重新出題」再練一次。</p>`;
+  updateStats();
+}
+function updateStats(){
+  const total=quiz.length||0;
+  document.getElementById('progress').textContent = total? `${Math.min(idx+1,total)}/${total}`:'0/0';
+  document.getElementById('correct').textContent = correct;
+  document.getElementById('wrong').textContent = wrong;
+  const done=correct+wrong;
+  document.getElementById('rate').textContent = done? Math.round(correct/done*100)+'%':'0%';
+}
+function svgShape(q){
+  if(q.shape==="circle"){
+    const n=q.parts, cx=150, cy=120, r=85;
+    let parts=[];
+    for(let i=0;i<n;i++){
+      const a1=(-90+i*360/n)*Math.PI/180, a2=(-90+(i+1)*360/n)*Math.PI/180;
+      const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1), x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2);
+      const large=(360/n)>180?1:0;
+      const fill=q.shaded.includes(i) !== !!q.askBlank ? "#b9b9b9" : "#fff";
+      // If askBlank true, display original shaded but ask blank? Better always shade q.shaded.
+      const realFill=q.shaded.includes(i) ? "#b9b9b9" : "#fff";
+      parts.push(`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${realFill}" stroke="#222" stroke-width="2"/>`);
+    }
+    return `<svg viewBox="0 0 300 240" aria-label="circle fraction">${parts.join('')}</svg>`;
+  } else {
+    const n=q.parts, cols = n%4===0?4:(n%3===0?3:5), rows=Math.ceil(n/cols);
+    const w=90,h=52, x0=60,y0=30;
+    let cells=[];
+    for(let i=0;i<n;i++){
+      const c=i%cols, r=Math.floor(i/cols);
+      const fill=q.shaded.includes(i) ? "#b9b9b9" : "#fff";
+      cells.push(`<rect x="${x0+c*w}" y="${y0+r*h}" width="${w}" height="${h}" fill="${fill}" stroke="#222" stroke-width="2"/>`);
+    }
+    return `<svg viewBox="0 0 ${x0*2+cols*w} ${y0*2+rows*h}" aria-label="rectangle fraction">${cells.join('')}</svg>`;
+  }
+}
+function renderQuestion(){
+  current=quiz[idx]; selected=null;
+  let p=document.getElementById('questionPanel');
+  let tags=`<span class="tag">${typeName(current.type)}</span>`;
+  let body=`<div>${tags}</div><div class="question-title">${idx+1}. ${current.title}</div>`;
+  if(current.type==="shade"){
+    body += `<div class="svgbox">${svgShape(current)}</div>`;
+    body += fracAnswer();
+  } else if(current.type==="read"){
+    if(current.frac) body += `<div class="work">分數：${fracHTML(current.frac[0],current.frac[1])}</div>`;
+    if(Array.isArray(current.ans)) body += fracAnswer();
+    else body += textAnswer("請輸入讀法，例如：八分之三");
+  } else if(current.type==="compare"){
+    if(current.left) body += `<div class="work" style="font-size:22px">${fracHTML(current.left[0],current.left[1])}　<input id="sym" type="text" placeholder="> < =" maxlength="1">　${fracHTML(current.right[0],current.right[1])}</div>`;
+    if(current.options) body += optionAnswer(current.options);
+    else body += `<div class="answer-area"><button class="primary" onclick="checkAnswer()">檢查答案</button></div>`;
+  } else if(current.type==="order"){
+    body += `<div class="work">請拖不到也可以直接按次序輸入：<b>${current.items.join("，")}</b></div>`;
+    body += `<div class="answer-area">
+      <input id="ord1" type="text" placeholder="第1個">，
+      <input id="ord2" type="text" placeholder="第2個">，
+      <input id="ord3" type="text" placeholder="第3個">
+      ${current.ans.length>3?`，<input id="ord4" type="text" placeholder="第4個">`:``}
+      <br><br><button class="primary" onclick="checkAnswer()">檢查答案</button>
+    </div>`;
+  } else if(current.type==="calc" || current.type==="word"){
+    if(current.textAns) body += textAnswer("請輸入答案");
+    else body += fracAnswer();
+  }
+  body += `<div id="fb"></div><div id="hint" class="hint hidden"></div>`;
+  p.innerHTML=body;
+}
+function typeName(t){
+  return {shade:"圖形分數", read:"讀法", compare:"比較", order:"排序", calc:"計算", word:"文字題"}[t]||t;
+}
+function fracAnswer(){
+  return `<div class="answer-area">答案：
+    <span class="fracInput"><input id="num" type="number" placeholder="分子"><span class="barline"></span><input id="den" type="number" placeholder="分母"></span>
+    <button class="primary" onclick="checkAnswer()">檢查答案</button>
+  </div>`;
+}
+function textAnswer(ph){
+  return `<div class="answer-area"><input id="txt" type="text" placeholder="${ph}" style="max-width:280px;text-align:left"> <button class="primary" onclick="checkAnswer()">檢查答案</button></div>`;
+}
+function optionAnswer(options){
+  return `<div class="options">`+options.map((op,i)=>`<div class="option" onclick="selectOption(this,'${htmlEscape(op)}')">${htmlEscape(op)}</div>`).join('')+`</div>
+  <div class="answer-area"><button class="primary" onclick="checkAnswer()">檢查答案</button></div>`;
+}
+function htmlEscape(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function selectOption(el,op){
+  selected=op;
+  document.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function getAnswer(){
+  if(current.type==="shade" || current.type==="calc" || (current.type==="word" && !current.textAns) || (current.type==="read" && Array.isArray(current.ans))){
+    return [norm(document.getElementById('num')?.value), norm(document.getElementById('den')?.value)];
+  }
+  if(current.type==="read" || (current.type==="word" && current.textAns)) return norm(document.getElementById('txt')?.value);
+  if(current.type==="compare"){
+    if(current.options) return norm(selected||"");
+    return norm(document.getElementById('sym')?.value);
+  }
+  if(current.type==="order"){
+    let ids=["ord1","ord2","ord3","ord4"];
+    return ids.map(id=>norm(document.getElementById(id)?.value||"")).filter(Boolean);
+  }
+}
+function isCorrect(ans){
+  if(current.textAns) return norm(ans)===norm(current.textAns);
+  if(current.type==="compare") return norm(ans)===norm(current.ans);
+  if(current.type==="order"){
+    if(current.acceptEquivalent){
+      // for 2/5,4/10,8/20 accept all permutations
+      return ans.length===current.ans.length && ans.every(x=>current.ans.map(norm).includes(norm(x)));
+    }
+    return JSON.stringify(ans.map(norm))===JSON.stringify(current.ans.map(norm));
+  }
+  if(Array.isArray(current.ans)){
+    if(Array.isArray(ans)){
+      if(ans[0]===norm(current.ans[0]) && ans[1]===norm(current.ans[1])) return true;
+      if(current.also && current.also.map(norm).includes(ans[0]) && (!ans[1] || ans[1]==="1")) return true;
+      return false;
+    }
+  }
+  return false;
+}
+function checkAnswer(){
+  if(!current) return;
+  const ans=getAnswer();
+  const ok=isCorrect(ans);
+  const fb=document.getElementById('fb');
+  if(ok){
+    correct++;
+    fb.innerHTML=`<div class="feedback ok">✅ 答對！好細心！</div><button class="good" onclick="nextQuestion()">下一題</button>`;
+  }else{
+    wrong++;
+    wrongItems.push({q:current.title, hint:current.hint, ans:answerText(current)});
+    fb.innerHTML=`<div class="feedback bad">❌ 未啱，再睇清楚題目問「陰影／空白」、「大至小／小至大」。</div><button onclick="showHint()">睇提示</button> <button class="good" onclick="nextQuestion()">下一題</button>`;
+  }
+  lockOptions(ok);
+  updateStats(); renderWrong();
+}
+function answerText(q){
+  if(q.textAns) return q.textAns;
+  if(q.type==="compare") return q.ans;
+  if(q.type==="order") return q.ans.join("，");
+  if(Array.isArray(q.ans)) return q.ans[0]+"/"+q.ans[1]+(q.also? " 或 "+q.also.join(" / "):"");
+  return String(q.ans);
+}
+function lockOptions(ok){
+  if(!current.options) return;
+  document.querySelectorAll('.option').forEach(el=>{
+    if(norm(el.textContent)===norm(current.ans)) el.classList.add('correct');
+    else if(el.classList.contains('selected')) el.classList.add('wrong');
+  });
+}
+function showHint(){
+  if(!current) return;
+  const h=document.getElementById('hint');
+  h.textContent=current.hint || "先圈關鍵字，再找分母和分子。";
+  h.classList.remove('hidden');
+}
+function renderWrong(){
+  const el=document.getElementById('wrongList');
+  if(!wrongItems.length){el.textContent="暫時未有錯題。";return;}
+  el.innerHTML=wrongItems.map((w,i)=>`<div style="margin-bottom:8px"><b>${i+1}. ${htmlEscape(w.q)}</b><br>答案：<span class="kbd">${htmlEscape(w.ans)}</span><br>提示：${htmlEscape(w.hint)}</div>`).join('');
+}
+function resetAll(){
+  quiz=[];idx=0;correct=0;wrong=0;wrongItems=[];current=null;selected=null;
+  document.getElementById('questionPanel').innerHTML='<div class="small">已清除。按「開始／重新出題」開始。</div>';
+  updateStats(); renderWrong();
+}
+startPractice();
+</script>
+</body>
+</html>
