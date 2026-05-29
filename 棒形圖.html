@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>棒形圖互動遊戲</title>
+<style>
+:root{--ink:#1f2937;--line:#111827;--paper:#fffdf7;--green:#dcfce7;--blue:#dbeafe;--red:#fee2e2;--yellow:#fffbeb;--bar:#b8c1cc}
+*{box-sizing:border-box}
+body{margin:0;background:#f5efe4;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif}
+.app{max-width:1120px;margin:16px auto;padding:18px;border:3px solid #111;border-radius:12px;background:var(--paper);box-shadow:0 4px 0 #111}
+header{border-bottom:6px double #111;padding-bottom:10px;margin-bottom:12px}
+h1{margin:4px 0;text-align:center;font-size:31px;letter-spacing:.1em}
+.topline{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:900;font-size:16px}
+.tabs,.tools{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.tab,.btn{border:3px solid #111;border-radius:12px;background:white;padding:10px 16px;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 3px 0 #111}
+.tab.active{background:#dbeafe}.btn.main{background:#dcfce7}.btn.warn{background:#fff7ed}
+.tab:active,.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #111}
+select,input{border:3px solid #111;border-radius:10px;padding:8px 10px;font-size:18px;font-weight:800;background:white}
+.progressWrap{height:18px;border:3px solid #111;border-radius:999px;overflow:hidden;margin:10px 0;background:white}
+.progress{height:100%;width:0;background:#86efac}
+.meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:15px;margin-bottom:8px;color:#374151}
+.qtitle{font-size:24px;font-weight:900;line-height:1.45;margin:12px 0 14px}
+.stage{border:3px solid #111;border-radius:10px;padding:18px;background:#fff;margin-bottom:16px}
+.chartTitle{font-size:22px;font-weight:900;text-align:center;margin-bottom:8px}
+.chartWrap{overflow:auto;padding:8px}
+svg{max-width:100%;height:auto}
+.choiceGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;width:100%;margin-top:10px}
+.choice{border:3px solid #111;border-radius:10px;padding:14px;font-size:21px;font-weight:900;background:white;cursor:pointer;text-align:center}
+.choice.sel{background:#dbeafe}.choice.ok{background:#dcfce7}.choice.no{background:#fee2e2}
+.answer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:22px;margin:8px 0}
+.numInput{width:120px;text-align:center}
+.fracIn{display:inline-flex;flex-direction:column;align-items:center;gap:4px}
+.fracLine{width:105px;height:3px;background:#111}
+.barInputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;width:100%}
+.barInputs label{border:2px solid #111;border-radius:10px;padding:10px;background:#fff}
+.feedback{font-size:22px;font-weight:900;margin:10px 0}.okText{color:#15803d}.badText{color:#b91c1c}
+.hint{border:3px dashed #f59e0b;background:#fffbeb;border-radius:10px;padding:14px;font-size:19px;line-height:1.55;margin-top:10px}
+.hidden{display:none}
+.wrongBox{border-top:2px solid #111;margin-top:14px;padding-top:12px;font-size:16px;line-height:1.6}
+.tableBox{margin:8px auto 14px;overflow:auto}
+table{border-collapse:collapse;margin:auto;font-size:19px;background:white}
+td,th{border:3px solid #111;padding:10px 14px;text-align:center}
+.badge{display:inline-block;border:2px solid #111;border-radius:999px;padding:5px 10px;background:#fff7ed;font-weight:900;margin-bottom:8px}
+@media(max-width:640px){.app{margin:0;border:0;border-radius:0;box-shadow:none}.qtitle{font-size:21px}.tab,.btn{font-size:15px;padding:9px 12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="topline"><span>單元：棒形圖</span><span>日期：__________</span><span>成績：____ / ____</span></div>
+  <h1>棒形圖互動遊戲</h1>
+</header>
+
+<div class="tabs" id="tabs"></div>
+<div class="tools">
+  <label>每次題數：
+    <select id="limit" onchange="restart()">
+      <option value="10">10</option>
+      <option value="15" selected>15</option>
+      <option value="20">20</option>
+      <option value="30">30</option>
+    </select>
+  </label>
+  <button class="btn warn" onclick="runSelfCheck()">自動檢查題庫</button>
+</div>
+
+<div class="progressWrap"><div class="progress" id="progress"></div></div>
+<div class="meta">
+  <div>題目：<b id="count">0 / 0</b></div>
+  <div>答對：<b id="right">0</b>　答錯：<b id="wrong">0</b>　正確率：<b id="rate">0%</b></div>
+</div>
+
+<div class="qtitle" id="qtitle"></div>
+<div class="stage" id="stage"></div>
+<div class="answer" id="answer"></div>
+<div>
+  <button class="btn main" onclick="check()">檢查答案</button>
+  <button class="btn" onclick="hint()">提示</button>
+  <button class="btn" onclick="next()">下一題</button>
+  <button class="btn" onclick="restart()">重新出題</button>
+</div>
+<div id="feedback"></div>
+<div id="hint" class="hint hidden"></div>
+<div class="wrongBox"><b>錯題紀錄：</b><div id="wrongList">暫時未有錯題。</div></div>
+</div>
+
+<script>
+const CATS=[["mixed","混合"],["read","閱讀圖表"],["make","製作棒形圖"],["horizontal","橫向圖"],["fraction","分數結合"],["axis","圖表四寶"],["recommend","生活判斷"]];
+const BANK=[{"type": "read", "title": "閱讀棒形圖", "question": "下圖顯示三年級各班參加海報設計比賽的人數。最多學生參加的是哪一班？", "chartTitle": "三年級各班參加海報設計比賽的人數", "xLabel": "班別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["3A", "3B", "3C", "3D", "3E"], "values": [7, 3, 8, 4, 9], "answerType": "choice", "options": ["3A", "3B", "3C", "3D", "3E"], "answer": "3E", "hint": "先看每條棒形的高度，最高的一條就是最多。"}, {"type": "read", "title": "閱讀棒形圖", "question": "3A 班比 3D 班多多少人？", "chartTitle": "三年級各班參加海報設計比賽的人數", "xLabel": "班別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["3A", "3B", "3C", "3D", "3E"], "values": [7, 3, 8, 4, 9], "answerType": "number", "answer": "3", "unit": "人", "hint": "3A 是 7 人，3D 是 4 人，7 − 4 = 3。"}, {"type": "read", "title": "閱讀棒形圖", "question": "參加海報設計比賽的三年級學生共有多少人？", "chartTitle": "三年級各班參加海報設計比賽的人數", "xLabel": "班別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["3A", "3B", "3C", "3D", "3E"], "values": [7, 3, 8, 4, 9], "answerType": "number", "answer": "31", "unit": "人", "hint": "把所有班別的人數加起來：7 + 3 + 8 + 4 + 9 = 31。"}, {"type": "read", "title": "閱讀棒形圖", "question": "這是一個（直向／橫向）棒形圖？", "chartTitle": "果汁店上星期五天的銷量", "xLabel": "星期", "yLabel": "銷量（杯）", "orientation": "vertical", "scaleMax": 20, "step": 2, "labels": ["一", "二", "三", "四", "五"], "values": [8, 12, 6, 16, 10], "answerType": "choice", "options": ["直向", "橫向"], "answer": "直向", "hint": "棒形由下向上畫，就是直向棒形圖。"}, {"type": "read", "title": "閱讀棒形圖", "question": "星期四比星期三多售出多少杯果汁？", "chartTitle": "果汁店上星期五天的銷量", "xLabel": "星期", "yLabel": "銷量（杯）", "orientation": "vertical", "scaleMax": 20, "step": 2, "labels": ["一", "二", "三", "四", "五"], "values": [8, 12, 6, 16, 10], "answerType": "number", "answer": "10", "unit": "杯", "hint": "星期四 16 杯，星期三 6 杯，16 − 6 = 10。"}, {"type": "read", "title": "閱讀棒形圖", "question": "如果店主想在銷量最差的一天做優惠，應選星期幾？", "chartTitle": "果汁店上星期五天的銷量", "xLabel": "星期", "yLabel": "銷量（杯）", "orientation": "vertical", "scaleMax": 20, "step": 2, "labels": ["一", "二", "三", "四", "五"], "values": [8, 12, 6, 16, 10], "answerType": "choice", "options": ["星期一", "星期二", "星期三", "星期四", "星期五"], "answer": "星期三", "hint": "做優惠通常想救銷量最少的一天；最少是星期三 6 杯。"}, {"type": "horizontal", "title": "橫向棒形圖", "question": "以下圖書類別中，借閱次數最多的是哪一類？", "chartTitle": "圖書館五類圖書的借閱次數", "xLabel": "次數", "yLabel": "圖書類別", "orientation": "horizontal", "scaleMax": 18, "step": 2, "labels": ["童話", "科學", "歷史", "漫畫", "旅遊"], "values": [10, 14, 6, 16, 8], "answerType": "choice", "options": ["童話", "科學", "歷史", "漫畫", "旅遊"], "answer": "漫畫", "hint": "橫向棒形圖要看哪條棒形最長。"}, {"type": "horizontal", "title": "橫向棒形圖", "question": "科學類比歷史類多借閱多少次？", "chartTitle": "圖書館五類圖書的借閱次數", "xLabel": "次數", "yLabel": "圖書類別", "orientation": "horizontal", "scaleMax": 18, "step": 2, "labels": ["童話", "科學", "歷史", "漫畫", "旅遊"], "values": [10, 14, 6, 16, 8], "answerType": "number", "answer": "8", "unit": "次", "hint": "科學 14 次，歷史 6 次，14 − 6 = 8。"}, {"type": "horizontal", "title": "橫向棒形圖", "question": "漫畫類和旅遊類共借閱多少次？", "chartTitle": "圖書館五類圖書的借閱次數", "xLabel": "次數", "yLabel": "圖書類別", "orientation": "horizontal", "scaleMax": 18, "step": 2, "labels": ["童話", "科學", "歷史", "漫畫", "旅遊"], "values": [10, 14, 6, 16, 8], "answerType": "number", "answer": "24", "unit": "次", "hint": "漫畫 16 次，旅遊 8 次，16 + 8 = 24。"}, {"type": "make", "title": "製作棒形圖", "question": "根據統計表，完成直向棒形圖。請輸入每項棒形的高度。", "tableTitle": "三年級學生最喜愛的運動", "chartTitle": "三年級學生最喜愛的運動", "xLabel": "項目", "yLabel": "人數", "orientation": "vertical", "scaleMax": 12, "step": 2, "labels": ["足球", "游泳", "羽毛球", "跳繩", "籃球"], "values": [8, 6, 10, 4, 12], "answerType": "bars", "hint": "看表格，把每個項目的人數輸入到相同項目的空格。"}, {"type": "make", "title": "製作棒形圖", "question": "根據統計表，完成橫向棒形圖。請輸入每項棒形的長度。", "tableTitle": "文具店上星期四款文具的銷量", "chartTitle": "文具店上星期四款文具的銷量", "xLabel": "銷量（件）", "yLabel": "文具", "orientation": "horizontal", "scaleMax": 40, "step": 5, "labels": ["鉛筆", "直尺", "膠擦", "剪刀", "膠水"], "values": [35, 20, 25, 15, 30], "answerType": "bars", "hint": "橫向棒形圖要按數值向右畫，今次用輸入數字代替畫棒形。"}, {"type": "make", "title": "半格陷阱", "question": "每一格代表 2 人。根據統計表完成棒形圖，請輸入每項人數。", "tableTitle": "圖書館五類圖書的借閱人數", "chartTitle": "圖書館五類圖書的借閱人數", "xLabel": "圖書類別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 14, "step": 2, "labels": ["故事書", "科學書", "漫畫", "字典", "歷史書"], "values": [5, 8, 11, 6, 13], "answerType": "bars", "hint": "有些數字是奇數，例如 5、11、13；如果畫圖要畫到半格。"}, {"type": "fraction", "title": "棒形圖＋分數", "question": "喜歡曲奇的人數佔全部投票人數的幾分之幾？", "chartTitle": "四款小食受歡迎人數", "xLabel": "小食", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["蛋撻", "曲奇", "布丁", "雪糕"], "values": [6, 9, 3, 6], "answerType": "fraction", "answer": ["9", "24"], "hint": "先求總人數：6 + 9 + 3 + 6 = 24。曲奇是 9 人，所以是 9/24。三年級不用約分。"}, {"type": "fraction", "title": "棒形圖＋分數", "question": "喜歡蛋撻和雪糕的人數共佔全部的幾分之幾？", "chartTitle": "四款小食受歡迎人數", "xLabel": "小食", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["蛋撻", "曲奇", "布丁", "雪糕"], "values": [6, 9, 3, 6], "answerType": "fraction", "answer": ["12", "24"], "hint": "蛋撻 6 人，雪糕 6 人，共 12 人；全部 24 人，所以是 12/24。"}, {"type": "axis", "title": "圖表四寶", "question": "下圖的數字刻度在縱軸，所以縱軸標籤應該是甚麼？", "chartTitle": "三年級各班圖書角圖書數量", "xLabel": "班別", "yLabel": "本數", "orientation": "vertical", "scaleMax": 16, "step": 2, "labels": ["3A", "3B", "3C", "3D", "3E"], "values": [12, 8, 14, 6, 10], "answerType": "choice", "options": ["班別", "本數", "星期", "圖書類別"], "answer": "本數", "hint": "跟住數字走：數字軸旁邊寫數量詞，例如人數、本數、銷量。"}, {"type": "axis", "title": "圖表四寶", "question": "下圖的橫軸標籤應該是甚麼？", "chartTitle": "三年級各班圖書角圖書數量", "xLabel": "班別", "yLabel": "本數", "orientation": "vertical", "scaleMax": 16, "step": 2, "labels": ["3A", "3B", "3C", "3D", "3E"], "values": [12, 8, 14, 6, 10], "answerType": "choice", "options": ["班別", "本數", "人數", "銷量"], "answer": "班別", "hint": "橫軸下面是 3A、3B、3C，所以橫軸標籤是班別。"}, {"type": "recommend", "title": "生活情境判斷", "question": "如果圖書館只可添購一類新書，你會建議添購哪一類？", "chartTitle": "圖書館五類圖書的借閱次數", "xLabel": "次數", "yLabel": "圖書類別", "orientation": "horizontal", "scaleMax": 18, "step": 2, "labels": ["童話", "科學", "歷史", "漫畫", "旅遊"], "values": [10, 14, 6, 16, 8], "answerType": "choice", "options": ["童話", "科學", "歷史", "漫畫", "旅遊"], "answer": "漫畫", "hint": "添購新書通常選最多人借閱、最受歡迎的一類。"}, {"type": "recommend", "title": "生活情境判斷", "question": "如果店主想在銷量最低的一天做優惠，應選哪一天？", "chartTitle": "水果店上星期五天的銷量", "xLabel": "星期", "yLabel": "銷量（份）", "orientation": "vertical", "scaleMax": 30, "step": 5, "labels": ["一", "二", "三", "四", "五"], "values": [25, 20, 15, 30, 22], "answerType": "choice", "options": ["星期一", "星期二", "星期三", "星期四", "星期五"], "answer": "星期三", "hint": "做優惠救生意，要找銷量最低的一天。"}, {"type": "read", "title": "閱讀棒形圖", "question": "閱讀課外書的人數中，最多的是哪一項？", "chartTitle": "閱讀課外書的人數", "xLabel": "班別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["3A", "3B", "3C", "3D"], "values": [6, 9, 5, 8], "answerType": "choice", "options": ["3A", "3B", "3C", "3D"], "answer": "3B", "hint": "找最高的棒形。"}, {"type": "read", "title": "閱讀棒形圖", "question": "3B 比 3C 多多少？", "chartTitle": "閱讀課外書的人數", "xLabel": "班別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["3A", "3B", "3C", "3D"], "values": [6, 9, 5, 8], "answerType": "number", "answer": "4", "unit": "", "hint": "9 − 5 = 4。"}, {"type": "read", "title": "閱讀棒形圖", "question": "全部共有多少？", "chartTitle": "閱讀課外書的人數", "xLabel": "班別", "yLabel": "人數", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["3A", "3B", "3C", "3D"], "values": [6, 9, 5, 8], "answerType": "number", "answer": "28", "unit": "", "hint": "把所有棒形代表的數字加起來。"}, {"type": "read", "title": "閱讀棒形圖", "question": "小食部售出食物數量中，最多的是哪一項？", "chartTitle": "小食部售出食物數量", "xLabel": "食物", "yLabel": "數量（個）", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["三文治", "飯糰", "麵包", "蛋糕"], "values": [9, 5, 7, 6], "answerType": "choice", "options": ["三文治", "飯糰", "麵包", "蛋糕"], "answer": "三文治", "hint": "找最高的棒形。"}, {"type": "read", "title": "閱讀棒形圖", "question": "三文治 比 飯糰 多多少？", "chartTitle": "小食部售出食物數量", "xLabel": "食物", "yLabel": "數量（個）", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["三文治", "飯糰", "麵包", "蛋糕"], "values": [9, 5, 7, 6], "answerType": "number", "answer": "4", "unit": "", "hint": "9 − 5 = 4。"}, {"type": "read", "title": "閱讀棒形圖", "question": "全部共有多少？", "chartTitle": "小食部售出食物數量", "xLabel": "食物", "yLabel": "數量（個）", "orientation": "vertical", "scaleMax": 10, "step": 1, "labels": ["三文治", "飯糰", "麵包", "蛋糕"], "values": [9, 5, 7, 6], "answerType": "number", "answer": "27", "unit": "", "hint": "把所有棒形代表的數字加起來。"}, {"type": "read", "title": "閱讀棒形圖", "question": "文具店售出四款文具的數量中，最多的是哪一項？", "chartTitle": "文具店售出四款文具的數量", "xLabel": "文具", "yLabel": "銷量（件）", "orientation": "vertical", "scaleMax": 50, "step": 5, "labels": ["鉛筆", "直尺", "膠擦", "剪刀"], "values": [45, 30, 40, 25], "answerType": "choice", "options": ["鉛筆", "直尺", "膠擦", "剪刀"], "answer": "鉛筆", "hint": "找最高的棒形。"}, {"type": "read", "title": "閱讀棒形圖", "question": "鉛筆 比 剪刀 多多少？", "chartTitle": "文具店售出四款文具的數量", "xLabel": "文具", "yLabel": "銷量（件）", "orientation": "vertical", "scaleMax": 50, "step": 5, "labels": ["鉛筆", "直尺", "膠擦", "剪刀"], "values": [45, 30, 40, 25], "answerType": "number", "answer": "20", "unit": "", "hint": "45 − 25 = 20。"}, {"type": "read", "title": "閱讀棒形圖", "question": "全部共有多少？", "chartTitle": "文具店售出四款文具的數量", "xLabel": "文具", "yLabel": "銷量（件）", "orientation": "vertical", "scaleMax": 50, "step": 5, "labels": ["鉛筆", "直尺", "膠擦", "剪刀"], "values": [45, 30, 40, 25], "answerType": "number", "answer": "140", "unit": "", "hint": "把所有棒形代表的數字加起來。"}, {"type": "read", "title": "閱讀棒形圖", "question": "星期一至五遲到人數中，最多的是哪一項？", "chartTitle": "星期一至五遲到人數", "xLabel": "星期", "yLabel": "人數", "orientation": "vertical", "scaleMax": 20, "step": 2, "labels": ["一", "二", "三", "四", "五"], "values": [8, 15, 12, 18, 16], "answerType": "choice", "options": ["一", "二", "三", "四", "五"], "answer": "四", "hint": "找最高的棒形。"}, {"type": "read", "title": "閱讀棒形圖", "question": "四 比 一 多多少？", "chartTitle": "星期一至五遲到人數", "xLabel": "星期", "yLabel": "人數", "orientation": "vertical", "scaleMax": 20, "step": 2, "labels": ["一", "二", "三", "四", "五"], "values": [8, 15, 12, 18, 16], "answerType": "number", "answer": "10", "unit": "", "hint": "18 − 8 = 10。"}, {"type": "read", "title": "閱讀棒形圖", "question": "全部共有多少？", "chartTitle": "星期一至五遲到人數", "xLabel": "星期", "yLabel": "人數", "orientation": "vertical", "scaleMax": 20, "step": 2, "labels": ["一", "二", "三", "四", "五"], "values": [8, 15, 12, 18, 16], "answerType": "number", "answer": "69", "unit": "", "hint": "把所有棒形代表的數字加起來。"}, {"type": "read", "title": "閱讀棒形圖", "question": "學生最喜愛的水果中，最多的是哪一項？", "chartTitle": "學生最喜愛的水果", "xLabel": "水果", "yLabel": "人數", "orientation": "vertical", "scaleMax": 12, "step": 1, "labels": ["蘋果", "香蕉", "西瓜", "橙", "葡萄"], "values": [11, 7, 9, 5, 8], "answerType": "choice", "options": ["蘋果", "香蕉", "西瓜", "橙", "葡萄"], "answer": "蘋果", "hint": "找最高的棒形。"}, {"type": "read", "title": "閱讀棒形圖", "question": "蘋果 比 橙 多多少？", "chartTitle": "學生最喜愛的水果", "xLabel": "水果", "yLabel": "人數", "orientation": "vertical", "scaleMax": 12, "step": 1, "labels": ["蘋果", "香蕉", "西瓜", "橙", "葡萄"], "values": [11, 7, 9, 5, 8], "answerType": "number", "answer": "6", "unit": "", "hint": "11 − 5 = 6。"}, {"type": "read", "title": "閱讀棒形圖", "question": "全部共有多少？", "chartTitle": "學生最喜愛的水果", "xLabel": "水果", "yLabel": "人數", "orientation": "vertical", "scaleMax": 12, "step": 1, "labels": ["蘋果", "香蕉", "西瓜", "橙", "葡萄"], "values": [11, 7, 9, 5, 8], "answerType": "number", "answer": "40", "unit": "", "hint": "把所有棒形代表的數字加起來。"}, {"type": "read", "title": "閱讀棒形圖", "question": "不同動物的票數中，最多的是哪一項？", "chartTitle": "不同動物的票數", "xLabel": "動物", "yLabel": "票數", "orientation": "vertical", "scaleMax": 15, "step": 1, "labels": ["貓", "狗", "兔", "獅子", "其他"], "values": [14, 12, 8, 11, 5], "answerType": "choice", "options": ["貓", "狗", "兔", "獅子", "其他"], "answer": "貓", "hint": "找最高的棒形。"}, {"type": "read", "title": "閱讀棒形圖", "question": "貓 比 其他 多多少？", "chartTitle": "不同動物的票數", "xLabel": "動物", "yLabel": "票數", "orientation": "vertical", "scaleMax": 15, "step": 1, "labels": ["貓", "狗", "兔", "獅子", "其他"], "values": [14, 12, 8, 11, 5], "answerType": "number", "answer": "9", "unit": "", "hint": "14 − 5 = 9。"}, {"type": "read", "title": "閱讀棒形圖", "question": "全部共有多少？", "chartTitle": "不同動物的票數", "xLabel": "動物", "yLabel": "票數", "orientation": "vertical", "scaleMax": 15, "step": 1, "labels": ["貓", "狗", "兔", "獅子", "其他"], "values": [14, 12, 8, 11, 5], "answerType": "number", "answer": "50", "unit": "", "hint": "把所有棒形代表的數字加起來。"}];
+let mode="mixed", quiz=[], i=0, right=0, wrong=0, chosen="", wrongLog=[];
+
+function initTabs(){
+  document.getElementById("tabs").innerHTML=CATS.map(([id,name])=>`<button class="tab ${id===mode?'active':''}" onclick="setMode('${id}')">${name}</button>`).join("");
+}
+function setMode(m){mode=m;initTabs();restart();}
+function pick(){
+  let pool=mode==="mixed"?BANK:BANK.filter(q=>q.type===mode || (mode==="horizontal"&&q.orientation==="horizontal"));
+  let n=Number(document.getElementById("limit")?.value||15);
+  return [...pool].sort(()=>Math.random()-.5).slice(0,Math.min(n,pool.length));
+}
+function restart(){quiz=pick();i=0;right=0;wrong=0;chosen="";wrongLog=[];render();stats();}
+function next(){if(!quiz.length)restart();else{i=(i+1)%quiz.length;chosen="";render();stats();}}
+function stats(){
+  document.getElementById("count").textContent=quiz.length?`${i+1} / ${quiz.length}`:"0 / 0";
+  document.getElementById("right").textContent=right; document.getElementById("wrong").textContent=wrong;
+  const done=right+wrong; document.getElementById("rate").textContent=done?Math.round(right/done*100)+"%":"0%";
+  document.getElementById("progress").style.width=quiz.length?((i+1)/quiz.length*100)+"%":"0%";
+  document.getElementById("wrongList").innerHTML=wrongLog.length?wrongLog.map((x,n)=>`${n+1}. ${escapeHTML(x)}`).join("<br>"):"暫時未有錯題。";
+}
+function render(){
+  const q=quiz[i]||BANK[0]; chosen="";
+  document.getElementById("qtitle").textContent=q.question;
+  document.getElementById("feedback").innerHTML="";
+  document.getElementById("hint").classList.add("hidden");
+  document.getElementById("hint").textContent=q.hint||"先看一小格代表多少，再讀每條棒形。";
+  document.getElementById("stage").innerHTML=stageHTML(q);
+  document.getElementById("answer").innerHTML=answerHTML(q);
+}
+function stageHTML(q){
+  let table="";
+  if(q.answerType==="bars"){
+    table=`<div class="tableBox"><table><tr><th>${escapeHTML(q.xLabel)}</th>${q.labels.map(x=>`<th>${escapeHTML(x)}</th>`).join("")}</tr><tr><th>${escapeHTML(q.yLabel)}</th>${q.values.map(v=>`<td>${v}</td>`).join("")}</tr></table></div>`;
+  }
+  return `${table}<div class="badge">${escapeHTML(q.title||"棒形圖")}</div><div class="chartTitle">${escapeHTML(q.chartTitle)}</div><div class="chartWrap">${drawChart(q)}</div>`;
+}
+function drawChart(q){
+  if(q.orientation==="horizontal") return drawHorizontal(q);
+  return drawVertical(q);
+}
+function drawVertical(q){
+  const W=760,H=420, left=76, right=30, top=26, bottom=78;
+  const cw=W-left-right, ch=H-top-bottom;
+  const step=q.step, max=q.scaleMax;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  svg+=`<rect x="0" y="0" width="${W}" height="${H}" fill="white"/>`;
+  for(let v=0; v<=max; v+=step){
+    const y=top+ch-(v/max)*ch;
+    svg+=`<line x1="${left}" y1="${y}" x2="${left+cw}" y2="${y}" stroke="#999" stroke-dasharray="4 4"/>`;
+    svg+=`<text x="${left-12}" y="${y+5}" text-anchor="end" font-size="16" font-weight="700">${v}</text>`;
+  }
+  svg+=`<line x1="${left}" y1="${top}" x2="${left}" y2="${top+ch}" stroke="#111" stroke-width="3"/>`;
+  svg+=`<line x1="${left}" y1="${top+ch}" x2="${left+cw}" y2="${top+ch}" stroke="#111" stroke-width="3"/>`;
+  const n=q.labels.length, gap=18, bw=(cw-gap*(n+1))/n;
+  q.labels.forEach((lab,idx)=>{
+    const val=q.values[idx], x=left+gap+idx*(bw+gap), h=(val/max)*ch, y=top+ch-h;
+    svg+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="#b8c1cc" stroke="#111" stroke-width="3"/>`;
+    svg+=`<text x="${x+bw/2}" y="${top+ch+28}" text-anchor="middle" font-size="18" font-weight="800">${escapeHTML(lab)}</text>`;
+    svg+=`<text x="${x+bw/2}" y="${y-7}" text-anchor="middle" font-size="16" font-weight="800">${val}</text>`;
+  });
+  svg+=`<text x="${left+cw/2}" y="${H-18}" text-anchor="middle" font-size="18" font-weight="900">${escapeHTML(q.xLabel)}</text>`;
+  svg+=`<text x="22" y="${top+ch/2}" text-anchor="middle" transform="rotate(-90 22 ${top+ch/2})" font-size="18" font-weight="900">${escapeHTML(q.yLabel)}</text>`;
+  svg+=`</svg>`;
+  return svg;
+}
+function drawHorizontal(q){
+  const W=760,H=420, left=120, right=38, top=30, bottom=58;
+  const cw=W-left-right, ch=H-top-bottom;
+  const step=q.step, max=q.scaleMax;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img"><rect x="0" y="0" width="${W}" height="${H}" fill="white"/>`;
+  for(let v=0; v<=max; v+=step){
+    const x=left+(v/max)*cw;
+    svg+=`<line x1="${x}" y1="${top}" x2="${x}" y2="${top+ch}" stroke="#999" stroke-dasharray="4 4"/>`;
+    svg+=`<text x="${x}" y="${top+ch+25}" text-anchor="middle" font-size="15" font-weight="700">${v}</text>`;
+  }
+  svg+=`<line x1="${left}" y1="${top}" x2="${left}" y2="${top+ch}" stroke="#111" stroke-width="3"/>`;
+  svg+=`<line x1="${left}" y1="${top+ch}" x2="${left+cw}" y2="${top+ch}" stroke="#111" stroke-width="3"/>`;
+  const n=q.labels.length, gap=12, bh=(ch-gap*(n+1))/n;
+  q.labels.forEach((lab,idx)=>{
+    const val=q.values[idx], y=top+gap+idx*(bh+gap), w=(val/max)*cw;
+    svg+=`<text x="${left-12}" y="${y+bh/2+6}" text-anchor="end" font-size="18" font-weight="800">${escapeHTML(lab)}</text>`;
+    svg+=`<rect x="${left}" y="${y}" width="${w}" height="${bh}" fill="#b8c1cc" stroke="#111" stroke-width="3"/>`;
+    svg+=`<text x="${left+w+12}" y="${y+bh/2+6}" font-size="16" font-weight="800">${val}</text>`;
+  });
+  svg+=`<text x="${left+cw/2}" y="${H-14}" text-anchor="middle" font-size="18" font-weight="900">${escapeHTML(q.xLabel)}</text>`;
+  svg+=`<text x="24" y="${top+ch/2}" text-anchor="middle" transform="rotate(-90 24 ${top+ch/2})" font-size="18" font-weight="900">${escapeHTML(q.yLabel)}</text>`;
+  svg+=`</svg>`;
+  return svg;
+}
+function answerHTML(q){
+  if(q.answerType==="choice"){
+    return `<div class="choiceGrid">${q.options.map(o=>`<button class="choice" onclick="choose(this,'${jsAttr(o)}')">${escapeHTML(o)}</button>`).join("")}</div>`;
+  }
+  if(q.answerType==="number") return `答案：<input class="numInput" id="numAns" placeholder="數字"> ${q.unit?escapeHTML(q.unit):""}`;
+  if(q.answerType==="fraction") return `答案：<span class="fracIn"><input id="num" placeholder="分子"><span class="fracLine"></span><input id="den" placeholder="分母"></span>`;
+  if(q.answerType==="bars"){
+    return `<div class="barInputs">${q.labels.map((lab,idx)=>`<label>${escapeHTML(lab)}：<input class="numInput barAns" data-idx="${idx}" placeholder="數值"></label>`).join("")}</div>`;
+  }
+  return "";
+}
+function choose(el,val){chosen=val;document.querySelectorAll(".choice").forEach(x=>x.classList.remove("sel"));el.classList.add("sel");}
+function norm(x){return String(x||"").trim().replace(/\s/g,"").replace(/[，。]/g,"").toUpperCase();}
+function check(){
+  const q=quiz[i]; let ok=false;
+  if(q.answerType==="choice") ok=norm(chosen)===norm(q.answer);
+  if(q.answerType==="number") ok=norm(document.getElementById("numAns")?.value)===norm(q.answer);
+  if(q.answerType==="fraction") ok=norm(document.getElementById("num")?.value)===norm(q.answer[0]) && norm(document.getElementById("den")?.value)===norm(q.answer[1]);
+  if(q.answerType==="bars"){
+    const vals=[...document.querySelectorAll(".barAns")].map(x=>norm(x.value));
+    ok=JSON.stringify(vals)===JSON.stringify(q.values.map(v=>String(v)));
+  }
+  markChoices(q);
+  if(ok){right++;document.getElementById("feedback").innerHTML=`<div class="feedback okText">✅ 答對！</div>`;}
+  else{wrong++;wrongLog.push(q.question+"　答案："+correctText(q));document.getElementById("feedback").innerHTML=`<div class="feedback badText">❌ 未啱。記得先標數字，再計算。</div>`;hint();}
+  stats();
+}
+function markChoices(q){
+  if(q.answerType!=="choice") return;
+  document.querySelectorAll(".choice").forEach(el=>{if(norm(el.textContent)===norm(q.answer))el.classList.add("ok");else if(el.classList.contains("sel"))el.classList.add("no");});
+}
+function correctText(q){
+  if(q.answerType==="choice") return q.answer;
+  if(q.answerType==="number") return q.answer+(q.unit? q.unit:"");
+  if(q.answerType==="fraction") return q.answer[0]+"/"+q.answer[1];
+  if(q.answerType==="bars") return q.labels.map((l,i)=>l+"="+q.values[i]).join("，");
+  return "";
+}
+function hint(){document.getElementById("hint").classList.remove("hidden");}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function jsAttr(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
+function runSelfCheck(){
+  const errors=[];
+  BANK.forEach((q,idx)=>{
+    if(!q.question||!q.chartTitle) errors.push(idx+": 缺題目或標題");
+    if(q.answerType==="choice" && !q.options.includes(q.answer)) errors.push(idx+": 選擇題答案不在選項");
+    if(q.labels.length!==q.values.length) errors.push(idx+": labels/values 長度不同");
+    if(Math.max(...q.values)>q.scaleMax) errors.push(idx+": 數值大過刻度上限");
+  });
+  document.getElementById("feedback").innerHTML=errors.length?`<div class="feedback badText">⚠️ 題庫檢查發現：<br>${errors.map(escapeHTML).join("<br>")}</div>`:`<div class="feedback okText">✅ 題庫檢查通過：共 ${BANK.length} 題。</div>`;
+}
+initTabs();restart();
+</script>
+</body>
+</html>
