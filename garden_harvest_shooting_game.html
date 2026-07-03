@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>園圃收成射擊遊戲</title>
+  <style>
+    :root{
+      --green:#2f8f46;
+      --light:#f3ffe9;
+      --cream:#fff6dc;
+      --orange:#ffb347;
+      --red:#ff6868;
+      --brown:#8b5e34;
+      --blue:#83d6ff;
+      --dark:#28402a;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      font-family: "PingFang HK","Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;
+      background:linear-gradient(#c9f3ff 0%, #efffdd 45%, #a9df8f 100%);
+      color:var(--dark);
+      touch-action:none;
+      user-select:none;
+    }
+    #app{
+      width:100vw;
+      height:100vh;
+      position:relative;
+      overflow:hidden;
+    }
+    .screen{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      text-align:center;
+      z-index:10;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255,255,255,.75), transparent 16%),
+        radial-gradient(circle at 82% 18%, rgba(255,255,255,.65), transparent 14%),
+        linear-gradient(#c9f3ff 0%, #f7ffd9 54%, #b7e691 100%);
+    }
+    .hidden{display:none!important;}
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(34px,6vw,70px);
+      line-height:1.05;
+      color:#20753a;
+      text-shadow:0 4px 0 rgba(255,255,255,.65);
+      letter-spacing:1px;
+    }
+    .subtitle{
+      font-size:clamp(18px,2.8vw,30px);
+      line-height:1.45;
+      margin:10px auto 18px;
+      max-width:850px;
+      font-weight:700;
+    }
+    .card{
+      width:min(900px,92vw);
+      background:rgba(255,255,255,.82);
+      border:5px solid rgba(47,143,70,.25);
+      border-radius:28px;
+      padding:22px;
+      box-shadow:0 14px 40px rgba(40,90,30,.18);
+    }
+    .level-row{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      margin-top:18px;
+    }
+    button{
+      border:0;
+      border-radius:22px;
+      padding:18px 14px;
+      font-size:clamp(18px,2.4vw,28px);
+      font-weight:900;
+      color:white;
+      background:linear-gradient(#45b861,#2d8d45);
+      box-shadow:0 7px 0 #1f7135,0 11px 22px rgba(0,0,0,.17);
+      cursor:pointer;
+    }
+    button:active{transform:translateY(5px);box-shadow:0 2px 0 #1f7135;}
+    .level-btn small{
+      display:block;
+      font-size:.58em;
+      line-height:1.35;
+      margin-top:6px;
+      font-weight:800;
+      color:#eaffdf;
+    }
+    .secondary{
+      background:linear-gradient(#ffbe55,#ee8a24);
+      box-shadow:0 7px 0 #c56b14,0 11px 22px rgba(0,0,0,.17);
+    }
+    .danger{
+      background:linear-gradient(#ff7a7a,#e44747);
+      box-shadow:0 7px 0 #bd2f2f,0 11px 22px rgba(0,0,0,.17);
+    }
+    #game{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 10% 16%, rgba(255,255,255,.8), transparent 11%),
+        radial-gradient(circle at 75% 11%, rgba(255,255,255,.7), transparent 12%),
+        linear-gradient(#bcecff 0%, #eaffd6 46%, #8bd16e 46%, #69b84e 100%);
+    }
+    #field{
+      position:absolute;
+      left:-5%;
+      right:-5%;
+      bottom:-18%;
+      height:58%;
+      background:
+        repeating-linear-gradient(105deg, rgba(76,137,54,.28) 0 24px, rgba(255,255,255,.08) 24px 44px),
+        linear-gradient(#7bc65b,#4ea843);
+      border-radius:50% 50% 0 0 / 24% 24% 0 0;
+      z-index:0;
+    }
+    #field::after{
+      content:"";
+      position:absolute;
+      inset:18% 4% 0;
+      background:repeating-linear-gradient(0deg, transparent 0 54px, rgba(50,100,35,.17) 54px 62px);
+      border-radius:inherit;
+    }
+    #hud{
+      position:absolute;
+      top:calc(env(safe-area-inset-top,0px) + 10px);
+      left:14px;
+      right:14px;
+      min-height:76px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      z-index:5;
+      pointer-events:none;
+    }
+    .hud-box{
+      background:rgba(255,255,255,.88);
+      border:4px solid rgba(47,143,70,.25);
+      border-radius:22px;
+      padding:9px 12px;
+      font-size:clamp(18px,2.2vw,30px);
+      font-weight:900;
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+    }
+    .hud-label{
+      display:block;
+      font-size:.55em;
+      color:#5d7f50;
+      margin-bottom:2px;
+    }
+    #hintBar{
+      position:absolute;
+      top:calc(env(safe-area-inset-top,0px) + 96px);
+      left:50%;
+      transform:translateX(-50%);
+      width:min(92vw,850px);
+      background:rgba(255,246,220,.94);
+      border:4px solid rgba(255,179,71,.55);
+      border-radius:999px;
+      padding:10px 18px;
+      z-index:5;
+      font-size:clamp(17px,2.2vw,28px);
+      font-weight:900;
+      box-shadow:0 8px 20px rgba(0,0,0,.08);
+      pointer-events:none;
+    }
+    #pauseBtn{
+      position:absolute;
+      right:16px;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 16px);
+      z-index:7;
+      width:88px;
+      height:88px;
+      border-radius:50%;
+      font-size:36px;
+      padding:0;
+      pointer-events:auto;
+    }
+    .target{
+      position:absolute;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      z-index:3;
+      transform:translate(-50%,-50%);
+      cursor:pointer;
+      will-change:transform, left, top;
+      filter:drop-shadow(0 10px 8px rgba(37,80,34,.22));
+    }
+    .target .bubble{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      background:rgba(255,255,255,.38);
+      border:5px solid rgba(255,255,255,.55);
+      box-shadow:inset 0 -10px 16px rgba(0,0,0,.06);
+    }
+    .target.good .bubble{background:rgba(255,255,255,.30);}
+    .target.bad .bubble{background:rgba(255,226,226,.50);border-color:rgba(255,120,120,.7);}
+    .target .emoji{
+      line-height:1;
+      transform:translateY(-2px);
+    }
+    .target .name{
+      position:absolute;
+      bottom:-18px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(255,255,255,.92);
+      color:#2d6936;
+      border-radius:999px;
+      white-space:nowrap;
+      padding:3px 9px;
+      font-size:16px;
+      font-weight:900;
+      box-shadow:0 3px 8px rgba(0,0,0,.08);
+    }
+    .target.bad .name{color:#c83b3b;}
+    .pop{
+      position:absolute;
+      z-index:8;
+      font-size:clamp(22px,4vw,42px);
+      font-weight:1000;
+      pointer-events:none;
+      animation:popUp .72s ease-out forwards;
+      text-shadow:0 3px 0 white;
+    }
+    @keyframes popUp{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.6);}
+      20%{opacity:1;transform:translate(-50%,-72%) scale(1.15);}
+      100%{opacity:0;transform:translate(-50%,-140%) scale(.9);}
+    }
+    .spark{
+      position:absolute;
+      z-index:6;
+      width:80px;
+      height:80px;
+      pointer-events:none;
+      transform:translate(-50%,-50%);
+      animation:spark .45s ease-out forwards;
+    }
+    .spark::before{
+      content:"✨";
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:54px;
+    }
+    @keyframes spark{
+      from{opacity:1;transform:translate(-50%,-50%) scale(.5) rotate(0deg);}
+      to{opacity:0;transform:translate(-50%,-50%) scale(1.45) rotate(18deg);}
+    }
+    .float-plant{
+      position:absolute;
+      font-size:clamp(44px,7vw,82px);
+      opacity:.58;
+      animation:floaty 4s ease-in-out infinite;
+    }
+    .float-plant:nth-child(2){animation-delay:.6s;}
+    .float-plant:nth-child(3){animation-delay:1.2s;}
+    @keyframes floaty{
+      0%,100%{transform:translateY(0) rotate(-3deg);}
+      50%{transform:translateY(-18px) rotate(4deg);}
+    }
+    #resultEmoji{
+      font-size:clamp(58px,10vw,120px);
+      margin-bottom:6px;
+    }
+    .result-line{
+      font-size:clamp(22px,3.2vw,38px);
+      font-weight:900;
+      margin:6px 0;
+    }
+    .rules{
+      text-align:left;
+      display:grid;
+      gap:8px;
+      font-size:clamp(17px,2.2vw,26px);
+      font-weight:800;
+      line-height:1.35;
+      margin:12px auto 0;
+      max-width:760px;
+    }
+    .pill{
+      display:inline-block;
+      border-radius:999px;
+      padding:4px 11px;
+      background:#e7ffe3;
+      color:#2f8f46;
+      border:2px solid rgba(47,143,70,.2);
+      font-weight:1000;
+    }
+    .footer-note{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 8px);
+      text-align:center;
+      font-size:15px;
+      font-weight:800;
+      color:rgba(40,64,42,.7);
+      z-index:12;
+      pointer-events:none;
+    }
+    @media (max-width:700px){
+      .level-row{grid-template-columns:1fr;}
+      #hud{grid-template-columns:1fr 1fr 1fr;gap:5px;left:7px;right:7px;}
+      .hud-box{border-width:3px;border-radius:16px;padding:6px 5px;}
+      #hintBar{top:calc(env(safe-area-inset-top,0px) + 82px);border-radius:20px;}
+      #pauseBtn{width:72px;height:72px;font-size:30px;}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <section id="startScreen" class="screen">
+    <div class="float-plant" style="left:8%;top:13%">🥒</div>
+    <div class="float-plant" style="right:9%;top:18%">🍆</div>
+    <div class="float-plant" style="left:12%;bottom:18%">🍉</div>
+    <div class="float-plant" style="right:12%;bottom:15%">🌿</div>
+
+    <h1>園圃收成射擊遊戲</h1>
+    <div class="subtitle">用手指撳中成熟農作物，就可以幫園圃收成！<br>小心唔好撳到害蟲、雜草同石頭呀！</div>
+
+    <div class="card">
+      <div class="rules">
+        <div>玩法：<span class="pill">撳畫面</span> → 瞄準農作物 → 成功收成加分</div>
+        <div>限時：每局 <span class="pill">30 秒</span></div>
+        <div>目標：收成越多，分數越高！</div>
+      </div>
+      <div class="level-row">
+        <button class="level-btn" data-level="easy">初級<br><small>目標大・速度慢<br>適合幼稚園至小一</small></button>
+        <button class="level-btn secondary" data-level="medium">中級<br><small>有雜草・速度中等<br>適合小二至小三</small></button>
+        <button class="level-btn danger" data-level="hard">高級<br><small>害蟲更多・速度快<br>適合小四或以上</small></button>
+      </div>
+    </div>
+    <div class="footer-note">建議 iPad Safari 橫向全螢幕使用</div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div id="field"></div>
+    <div id="hud">
+      <div class="hud-box"><span class="hud-label">時間</span><span id="timeText">30</span> 秒</div>
+      <div class="hud-box"><span class="hud-label">分數</span><span id="scoreText">0</span></div>
+      <div class="hud-box"><span class="hud-label">收成</span><span id="harvestText">0</span> 個</div>
+    </div>
+    <div id="hintBar">撳中成熟農作物！</div>
+    <button id="pauseBtn" aria-label="返回主畫面">🏠</button>
+  </section>
+
+  <section id="endScreen" class="screen hidden">
+    <div id="resultEmoji">🎉</div>
+    <h1 id="resultTitle">收成完成！</h1>
+    <div class="card">
+      <div class="result-line">你的分數：<span id="finalScore">0</span></div>
+      <div class="result-line">成功收成：<span id="finalHarvest">0</span> 個農作物</div>
+      <div class="result-line" id="messageLine">你好叻！</div>
+      <div class="level-row" style="grid-template-columns:1fr 1fr;margin-top:20px;">
+        <button id="againBtn">再玩一次</button>
+        <button id="homeBtn" class="secondary">選擇級別</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const startScreen = document.getElementById('startScreen');
+  const gameScreen = document.getElementById('game');
+  const endScreen = document.getElementById('endScreen');
+  const timeText = document.getElementById('timeText');
+  const scoreText = document.getElementById('scoreText');
+  const harvestText = document.getElementById('harvestText');
+  const hintBar = document.getElementById('hintBar');
+  const finalScore = document.getElementById('finalScore');
+  const finalHarvest = document.getElementById('finalHarvest');
+  const messageLine = document.getElementById('messageLine');
+  const resultEmoji = document.getElementById('resultEmoji');
+  const resultTitle = document.getElementById('resultTitle');
+
+  const crops = [
+    {emoji:'🥒', name:'青瓜'},
+    {emoji:'🍆', name:'茄子'},
+    {emoji:'🍈', name:'哈密瓜'},
+    {emoji:'🍉', name:'西瓜'},
+    {emoji:'🌿', name:'羅勒'},
+    {emoji:'🌱', name:'甜葉菊'},
+    {emoji:'🥬', name:'莧菜'},
+    {emoji:'🍃', name:'薄荷'}
+  ];
+
+  const badItems = [
+    {emoji:'🐛', name:'害蟲'},
+    {emoji:'🪨', name:'石頭'},
+    {emoji:'🌾', name:'雜草'}
+  ];
+
+  const levelSettings = {
+    easy: {
+      label:'初級',
+      duration:30,
+      spawnEvery:850,
+      life:2100,
+      size:118,
+      badChance:0.08,
+      move:false,
+      points:10,
+      penalty:0,
+      hint:'撳中成熟農作物！'
+    },
+    medium: {
+      label:'中級',
+      duration:30,
+      spawnEvery:680,
+      life:1750,
+      size:100,
+      badChance:0.22,
+      move:true,
+      points:10,
+      penalty:5,
+      hint:'收成農作物，避開雜草同石頭！'
+    },
+    hard: {
+      label:'高級',
+      duration:30,
+      spawnEvery:500,
+      life:1350,
+      size:86,
+      badChance:0.36,
+      move:true,
+      points:12,
+      penalty:8,
+      hint:'快手收成！害蟲、雜草、石頭唔好撳！'
+    }
+  };
+
+  let state = {
+    level:'easy',
+    settings: levelSettings.easy,
+    score:0,
+    harvest:0,
+    timeLeft:30,
+    active:false,
+    targets:new Map(),
+    timerId:null,
+    spawnId:null,
+    lastLevel:'easy'
+  };
+
+  function show(screen){
+    startScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    screen.classList.remove('hidden');
+  }
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function updateHud(){
+    timeText.textContent = state.timeLeft;
+    scoreText.textContent = state.score;
+    harvestText.textContent = state.harvest;
+  }
+
+  function clearTargets(){
+    state.targets.forEach(t => {
+      clearTimeout(t.timeout);
+      if(t.raf) cancelAnimationFrame(t.raf);
+      t.el.remove();
+    });
+    state.targets.clear();
+  }
+
+  function startGame(level){
+    state.level = level;
+    state.lastLevel = level;
+    state.settings = levelSettings[level];
+    state.score = 0;
+    state.harvest = 0;
+    state.timeLeft = state.settings.duration;
+    state.active = true;
+    hintBar.textContent = state.settings.hint;
+    updateHud();
+    clearTargets();
+    show(gameScreen);
+
+    state.timerId = setInterval(() => {
+      state.timeLeft--;
+      updateHud();
+      if(state.timeLeft <= 0) endGame();
+    }, 1000);
+
+    state.spawnId = setInterval(spawnTarget, state.settings.spawnEvery);
+    for(let i=0;i<4;i++) setTimeout(spawnTarget, i*230);
+  }
+
+  function endGame(){
+    if(!state.active) return;
+    state.active = false;
+    clearInterval(state.timerId);
+    clearInterval(state.spawnId);
+    clearTargets();
+
+    finalScore.textContent = state.score;
+    finalHarvest.textContent = state.harvest;
+
+    if(state.score >= 180){
+      resultEmoji.textContent = '🏆';
+      resultTitle.textContent = '收成大師！';
+      messageLine.textContent = '你又快又準，園圃大豐收！';
+    }else if(state.score >= 90){
+      resultEmoji.textContent = '🎉';
+      resultTitle.textContent = '收成成功！';
+      messageLine.textContent = '好叻呀！你幫園圃收成好多農作物！';
+    }else{
+      resultEmoji.textContent = '🌱';
+      resultTitle.textContent = '努力小農夫！';
+      messageLine.textContent = '再玩一次，試下收成更多農作物！';
+    }
+    show(endScreen);
+  }
+
+  function quitToHome(){
+    state.active = false;
+    clearInterval(state.timerId);
+    clearInterval(state.spawnId);
+    clearTargets();
+    show(startScreen);
+  }
+
+  function spawnTarget(){
+    if(!state.active) return;
+    const s = state.settings;
+    const isBad = Math.random() < s.badChance;
+    const data = isBad ? pick(badItems) : pick(crops);
+    const size = s.size * rand(.88,1.12);
+    const el = document.createElement('div');
+    el.className = 'target ' + (isBad ? 'bad' : 'good');
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+
+    const topLimit = window.innerHeight < 600 ? 155 : 190;
+    const x = rand(size/2 + 16, window.innerWidth - size/2 - 16);
+    const y = rand(topLimit, window.innerHeight - size/2 - 70);
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+
+    const emojiSize = Math.round(size * .50);
+    el.innerHTML = `<div class="bubble"><div class="emoji" style="font-size:${emojiSize}px">${data.emoji}</div></div><div class="name">${data.name}</div>`;
+
+    const id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+    const target = {id, el, isBad, data, born:performance.now(), x, y, vx:rand(-.055,.055), vy:rand(-.045,.045), raf:null, timeout:null};
+    state.targets.set(id, target);
+    gameScreen.appendChild(el);
+
+    const remove = () => {
+      const t = state.targets.get(id);
+      if(!t) return;
+      if(t.raf) cancelAnimationFrame(t.raf);
+      clearTimeout(t.timeout);
+      t.el.remove();
+      state.targets.delete(id);
+    };
+
+    if(s.move){
+      const animate = () => {
+        const t = state.targets.get(id);
+        if(!t || !state.active) return;
+        const elapsed = performance.now() - t.born;
+        const nx = t.x + Math.sin(elapsed * t.vx) * 45;
+        const ny = t.y + Math.cos(elapsed * t.vy) * 33;
+        t.el.style.left = Math.max(size/2, Math.min(window.innerWidth-size/2, nx)) + 'px';
+        t.el.style.top = Math.max(145, Math.min(window.innerHeight-size/2-55, ny)) + 'px';
+        t.raf = requestAnimationFrame(animate);
+      };
+      target.raf = requestAnimationFrame(animate);
+    }
+
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hitTarget(id, e.clientX, e.clientY);
+    }, {passive:false});
+
+    target.timeout = setTimeout(remove, s.life);
+  }
+
+  function hitTarget(id,x,y){
+    const t = state.targets.get(id);
+    if(!t || !state.active) return;
+
+    if(t.isBad){
+      state.score = Math.max(0, state.score - state.settings.penalty);
+      showPop(x,y,`-${state.settings.penalty}`, true);
+      hintBar.textContent = '哎呀！呢個唔係農作物呀！';
+      setTimeout(() => { if(state.active) hintBar.textContent = state.settings.hint; }, 700);
+    }else{
+      state.score += state.settings.points;
+      state.harvest += 1;
+      showPop(x,y,'+收成', false);
+      showSpark(x,y);
+    }
+    updateHud();
+
+    clearTimeout(t.timeout);
+    if(t.raf) cancelAnimationFrame(t.raf);
+    t.el.remove();
+    state.targets.delete(id);
+  }
+
+  function showPop(x,y,text,bad){
+    const el = document.createElement('div');
+    el.className = 'pop';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.color = bad ? '#e44747' : '#1f8a3b';
+    el.textContent = text;
+    gameScreen.appendChild(el);
+    setTimeout(()=>el.remove(),760);
+  }
+
+  function showSpark(x,y){
+    const el = document.createElement('div');
+    el.className = 'spark';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    gameScreen.appendChild(el);
+    setTimeout(()=>el.remove(),480);
+  }
+
+  // Miss tap feedback: game still feels like a shooting game.
+  gameScreen.addEventListener('pointerdown', (e) => {
+    if(!state.active) return;
+    if(e.target.closest('.target') || e.target.closest('button')) return;
+    showPop(e.clientX,e.clientY,'未中', true);
+  }, {passive:false});
+
+  document.querySelectorAll('.level-btn').forEach(btn => {
+    btn.addEventListener('click', () => startGame(btn.dataset.level));
+  });
+  document.getElementById('pauseBtn').addEventListener('click', quitToHome);
+  document.getElementById('againBtn').addEventListener('click', () => startGame(state.lastLevel));
+  document.getElementById('homeBtn').addEventListener('click', () => show(startScreen));
+
+  // Prevent iPad double-tap zoom / page scrolling.
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  document.addEventListener('touchmove', e => {
+    if(state.active) e.preventDefault();
+  }, {passive:false});
+})();
+</script>
+</body>
+</html>
