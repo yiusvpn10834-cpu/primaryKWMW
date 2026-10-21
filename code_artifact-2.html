@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>校園農場大作戰 (iPad 觸控 + 3/5分鐘調校版)</title>
+  <style>
+    :root {
+      --panel-bg: #fffdf6;
+      --border-wood: #8c5828;
+      --green: #2ecc71;
+      --orange: #f39c12;
+      --red: #e74c3c;
+      --blue: #3498db;
+      --gold: #f1c40f;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: linear-gradient(180deg, #74b9ff 0%, #dff6ff 42%, #8fd16a 42%, #5cb85c 100%);
+      transition: background 0.8s ease;
+    }
+
+    body.weather-hot {
+      background: linear-gradient(180deg, #ff9f43 0%, #ffeaa7 42%, #a3cb38 42%, #6ab04c 100%);
+    }
+
+    body.weather-rain {
+      background: linear-gradient(180deg, #576574 0%, #8395a7 42%, #4b6584 42%, #3867d6 100%);
+    }
+
+    /* 主遊戲容器：100% 適配 iPad 螢幕 */
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 1366px;
+      margin: 0 auto;
+      padding: 8px 12px;
+      gap: 8px;
+      position: relative;
+      z-index: 5;
+    }
+
+    /* 頂部 HUD 資訊列 */
+    .hud-bar {
+      display: grid;
+      grid-template-columns: 1.35fr 1.15fr 1.6fr 0.9fr;
+      gap: 8px;
+      background: var(--panel-bg);
+      border: 4px solid var(--border-wood);
+      border-radius: 18px;
+      padding: 6px 12px;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.18);
+      align-items: center;
+    }
+
+    .hud-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: #f5eedc;
+      padding: 5px 10px;
+      border-radius: 12px;
+      border: 2px solid #decba4;
+    }
+
+    .hud-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .hud-label {
+      font-size: 12px;
+      color: #6e5536;
+      font-weight: 800;
+    }
+
+    .hud-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: #3d2817;
+      line-height: 1.1;
+    }
+
+    /* 頂部 3分/5分 快速切換掣 */
+    .duration-mini-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dur-mini-btn {
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 2px solid #b7950b;
+      background: #fff9db;
+      color: #7d6608;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .dur-mini-btn.active {
+      background: #f39c12;
+      border-color: #9c640c;
+      color: #fff;
+      box-shadow: 0 2px 0 #7e5109;
+    }
+
+    /* 送菜任務與徽章區 */
+    .mission-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #eafaf1;
+      border: 2px solid #82e0aa;
+      padding: 5px 12px;
+      border-radius: 12px;
+      gap: 8px;
+    }
+
+    .mission-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .mission-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #1e8449;
+    }
+
+    .mission-sub {
+      font-size: 12px;
+      font-weight: 800;
+      color: #27ae60;
+    }
+
+    .badges-row {
+      display: flex;
+      gap: 5px;
+    }
+
+    .badge-slot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #d5dbdb;
+      border: 2px dashed #95a5a6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      opacity: 0.4;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .badge-slot.earned {
+      opacity: 1;
+      background: #fff9db;
+      border: 2px solid #f1c40f;
+      transform: scale(1.12);
+      box-shadow: 0 2px 6px rgba(241,196,15,0.55);
+    }
+
+    /* 中央主遊戲場地 */
+    .main-stage {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 220px 1fr 185px;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .panel {
+      background: rgba(255, 253, 246, 0.94);
+      border: 4px solid var(--border-wood);
+      border-radius: 20px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.14);
+      position: relative;
+      min-height: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 900;
+      color: #4a3219;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 2px dashed #d5c3aa;
+    }
+
+    /* 左側：4個育苗格 */
+    .nursery-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+      min-height: 0;
+    }
+
+    .tray-cell {
+      background: #7d5a3c;
+      border: 3px solid #5c3f24;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.1s;
+    }
+
+    .tray-cell:active {
+      transform: scale(0.95);
+    }
+
+    .tray-cell.ready {
+      background: #6e8b3d;
+      border-color: #2ecc71;
+      box-shadow: 0 0 12px rgba(46, 204, 113, 0.7);
+    }
+
+    .tray-status {
+      font-size: 12px;
+      font-weight: 900;
+      color: #fff;
+      background: rgba(0,0,0,0.5);
+      padding: 2px 7px;
+      border-radius: 8px;
+      margin-top: 3px;
+    }
+
+    .nursery-btn {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 12px;
+      border: 3px solid #1e8449;
+      background: #2ecc71;
+      color: white;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #196f3d;
+    }
+
+    .nursery-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #196f3d;
+    }
+
+    /* 中間：8個種植位 */
+    .farm-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .plot-card {
+      background: #8c5a32;
+      border: 4px solid #633e1f;
+      border-radius: 16px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 7px;
+      cursor: pointer;
+      transition: transform 0.1s, border-color 0.2s, background-color 0.3s;
+      overflow: hidden;
+    }
+
+    .plot-card:active {
+      transform: scale(0.96);
+    }
+
+    .plot-card.dry-soil {
+      background: #c2925e;
+      border-color: #935116;
+    }
+
+    .plot-card.wet-soil {
+      background: #3b2d1f;
+      border-color: #1b4f72;
+    }
+
+    /* 最危急閃爍提示 */
+    .plot-card.most-urgent {
+      border-color: #ff2e2e !important;
+      box-shadow: 0 0 0 4px rgba(255, 46, 46, 0.65);
+      animation: urgentPulse 0.7s infinite alternate;
+    }
+
+    @keyframes urgentPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.025); }
+    }
+
+    /* 黃金收成期特效 */
+    .plot-card.golden-ready {
+      border-color: #f1c40f;
+      box-shadow: 0 0 16px rgba(241, 196, 15, 0.9);
+    }
+
+    .urgent-badge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 10px;
+      border: 2px solid #fff;
+      z-index: 6;
+      animation: bounce 0.45s infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px); }
+    }
+
+    .plot-top-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      z-index: 4;
+    }
+
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-icon {
+      font-size: 12px;
+      width: 15px;
+      text-align: center;
+    }
+
+    .bar-bg {
+      flex: 1;
+      height: 9px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.2s, background-color 0.2s;
+    }
+
+    /* 水分理想區間刻度線 (35% - 75%) */
+    .water-zone-mark {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 35%;
+      width: 40%;
+      border-left: 2px solid rgba(255, 255, 255, 0.9);
+      border-right: 2px solid rgba(255, 255, 255, 0.9);
+      background: rgba(46, 204, 113, 0.22);
+      pointer-events: none;
+    }
+
+    .stat-num {
+      font-size: 11px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* 植物插圖容器 */
+    .plant-art-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 58px;
+      pointer-events: none;
+    }
+
+    .plant-svg {
+      width: 78px;
+      height: 78px;
+      transition: transform 0.25s;
+    }
+
+    .tilted-plant {
+      transform: rotate(-28deg) translateY(4px);
+    }
+
+    /* 事故氣泡提示 */
+    .hazard-badges {
+      position: absolute;
+      bottom: 30px;
+      left: 4px;
+      right: 4px;
+      display: flex;
+      justify-content: center;
+      gap: 3px;
+      flex-wrap: wrap;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .hazard-pill {
+      font-size: 12px;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 9px;
+      color: #fff;
+      border: 1.5px solid #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+    }
+
+    .pill-dry { background: #e67e22; }
+    .pill-wet { background: #2980b9; }
+    .pill-bug { background: #8e44ad; }
+    .pill-tilt { background: #d35400; }
+    .pill-gold { background: #f39c12; color: #fff; }
+
+    .plot-footer {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      padding: 3px 4px;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* 右側：儲水箱與排水口 */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .tank-box, .drain-box {
+      flex: 1;
+      background: rgba(255, 253, 246, 0.94);
+      border: 4px solid var(--border-wood);
+      border-radius: 20px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 6px 0 rgba(0,0,0,0.14);
+    }
+
+    .tank-visual {
+      width: 72px;
+      height: 96px;
+      border: 4px solid #2980b9;
+      border-radius: 14px;
+      background: #ebf5fb;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .tank-water {
+      width: 100%;
+      background: linear-gradient(180deg, #5dade2 0%, #2e86c1 100%);
+      transition: height 0.25s;
+    }
+
+    .tank-percent {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1b4f72;
+      text-shadow: 0 0 4px #fff;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 8px 6px;
+      border-radius: 12px;
+      border: 3px solid #2471a3;
+      background: #3498db;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #1b4f72;
+    }
+
+    .action-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #1b4f72;
+    }
+
+    .drain-box.clogged {
+      background: #fdedec;
+      border-color: #e74c3c;
+      animation: urgentPulse 0.75s infinite alternate;
+    }
+
+    .drain-visual {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: #566573;
+      border: 4px solid #2c3e50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* 底部工具列 */
+    .toolbar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      background: var(--panel-bg);
+      border: 4px solid var(--border-wood);
+      border-radius: 18px;
+      padding: 6px 12px;
+      box-shadow: 0 5px 0 rgba(0,0,0,0.16);
+    }
+
+    .tool-btn {
+      flex: 1;
+      max-width: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 9px 6px;
+      border-radius: 13px;
+      border: 3px solid #d5c3aa;
+      background: #f8f1e5;
+      font-size: 15px;
+      font-weight: 900;
+      color: #4a3219;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .tool-btn.active {
+      background: #fff3bf;
+      border-color: #f39c12;
+      box-shadow: 0 4px 0 #d68910;
+      transform: translateY(-2px);
+    }
+
+    /* 飄字特效 */
+    .floating-text {
+      position: fixed;
+      font-size: 19px;
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 150;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      animation: floatUp 0.95s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.9); }
+      100% { opacity: 0; transform: translateY(-42px) scale(1.08); }
+    }
+
+    /* 天氣特效層 */
+    #weatherLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .rain-drop {
+      position: absolute;
+      width: 3px;
+      height: 20px;
+      background: rgba(174, 214, 241, 0.75);
+      border-radius: 2px;
+      animation: rainFall 0.6s linear infinite;
+    }
+
+    @keyframes rainFall {
+      from { transform: translateY(-20px); }
+      to { transform: translateY(100vh); }
+    }
+
+    .sun-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 85% 10%, rgba(255, 165, 0, 0.4), transparent 60%);
+      animation: sunPulse 1.5s infinite alternate;
+    }
+
+    @keyframes sunPulse {
+      from { opacity: 0.55; }
+      to { opacity: 1; }
+    }
+
+    /* 開場與結算彈窗 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.68);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: #fffdf6;
+      border: 6px solid var(--border-wood);
+      border-radius: 28px;
+      max-width: 680px;
+      width: 100%;
+      padding: 20px 24px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+
+    .modal-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #2e7d32;
+      margin: 0 0 6px;
+    }
+
+    /* 開場時間選擇按鈕組 */
+    .duration-selector {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 12px 0;
+    }
+
+    .duration-choice-btn {
+      flex: 1;
+      max-width: 240px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 4px solid #bdc3c7;
+      background: #f8f9f9;
+      color: #5d6d7e;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .duration-choice-btn.selected {
+      border-color: #f39c12;
+      background: #fff9db;
+      color: #b7950b;
+      box-shadow: 0 5px 0 #d68910;
+      transform: translateY(-2px);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      text-align: left;
+      margin: 12px 0 16px;
+    }
+
+    .guide-item {
+      background: #f4ecf7;
+      border: 2px solid #d7bde2;
+      padding: 9px 12px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #3d2817;
+    }
+
+    .guide-item span.icon {
+      font-size: 26px;
+    }
+
+    .big-start-btn {
+      background: #2ecc71;
+      border: 4px solid #1e8449;
+      color: white;
+      font-size: 22px;
+      font-weight: 900;
+      padding: 12px 36px;
+      border-radius: 18px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #196f3d;
+    }
+
+    .big-start-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #196f3d;
+    }
+
+    @media (max-width: 960px) {
+      .hud-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+      .main-stage {
+        grid-template-columns: 185px 1fr 150px;
+      }
+      .plant-svg {
+        width: 64px;
+        height: 64px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="weatherLayer"></div>
+
+  <div id="app">
+    <!-- 頂部資訊列 -->
+    <div class="hud-bar">
+      <!-- 計時器 + 3分/5分快速切換 -->
+      <div class="hud-box">
+        <div class="hud-left">
+          <div class="hud-icon">⏱️</div>
+          <div>
+            <div class="hud-label">剩餘時間</div>
+            <div class="hud-value" id="timerText">05:00</div>
+          </div>
+        </div>
+        <div class="duration-mini-group">
+          <button class="dur-mini-btn" id="hudDur180" onclick="switchDurationInGame(180)">3分</button>
+          <button class="dur-mini-btn active" id="hudDur300" onclick="switchDurationInGame(300)">5分</button>
+        </div>
+      </div>
+
+      <!-- 天氣預報 -->
+      <div class="hud-box" id="weatherBox">
+        <div class="hud-left">
+          <div class="hud-icon" id="weatherIcon">☀️</div>
+          <div>
+            <div class="hud-label" id="weatherSub">18秒後轉天氣</div>
+            <div class="hud-value" id="weatherName" style="font-size:18px;">溫暖晴天</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 送菜任務與徽章 -->
+      <div class="mission-box">
+        <div class="mission-info">
+          <div class="mission-title" id="missionTitle">📦 送菜任務 1：收成 2 棵 ≥80% 生菜</div>
+          <div class="mission-sub" id="missionProgress">進度：0 / 2 棵</div>
+        </div>
+        <div class="badges-row">
+          <div class="badge-slot" id="badge0" title="銅牌農夫">🥉</div>
+          <div class="badge-slot" id="badge1" title="銀牌農夫">🥈</div>
+          <div class="badge-slot" id="badge2" title="金牌農夫">🥇</div>
+          <div class="badge-slot" id="badge3" title="皇家特級">👑</div>
+        </div>
+      </div>
+
+      <!-- 總分 (只計健康收成) -->
+      <div class="hud-box" style="background:#fff9db; border-color:#f1c40f;">
+        <div class="hud-left">
+          <div class="hud-icon">🧺</div>
+          <div>
+            <div class="hud-label">健康收成總分</div>
+            <div class="hud-value" id="scoreText" style="color:#d35400;">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 中央主舞台 -->
+    <div class="main-stage">
+      <!-- 左：4格育苗盤 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>🌱 育苗溫室 (4格)</span>
+          <span id="readySeedlingCount" style="color:#27ae60;">存苗: 2</span>
+        </div>
+        <div class="nursery-grid" id="nurseryGrid"></div>
+        <button class="nursery-btn" id="sowAllBtn" onclick="sowAllEmptyTrays()">🌱 一鍵全部播種</button>
+      </div>
+
+      <!-- 中：8個種植位 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>🥬 校園農地 (8格) — 先救紅框「🚨最急!」嗰棵</span>
+          <span style="font-size:12px; color:#7f8c8d;">💧綠區(35-75%)最健康｜只靠收成計分</span>
+        </div>
+        <div class="farm-grid" id="farmGrid"></div>
+      </div>
+
+      <!-- 右：儲水箱與排水口 -->
+      <div class="right-column">
+        <div class="tank-box">
+          <div class="panel-header" style="width:100%; justify-content:center; margin-bottom:2px;">💧 有限儲水箱</div>
+          <div class="tank-visual">
+            <div class="tank-water" id="tankFill" style="height: 100%;"></div>
+            <div class="tank-percent" id="tankText">100%</div>
+          </div>
+          <button class="action-btn" id="refillBtn" onclick="refillWaterTank(event)">🚰 裝滿水箱</button>
+        </div>
+
+        <div class="drain-box" id="drainBox" onclick="clearDrain(event)">
+          <div class="panel-header" style="width:100%; justify-content:center; margin-bottom:2px;">🕳️ 農場排水口</div>
+          <div class="drain-visual" id="drainVisual"></div>
+          <button class="action-btn" id="drainBtn" style="background:#27ae60; border-color:#1e8449;">✅ 排水正常</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部工具列 -->
+    <div class="toolbar">
+      <button class="tool-btn active" data-tool="auto" onclick="selectTool('auto')">✨ 智能點擊 (推薦)</button>
+      <button class="tool-btn" data-tool="plant" onclick="selectTool('plant')">🌱 定植菜苗</button>
+      <button class="tool-btn" data-tool="water" onclick="selectTool('water')">🚿 淋水 (+26%)</button>
+      <button class="tool-btn" data-tool="rescue" onclick="selectTool('rescue')">🧤 捉蟲 / 扶苗</button>
+      <button class="tool-btn" data-tool="harvest" onclick="selectTool('harvest')">🧺 收成生菜</button>
+    </div>
+  </div>
+
+  <!-- 開場教學與 3分/5分 選擇彈窗 -->
+  <div class="modal-overlay" id="startModal">
+    <div class="modal-card">
+      <h1 class="modal-title">🥬 校園農場大作戰</h1>
+      <p style="font-size:15px; font-weight:800; color:#5d4037; margin:2px 0 8px;">
+        高小有機農場挑戰｜請選擇每局遊戲時間：
+      </p>
+
+      <!-- 3分鐘 / 5分鐘 選擇掣 -->
+      <div class="duration-selector">
+        <button class="duration-choice-btn" id="modalDur180" onclick="chooseDuration(180)">
+          ⚡ 3 分鐘挑戰<br><span style="font-size:13px; font-weight:700;">節奏明快・課堂熱身</span>
+        </button>
+        <button class="duration-choice-btn selected" id="modalDur300" onclick="chooseDuration(300)">
+          🌟 5 分鐘標準<br><span style="font-size:13px; font-weight:700;">完整體驗・衝擊皇冠</span>
+        </button>
+      </div>
+
+      <div class="guide-grid">
+        <div class="guide-item">
+          <span class="icon">🌱</span>
+          <div><strong>預先培苗：</strong>左邊 4 個育苗格要先播種（6秒成苗），收成後先有菜苗補上！</div>
+        </div>
+        <div class="guide-item">
+          <span class="icon">🚨</span>
+          <div><strong>先救最急：</strong>同時會有缺水、菜蟲、歪苗、塞渠，優先點擊紅框「🚨最急!」生菜。</div>
+        </div>
+        <div class="guide-item">
+          <span class="icon">🌦️</span>
+          <div><strong>留意天氣與水箱：</strong>暴曬極快乾土；落雨會補水，若排水口塞咗會全場積水！</div>
+        </div>
+        <div class="guide-item">
+          <span class="icon">🏆</span>
+          <div><strong>只用健康收成計分：</strong>收一棵 92% 健康生菜 = 得 92 分！黃金期內及時收成！</div>
+        </div>
+      </div>
+
+      <button class="big-start-btn" id="startBtn" onclick="startGameNow()">▶️ 開始 5 分鐘挑戰</button>
+    </div>
+  </div>
+
+  <!-- 結算彈窗 -->
+  <div class="modal-overlay" id="endModal" style="display:none;">
+    <div class="modal-card">
+      <h1 class="modal-title" id="endTitle">🎉 收成時間到！</h1>
+      <p style="font-size:30px; font-weight:900; color:#d35400; margin:10px 0;" id="finalScoreText">總分：0 分</p>
+      <p style="font-size:17px; font-weight:800; color:#3d2817; margin-bottom:14px;" id="finalStatsText"></p>
+      <div class="duration-selector" style="margin-bottom:16px;">
+        <button class="duration-choice-btn" id="endDur180" onclick="chooseDuration(180)">⚡ 改玩 3 分鐘</button>
+        <button class="duration-choice-btn selected" id="endDur300" onclick="chooseDuration(300)">🌟 改玩 5 分鐘</button>
+      </div>
+      <button class="big-start-btn" id="restartBtn" onclick="startGameNow()">🔄 再玩一局</button>
+    </div>
+  </div>
+
+  <script>
+    // ====== Web Audio API 合成音效 (iPad 觸控即解鎖) ======
+    let audioCtx = null;
+    function unlockAudio() {
+      try {
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {}
+    }
+
+    function playTone(freq = 440, duration = 0.12, type = 'sine') {
+      unlockAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.14, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // ====== 內嵌高清 SVG 插圖產生器 ======
+    function getTraySVG(tray) {
+      if (tray.state === 'empty') {
+        return `<svg width="52" height="52" viewBox="0 0 64 64">
+          <circle cx="32" cy="36" r="18" fill="#5c3a1e"/>
+          <path d="M22 36 Q32 28 42 36" stroke="#8c6239" stroke-width="3" fill="none"/>
+        </svg>`;
+      }
+      if (tray.state === 'growing') {
+        return `<svg width="52" height="52" viewBox="0 0 64 64">
+          <circle cx="32" cy="42" r="16" fill="#4a2e16"/>
+          <path d="M32 42 L32 24" stroke="#2ecc71" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="26" cy="24" rx="6" ry="4" fill="#2ecc71" transform="rotate(-20 26 24)"/>
+          <ellipse cx="38" cy="24" rx="6" ry="4" fill="#2ecc71" transform="rotate(20 38 24)"/>
+        </svg>`;
+      }
+      return `<svg width="56" height="56" viewBox="0 0 64 64">
+        <circle cx="32" cy="44" r="16" fill="#4a2e16"/>
+        <path d="M32 44 L32 18" stroke="#27ae60" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="23" cy="24" rx="10" ry="6" fill="#2ecc71" transform="rotate(-25 23 24)"/>
+        <ellipse cx="41" cy="24" rx="10" ry="6" fill="#2ecc71" transform="rotate(25 41 24)"/>
+        <circle cx="32" cy="18" r="6" fill="#58d68d"/>
+      </svg>`;
+    }
+
+    function getPlantSVG(plot) {
+      if (plot.state === 'empty') {
+        return `<svg class="plant-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="68" rx="34" ry="14" fill="rgba(0,0,0,0.22)"/>
+          <path d="M35 65 L65 65 M50 52 L50 78" stroke="rgba(255,255,255,0.5)" stroke-width="4" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      const isOverripe = plot.state === 'overripe';
+      const leafMain = isOverripe ? '#b7950b' : (plot.health < 50 ? '#d4ac0d' : '#2ecc71');
+      const leafDark = isOverripe ? '#9a7d0a' : (plot.health < 50 ? '#b7950b' : '#27ae60');
+      const scale = plot.state === 'growing' ? (0.52 + 0.48 * (plot.growth / 100)) : 1;
+
+      const bugGraphic = plot.hasBug ? `
+        <g transform="translate(52, 26)">
+          <circle cx="0" cy="0" r="7" fill="#e74c3c" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="9" cy="2" r="6" fill="#c0392b" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="17" cy="5" r="5" fill="#e74c3c" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="-3" cy="-2" r="2" fill="#fff"/>
+        </g>` : '';
+
+      const goldSparkle = plot.state === 'ready' ? `
+        <circle cx="20" cy="22" r="5" fill="#f1c40f"/>
+        <circle cx="80" cy="18" r="6" fill="#f1c40f"/>
+        <circle cx="84" cy="50" r="4" fill="#fff9db"/>` : '';
+
+      return `<svg class="plant-svg ${plot.isTilted ? 'tilted-plant' : ''}" viewBox="0 0 100 100">
+        <ellipse cx="50" cy="78" rx="36" ry="12" fill="rgba(0,0,0,0.28)"/>
+        <g transform="translate(50, 72) scale(${scale}) translate(-50, -72)">
+          <ellipse cx="34" cy="56" rx="22" ry="16" fill="${leafDark}" transform="rotate(-25 34 56)"/>
+          <ellipse cx="66" cy="56" rx="22" ry="16" fill="${leafDark}" transform="rotate(25 66 56)"/>
+          <ellipse cx="38" cy="46" rx="20" ry="22" fill="${leafMain}" transform="rotate(-12 38 46)"/>
+          <ellipse cx="62" cy="46" rx="20" ry="22" fill="${leafMain}" transform="rotate(12 62 46)"/>
+          <circle cx="50" cy="46" r="18" fill="#58d68d"/>
+          <path d="M50 64 L50 36 M42 50 L50 56 M58 48 L50 54" stroke="#e8f8f5" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        ${goldSparkle}
+        ${bugGraphic}
+      </svg>`;
+    }
+
+    function getDrainSVG(clogged) {
+      if (!clogged) {
+        return `<svg width="58" height="58" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="26" fill="#34495e"/>
+          <line x1="16" y1="22" x2="48" y2="22" stroke="#95a5a6" stroke-width="4" stroke-linecap="round"/>
+          <line x1="14" y1="32" x2="50" y2="32" stroke="#95a5a6" stroke-width="4" stroke-linecap="round"/>
+          <line x1="16" y1="42" x2="48" y2="42" stroke="#95a5a6" stroke-width="4" stroke-linecap="round"/>
+        </svg>`;
+      }
+      return `<svg width="58" height="58" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="#34495e"/>
+        <ellipse cx="26" cy="28" rx="14" ry="9" fill="#d35400" transform="rotate(-20 26 28)"/>
+        <ellipse cx="38" cy="36" rx="14" ry="9" fill="#e67e22" transform="rotate(25 38 36)"/>
+        <ellipse cx="28" cy="40" rx="12" ry="8" fill="#f39c12" transform="rotate(-10 28 40)"/>
+      </svg>`;
+    }
+
+    // ====== 遊戲任務與狀態 ======
+    const MISSIONS = [
+      { count: 2, minHealth: 80, title: '📦 任務 1：收成 2 棵 ≥80% 生菜' },
+      { count: 3, minHealth: 85, title: '📦 任務 2：收成 3 棵 ≥85% 生菜' },
+      { count: 3, minHealth: 90, title: '📦 任務 3：收成 3 棵 ≥90% 生菜' },
+      { count: 4, minHealth: 90, title: '📦 任務 4：收成 4 棵 ≥90% 生菜' }
+    ];
+
+    let selectedDuration = 300; // 預設 5 分鐘 (300秒)，可切換 180 秒
+
+    let state = {
+      running: false,
+      totalDuration: 300,
+      timeLeft: 300,
+      score: 0,
+      harvestCount: 0,
+      waterTank: 100,
+      drainClogged: false,
+      activeTool: 'auto',
+      weather: 'sunny', // sunny, hot, rain
+      weatherTimer: 18,
+      missionIdx: 0,
+      missionProgress: 0,
+      hazardCooldown: 6,
+      trays: [],
+      plots: []
+    };
+
+    // ====== 時間選擇 (3分鐘 vs 5分鐘) ======
+    function chooseDuration(seconds) {
+      selectedDuration = seconds;
+      playTone(520, 0.08, 'sine');
+
+      // 更新彈窗按鈕樣式
+      ['modalDur180', 'endDur180'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('selected', seconds === 180);
+      });
+      ['modalDur300', 'endDur300'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('selected', seconds === 300);
+      });
+
+      // 更新頂部切換掣
+      document.getElementById('hudDur180').classList.toggle('active', seconds === 180);
+      document.getElementById('hudDur300').classList.toggle('active', seconds === 300);
+
+      const minsLabel = seconds === 180 ? '3 分鐘' : '5 分鐘';
+      document.getElementById('startBtn').textContent = `▶️ 開始 ${minsLabel}挑戰`;
+
+      if (!state.running) {
+        state.totalDuration = seconds;
+        state.timeLeft = seconds;
+        renderAll();
+      }
+    }
+
+    function switchDurationInGame(seconds) {
+      chooseDuration(seconds);
+      initState();
+    }
+
+    function startGameNow() {
+      unlockAudio();
+      playTone(660, 0.15, 'triangle');
+      document.getElementById('startModal').style.display = 'none';
+      document.getElementById('endModal').style.display = 'none';
+      initState();
+    }
+
+    function initState() {
+      state.running = true;
+      state.totalDuration = selectedDuration;
+      state.timeLeft = selectedDuration;
+      state.score = 0;
+      state.harvestCount = 0;
+      state.waterTank = 100;
+      state.drainClogged = false;
+      state.weather = 'sunny';
+      state.weatherTimer = 18;
+      state.missionIdx = 0;
+      state.missionProgress = 0;
+      state.hazardCooldown = 6;
+
+      // 開局預設 2 棵已育成菜苗、1 格培育中、1 格空
+      state.trays = [
+        { id: 0, state: 'ready', progress: 100 },
+        { id: 1, state: 'ready', progress: 100 },
+        { id: 2, state: 'growing', progress: 50 },
+        { id: 3, state: 'empty', progress: 0 }
+      ];
+
+      // 開局 8 個種植位：預設 3 棵生長中讓學生立即體驗照顧，5 個空位
+      state.plots = Array.from({ length: 8 }, (_, i) => ({
+        id: i,
+        state: i < 3 ? 'growing' : 'empty',
+        growth: i === 0 ? 60 : (i < 3 ? 25 : 0),
+        water: 56,
+        health: 100,
+        hasBug: false,
+        isTilted: false,
+        goldenLeft: 9
+      }));
+
+      updateBadgeUI();
+      updateWeatherEffect();
+      renderAll();
+    }
+
+    // ====== 建立育苗盤與農地 DOM ======
+    const nurseryGrid = document.getElementById('nurseryGrid');
+    const farmGrid = document.getElementById('farmGrid');
+
+    function buildGrids() {
+      nurseryGrid.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'tray-cell';
+        cell.id = `tray-${i}`;
+        cell.setAttribute('onclick', `onTrayTap(${i})`);
+        nurseryGrid.appendChild(cell);
+      }
+
+      farmGrid.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const card = document.createElement('div');
+        card.className = 'plot-card';
+        card.id = `plot-${i}`;
+        card.setAttribute('onclick', `onPlotTap(${i}, event)`);
+        farmGrid.appendChild(card);
+      }
+    }
+
+    // ====== 互動操作邏輯 ======
+    function spawnFloatText(x, y, text, color = '#2ecc71') {
+      const el = document.createElement('div');
+      el.className = 'floating-text';
+      el.style.left = `${Math.max(20, Math.min(window.innerWidth - 140, x - 40))}px`;
+      el.style.top = `${Math.max(20, y - 20)}px`;
+      el.style.color = color;
+      el.textContent = text;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 950);
+    }
+
+    function selectTool(toolName) {
+      state.activeTool = toolName;
+      document.querySelectorAll('.tool-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tool === toolName);
+      });
+      playTone(420, 0.06, 'sine');
+    }
+
+    function onTrayTap(index) {
+      if (!state.running) return;
+      const tray = state.trays[index];
+      if (tray.state === 'empty') {
+        tray.state = 'growing';
+        tray.progress = 0;
+        playTone(520, 0.1, 'triangle');
+        renderAll();
+      } else if (tray.state === 'ready') {
+        // 點擊已育成菜苗，自動種落第一個空農地
+        const emptyPlot = state.plots.find(p => p.state === 'empty');
+        if (emptyPlot) {
+          plantSeedlingInto(emptyPlot, tray);
+          playTone(660, 0.14, 'sine');
+          renderAll();
+        } else {
+          playTone(240, 0.12, 'sawtooth');
+        }
+      }
+    }
+
+    function sowAllEmptyTrays() {
+      if (!state.running) return;
+      let sowed = false;
+      state.trays.forEach(t => {
+        if (t.state === 'empty') {
+          t.state = 'growing';
+          t.progress = 0;
+          sowed = true;
+        }
+      });
+      if (sowed) playTone(550, 0.12, 'triangle');
+      renderAll();
+    }
+
+    function plantSeedlingInto(plot, tray) {
+      tray.state = 'empty';
+      tray.progress = 0;
+      plot.state = 'growing';
+      plot.growth = 0;
+      plot.water = 56;
+      plot.health = 100;
+      plot.hasBug = false;
+      plot.isTilted = false;
+      plot.goldenLeft = 9;
+    }
+
+    function onPlotTap(index, e) {
+      if (!state.running) return;
+      const plot = state.plots[index];
+      const tool = state.activeTool;
+      const cardEl = document.getElementById(`plot-${index}`);
+      const rect = cardEl.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      // 1. 空地 -> 定植菜苗
+      if (plot.state === 'empty') {
+        if (tool === 'auto' || tool === 'plant') {
+          const readyTray = state.trays.find(t => t.state === 'ready');
+          if (readyTray) {
+            plantSeedlingInto(plot, readyTray);
+            playTone(620, 0.12, 'sine');
+            spawnFloatText(cx, cy, '🌱 定植成功', '#2ecc71');
+          } else {
+            playTone(220, 0.15, 'sawtooth');
+            spawnFloatText(cx, cy, '❗ 先喺左邊育苗', '#e74c3c');
+          }
+          renderAll();
+        }
+        return;
+      }
+
+      // 2. 成熟或過熟 -> 收成計分
+      if ((plot.state === 'ready' || plot.state === 'overripe') && (tool === 'auto' || tool === 'harvest')) {
+        harvestPlot(plot, cx, cy);
+        renderAll();
+        return;
+      }
+
+      // 3. 救援：捉蟲或扶正歪苗 (保護健康，本身唔加分)
+      if ((plot.hasBug || plot.isTilted) && (tool === 'auto' || tool === 'rescue')) {
+        if (plot.hasBug) {
+          plot.hasBug = false;
+          spawnFloatText(cx, cy, '🐛 捉走菜蟲！', '#9b59b6');
+        } else if (plot.isTilted) {
+          plot.isTilted = false;
+          spawnFloatText(cx, cy, '🌿 扶正菜苗！', '#e67e22');
+        }
+        playTone(740, 0.12, 'triangle');
+        renderAll();
+        return;
+      }
+
+      // 4. 淋水
+      if (tool === 'water' || (tool === 'auto' && plot.water < 65)) {
+        if (state.waterTank < 12) {
+          playTone(200, 0.15, 'sawtooth');
+          spawnFloatText(cx, cy, '🚰 水箱無水！撳右邊裝水', '#e74c3c');
+          return;
+        }
+        state.waterTank = Math.max(0, state.waterTank - 12);
+        plot.water = Math.min(100, plot.water + 26);
+        playTone(480, 0.1, 'sine');
+        if (plot.water > 80) {
+          plot.health = Math.max(10, plot.health - 5);
+          spawnFloatText(cx, cy, '🌊 泥太濕傷根！-5%', '#2980b9');
+        } else {
+          spawnFloatText(cx, cy, '💧 +26% 水分', '#3498db');
+        }
+        renderAll();
+      } else if (tool === 'auto') {
+        spawnFloatText(cx, cy, '✨ 水分充足，唔使再淋', '#27ae60');
+      }
+    }
+
+    function harvestPlot(plot, cx, cy) {
+      const gained = Math.round(plot.health);
+      state.score += gained;
+      state.harvestCount += 1;
+
+      playTone(880, 0.18, 'triangle');
+      spawnFloatText(cx, cy, `🧺 收成 +${gained}分`, '#f39c12');
+
+      // 檢查送菜任務
+      if (state.missionIdx < MISSIONS.length) {
+        const curMission = MISSIONS[state.missionIdx];
+        if (gained >= curMission.minHealth) {
+          state.missionProgress += 1;
+          if (state.missionProgress >= curMission.count) {
+            state.missionIdx += 1;
+            state.missionProgress = 0;
+            updateBadgeUI();
+            spawnFloatText(window.innerWidth / 2, 90, '🏅 完成送菜任務！獲得徽章！', '#f1c40f');
+          }
+        }
+      }
+
+      // 重置農地為空地
+      plot.state = 'empty';
+      plot.growth = 0;
+      plot.hasBug = false;
+      plot.isTilted = false;
+      plot.water = 52;
+      plot.health = 100;
+    }
+
+    function refillWaterTank(e) {
+      if (!state.running) return;
+      state.waterTank = 100;
+      playTone(600, 0.15, 'sine');
+      const r = e.currentTarget.getBoundingClientRect();
+      spawnFloatText(r.left, r.top, '🚰 水箱已裝滿！', '#3498db');
+      renderAll();
+    }
+
+    function clearDrain(e) {
+      if (!state.running) return;
+      if (state.drainClogged) {
+        state.drainClogged = false;
+        playTone(720, 0.15, 'triangle');
+        const r = e.currentTarget.getBoundingClientRect();
+        spawnFloatText(r.left, r.top, '✨ 清走落葉！排水暢通', '#2ecc71');
+        renderAll();
+      }
+    }
+
+    // ====== 遊戲主循環 (每 0.5 秒更新一次，難度按 3分鐘/5分鐘 比例縮放) ======
+    const TICK_SEC = 0.5;
+    setInterval(() => {
+      if (!state.running) return;
+
+      // 時間倒數
+      state.timeLeft = Math.max(0, state.timeLeft - TICK_SEC);
+      if (state.timeLeft <= 0) {
+        finishGame();
+        return;
+      }
+
+      // 根據所選總時間 (180s 或 300s) 計算進度比例 (0.0 -> 1.0)
+      const progressRatio = (state.totalDuration - state.timeLeft) / state.totalDuration;
+      const maxHazards = progressRatio < 0.25 ? 2 : (progressRatio < 0.6 ? 3 : 4);
+
+      // 天氣轉換
+      state.weatherTimer -= TICK_SEC;
+      if (state.weatherTimer <= 0) {
+        const roll = Math.random();
+        if (roll < 0.36) state.weather = 'sunny';
+        else if (roll < 0.68) state.weather = 'hot';
+        else state.weather = 'rain';
+        state.weatherTimer = 15 + Math.floor(Math.random() * 7);
+        updateWeatherEffect();
+      }
+
+      // 落雨自動幫儲水箱補少少水
+      if (state.weather === 'rain') {
+        state.waterTank = Math.min(100, state.waterTank + 2.5 * TICK_SEC);
+      }
+
+      // 育苗盤進度 (6秒完成一格)
+      state.trays.forEach(tray => {
+        if (tray.state === 'growing') {
+          tray.progress = Math.min(100, tray.progress + (100 / 6) * TICK_SEC);
+          if (tray.progress >= 100) {
+            tray.state = 'ready';
+          }
+        }
+      });
+
+      // 隨機產生事故 (菜蟲、歪苗、塞排水口)
+      state.hazardCooldown -= TICK_SEC;
+      if (state.hazardCooldown <= 0) {
+        const currentHazards = countActiveHazards();
+        if (currentHazards < maxHazards) {
+          triggerRandomHazard();
+        }
+        state.hazardCooldown = progressRatio < 0.3 ? 5.2 : (progressRatio < 0.65 ? 3.8 : 2.6);
+      }
+
+      // 更新 8 個種植位
+      state.plots.forEach(plot => {
+        if (plot.state === 'empty') return;
+
+        // 水分變化
+        let waterDelta = -1.6; // 晴天基礎蒸發
+        if (state.weather === 'hot') waterDelta = -3.9; // 暴曬加快乾土
+        if (state.weather === 'rain') {
+          waterDelta = state.drainClogged ? +6.0 : +2.5; // 落雨補水，塞渠時迅速積水
+        }
+        plot.water = Math.max(0, Math.min(100, plot.water + waterDelta * TICK_SEC));
+
+        // 計算健康扣減
+        let healthLoss = 0;
+        if (plot.water < 32) healthLoss += 3.0; // 缺水
+        if (plot.water > 80) healthLoss += (state.drainClogged ? 4.8 : 3.2); // 積水過濕
+        if (plot.hasBug) healthLoss += 3.6; // 菜蟲咬葉
+        if (plot.isTilted) healthLoss += 2.6; // 歪苗
+
+        plot.health = Math.max(10, Math.min(100, plot.health - healthLoss * TICK_SEC));
+
+        // 生長進度
+        if (plot.state === 'growing') {
+          let speed = 6.2; // 約 16 秒成熟
+          if (plot.water >= 35 && plot.water <= 75 && !plot.hasBug && !plot.isTilted) {
+            speed = 7.8; // 理想照顧加速生長
+          } else if (plot.isTilted || plot.water < 25) {
+            speed = 3.2;
+          }
+          plot.growth = Math.min(100, plot.growth + speed * TICK_SEC);
+          if (plot.growth >= 100) {
+            plot.state = 'ready';
+            plot.goldenLeft = 9; // 9秒黃金收成期
+          }
+        } else if (plot.state === 'ready') {
+          plot.goldenLeft -= TICK_SEC;
+          if (plot.goldenLeft <= 0) {
+            plot.state = 'overripe';
+          }
+        } else if (plot.state === 'overripe') {
+          plot.health = Math.max(10, plot.health - 4.5 * TICK_SEC);
+        }
+      });
+
+      renderAll();
+    }, TICK_SEC * 1000);
+
+    function countActiveHazards() {
+      let c = state.drainClogged ? 1 : 0;
+      state.plots.forEach(p => {
+        if (p.state !== 'empty') {
+          if (p.hasBug) c++;
+          if (p.isTilted) c++;
+          if (p.water < 30 || p.water > 82) c++;
+        }
+      });
+      return c;
+    }
+
+    function triggerRandomHazard() {
+      const activePlots = state.plots.filter(p => p.state === 'growing' || p.state === 'ready');
+      const roll = Math.random();
+
+      if ((roll < 0.26 || state.weather === 'rain') && !state.drainClogged && Math.random() < 0.5) {
+        state.drainClogged = true;
+        return;
+      }
+      if (activePlots.length === 0) return;
+      const target = activePlots[Math.floor(Math.random() * activePlots.length)];
+      if (roll < 0.62 && !target.hasBug) {
+        target.hasBug = true;
+      } else if (!target.isTilted) {
+        target.isTilted = true;
+      }
+    }
+
+    // ====== 畫面渲染 ======
+    function findMostUrgentPlotId() {
+      let urgentId = null;
+      let lowestHealth = 999;
+
+      state.plots.forEach(p => {
+        if (p.state === 'empty') return;
+        const hasIssue = p.hasBug || p.isTilted || p.water < 32 || p.water > 80 || p.state === 'overripe';
+        if (hasIssue && p.health < lowestHealth) {
+          lowestHealth = p.health;
+          urgentId = p.id;
+        }
+      });
+      return urgentId;
+    }
+
+    function updateWeatherEffect() {
+      const layer = document.getElementById('weatherLayer');
+      layer.innerHTML = '';
+      document.body.classList.remove('weather-hot', 'weather-rain');
+      const iconEl = document.getElementById('weatherIcon');
+      const nameEl = document.getElementById('weatherName');
+
+      if (state.weather === 'sunny') {
+        iconEl.textContent = '☀️';
+        nameEl.textContent = '溫暖晴天';
+      } else if (state.weather === 'hot') {
+        document.body.classList.add('weather-hot');
+        iconEl.textContent = '🔥';
+        nameEl.textContent = '酷熱暴曬 (快乾土)';
+        const glow = document.createElement('div');
+        glow.className = 'sun-glow';
+        layer.appendChild(glow);
+      } else if (state.weather === 'rain') {
+        document.body.classList.add('weather-rain');
+        iconEl.textContent = '🌧️';
+        nameEl.textContent = '落雨天 (小心積水)';
+        for (let i = 0; i < 24; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'rain-drop';
+          drop.style.left = `${Math.random() * 100}vw`;
+          drop.style.animationDelay = `${Math.random() * 0.6}s`;
+          layer.appendChild(drop);
+        }
+      }
+    }
+
+    function updateBadgeUI() {
+      for (let i = 0; i < 4; i++) {
+        const slot = document.getElementById(`badge${i}`);
+        if (i < state.missionIdx) slot.classList.add('earned');
+        else slot.classList.remove('earned');
+      }
+    }
+
+    function renderAll() {
+      // 時間與分數
+      const mins = String(Math.floor(state.timeLeft / 60)).padStart(2, '0');
+      const secs = String(Math.floor(state.timeLeft % 60)).padStart(2, '0');
+      document.getElementById('timerText').textContent = `${mins}:${secs}`;
+      document.getElementById('scoreText').textContent = state.score;
+      document.getElementById('weatherSub').textContent = `${Math.ceil(state.weatherTimer)}秒後轉天氣`;
+
+      // 送菜任務
+      if (state.missionIdx < MISSIONS.length) {
+        const m = MISSIONS[state.missionIdx];
+        document.getElementById('missionTitle').textContent = m.title;
+        document.getElementById('missionProgress').textContent = `進度：${state.missionProgress} / ${m.count} 棵`;
+      } else {
+        document.getElementById('missionTitle').textContent = '👑 已完成全部送菜任務！';
+        document.getElementById('missionProgress').textContent = '繼續收成衝高總分！';
+      }
+
+      // 育苗盤
+      const readyCount = state.trays.filter(t => t.state === 'ready').length;
+      document.getElementById('readySeedlingCount').textContent = `存苗: ${readyCount}`;
+
+      state.trays.forEach((tray, idx) => {
+        const cell = document.getElementById(`tray-${idx}`);
+        cell.className = `tray-cell ${tray.state === 'ready' ? 'ready' : ''}`;
+        let label = '點擊播種';
+        if (tray.state === 'growing') label = `培育中 ${Math.floor(tray.progress)}%`;
+        if (tray.state === 'ready') label = '✅ 菜苗就緒';
+        cell.innerHTML = `${getTraySVG(tray)}<div class="tray-status">${label}</div>`;
+      });
+
+      // 水箱與排水口
+      document.getElementById('tankFill').style.height = `${state.waterTank}%`;
+      document.getElementById('tankText').textContent = `${Math.round(state.waterTank)}%`;
+
+      const drainBox = document.getElementById('drainBox');
+      const drainBtn = document.getElementById('drainBtn');
+      document.getElementById('drainVisual').innerHTML = getDrainSVG(state.drainClogged);
+      if (state.drainClogged) {
+        drainBox.classList.add('clogged');
+        drainBtn.textContent = '🍂 點擊通渠！';
+        drainBtn.style.background = '#e74c3c';
+        drainBtn.style.borderColor = '#922b21';
+      } else {
+        drainBox.classList.remove('clogged');
+        drainBtn.textContent = '✅ 排水正常';
+        drainBtn.style.background = '#27ae60';
+        drainBtn.style.borderColor = '#1e8449';
+      }
+
+      // 8 個農地種植位
+      const urgentPlotId = findMostUrgentPlotId();
+      state.plots.forEach((plot, idx) => {
+        const card = document.getElementById(`plot-${idx}`);
+        const classes = ['plot-card'];
+        if (plot.state !== 'empty' && plot.water < 32) classes.push('dry-soil');
+        if (plot.state !== 'empty' && plot.water > 80) classes.push('wet-soil');
+        if (plot.id === urgentPlotId) classes.push('most-urgent');
+        if (plot.state === 'ready') classes.push('golden-ready');
+        card.className = classes.join(' ');
+
+        if (plot.state === 'empty') {
+          card.innerHTML = `
+            <div class="plot-top-bars" style="opacity:0.45;">
+              <div class="stat-row"><span class="stat-icon">🌱</span><span class="stat-num">空置</span></div>
+            </div>
+            <div class="plant-art-wrap">${getPlantSVG(plot)}</div>
+            <div class="plot-footer">點擊定植菜苗</div>
+          `;
+          return;
+        }
+
+        const waterColor = (plot.water >= 35 && plot.water <= 75) ? '#2ecc71' : (plot.water < 35 ? '#f39c12' : '#3498db');
+        const healthColor = plot.health >= 80 ? '#2ecc71' : (plot.health >= 50 ? '#f39c12' : '#e74c3c');
+
+        // 事故標籤
+        const pills = [];
+        if (plot.water < 32) pills.push(`<span class="hazard-pill pill-dry">💧缺水</span>`);
+        if (plot.water > 80) pills.push(`<span class="hazard-pill pill-wet">🌊積水</span>`);
+        if (plot.hasBug) pills.push(`<span class="hazard-pill pill-bug">🐛菜蟲</span>`);
+        if (plot.isTilted) pills.push(`<span class="hazard-pill pill-tilt">🌪️歪苗</span>`);
+        if (plot.state === 'ready') pills.push(`<span class="hazard-pill pill-gold">✨黃金期 ${Math.ceil(plot.goldenLeft)}s</span>`);
+        if (plot.state === 'overripe') pills.push(`<span class="hazard-pill pill-dry">⚠️過熟跌分</span>`);
+
+        let footerText = `生長 ${Math.floor(plot.growth)}%`;
+        if (plot.state === 'ready') footerText = `🧺 點擊收成 (+${Math.round(plot.health)}分)`;
+        if (plot.state === 'overripe') footerText = `🧺 快收成 (+${Math.round(plot.health)}分)`;
+
+        card.innerHTML = `
+          ${plot.id === urgentPlotId ? '<div class="urgent-badge">🚨最急!</div>' : ''}
+          <div class="plot-top-bars">
+            <div class="stat-row">
+              <span class="stat-icon">❤️</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:${plot.health}%; background:${healthColor};"></div></div>
+              <span class="stat-num">${Math.round(plot.health)}%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-icon">💧</span>
+              <div class="bar-bg">
+                <div class="water-zone-mark"></div>
+                <div class="bar-fill" style="width:${plot.water}%; background:${waterColor};"></div>
+              </div>
+              <span class="stat-num">${Math.round(plot.water)}%</span>
+            </div>
+          </div>
+          <div class="plant-art-wrap">${getPlantSVG(plot)}</div>
+          <div class="hazard-badges">${pills.join('')}</div>
+          <div class="plot-footer">${footerText}</div>
+        `;
+      });
+    }
+
+    function finishGame() {
+      state.running = false;
+      playTone(880, 0.3, 'triangle');
+      document.getElementById('endModal').style.display = 'flex';
+      document.getElementById('finalScoreText').textContent = `健康收成總分：${state.score} 分`;
+      document.getElementById('finalStatsText').textContent =
+        `共收成 ${state.harvestCount} 棵生菜 ｜ 獲得 ${state.missionIdx} 個農夫榮譽徽章！`;
+    }
+
+    // 啟動初始化畫面
+    window.onload = function () {
+      buildGrids();
+      initState();
+      state.running = false; // 等待玩家喺彈窗揀 3分鐘 或 5分鐘 後按開始
+      renderAll();
+    };
+  </script>
+</body>
+</html>
