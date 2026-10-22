@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎉 馬基乘法大抽獎 🎁</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入圓潤可愛字體 Fredoka & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Fredoka"', '"Noto Sans TC"', 'sans-serif'],
+                        num: ['"Fredoka"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background-color: #FFFDF9;
+            background-image: 
+                radial-gradient(#FFCAD4 2px, transparent 2px), 
+                radial-gradient(#B8E0FF 2px, #FFFDF9 2px);
+            background-size: 44px 44px;
+            background-position: 0 0, 22px 22px;
+            color: #4A4056;
+            overflow-x: hidden;
+        }
+
+        /* 3D 立體按壓按鈕與禮物盒 */
+        .btn-3d {
+            transition: all 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(0);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(5px) !important;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.12) !important;
+        }
+
+        /* 禮物盒待機輕微搖晃動畫 */
+        @keyframes giftWiggle {
+            0%, 100% { transform: rotate(0deg) translateY(0); }
+            25% { transform: rotate(-1.8deg) translateY(-2px); }
+            50% { transform: rotate(0deg) translateY(0); }
+            75% { transform: rotate(1.8deg) translateY(-2px); }
+        }
+        .gift-unopened:hover {
+            animation: giftWiggle 0.65s ease-in-out infinite;
+        }
+        .gift-float {
+            animation: giftWiggle 3.2s ease-in-out infinite;
+        }
+
+        /* 彈出與慶祝動畫 */
+        @keyframes popIn {
+            0% { transform: scale(0.75); opacity: 0; }
+            70% { transform: scale(1.04); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes prizeFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.04); }
+        }
+        .animate-prize-float {
+            animation: prizeFloat 2.4s ease-in-out infinite;
+        }
+
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spinSlow 14s linear infinite;
+        }
+
+        @keyframes gentleBounce {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-gentle-nudge {
+            animation: gentleBounce 0.35s ease-in-out;
+        }
+
+        /* 彩紙粒子動畫 */
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg) scale(0.8); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg) scale(1.1); opacity: 0; }
+        }
+        .confetti-piece {
+            position: fixed;
+            top: -20px;
+            pointer-events: none;
+            z-index: 100;
+            animation: confettiFall 2.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2.5 sm:p-4 md:p-6">
+
+    <!-- ======================= 頂部標題與進度列 ======================= -->
+    <header class="max-w-6xl w-full mx-auto bg-white/95 backdrop-blur border-4 border-pink-200 rounded-3xl p-3 sm:p-4 shadow-md mb-3 sm:mb-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- 標題 Logo -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-pink-200 via-amber-100 to-sky-200 border-2 border-pink-300 shadow-sm flex items-center justify-center text-2xl sm:text-3xl">
+                    🎁
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-800 flex items-center gap-1.5">
+                        <span>🎉 馬基乘法大抽獎 🎁</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-pink-500 font-bold">
+                        揀一個神秘禮物盒，答啱 6-19 乘法題即抽超人氣大獎！
+                    </p>
+                </div>
+            </div>
+
+            <!-- 進度顯示與控制按鈕 -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 ml-auto">
+                <!-- 已收集獎品進度條 -->
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl px-3.5 py-1.5 flex items-center gap-2.5 shadow-inner">
+                    <span class="text-lg sm:text-xl">🌟</span>
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-black text-amber-800">已收集獎品：</span>
+                            <span id="progress-text" class="font-num text-sm sm:text-base font-black text-rose-500">0 / 16</span>
+                        </div>
+                        <div class="w-28 sm:w-36 h-2.5 bg-amber-200/70 rounded-full overflow-hidden mt-0.5">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-pink-400 to-amber-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 音效開關按鈕 -->
+                <button onclick="toggleSound()" id="sound-btn" class="btn-3d bg-sky-100 hover:bg-sky-200 border-2 border-sky-300 text-sky-900 px-3 py-2 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-1 shadow-[0_4px_0_#7DD3FC]">
+                    <span id="sound-icon">🔊</span>
+                    <span id="sound-text" class="hidden sm:inline">音效開</span>
+                </button>
+
+                <!-- 重新洗牌按鈕 -->
+                <button onclick="initNewRound(true)" class="btn-3d bg-pink-100 hover:bg-pink-200 border-2 border-pink-300 text-pink-900 px-3.5 py-2 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-[0_4px_0_#F497AA]">
+                    <span>🔄</span>
+                    <span>重新洗牌</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ======================= 16個神秘禮物盒 4x4 主網格 ======================= -->
+    <main class="max-w-6xl w-full mx-auto flex-1 flex flex-col justify-center">
+        
+        <!-- 16/16 大滿貫橫幅 (集齊時顯示) -->
+        <div id="grand-slam-banner" class="hidden mb-4 bg-gradient-to-r from-amber-200 via-pink-200 to-purple-200 border-4 border-amber-400 rounded-3xl p-4 shadow-lg items-center justify-between flex-wrap gap-3 animate-pop">
+            <div class="flex items-center gap-3">
+                <span class="text-4xl">🏆</span>
+                <div>
+                    <h2 class="text-lg sm:text-xl font-black text-slate-800">馬基大滿貫！16 個神秘大獎全數集齊！🎉</h2>
+                    <p class="text-xs sm:text-sm font-bold text-slate-600">太厲害啦！所有 6-19 乘法難題都難唔到你！撳「重新洗牌」可以抽新一輪題目！</p>
+                </div>
+            </div>
+            <button onclick="initNewRound(true)" class="btn-3d bg-white border-2 border-amber-400 text-amber-900 px-4 py-2 rounded-2xl font-black text-sm shadow-[0_4px_0_#F59E0B]">
+                ✨ 開啟新一輪抽獎
+            </button>
+        </div>
+
+        <!-- 4x4 禮物盒容器 -->
+        <div id="gift-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 md:gap-5 w-full">
+            <!-- 由 JS 動態生成 16 個禮物盒 -->
+        </div>
+    </main>
+
+    <!-- 底部簡潔提示 -->
+    <footer class="max-w-6xl w-full mx-auto text-center mt-4 pb-1">
+        <p class="text-xs font-bold text-slate-400">
+            💡 提示：直接點擊任何禮物盒即可抽題目，支援 iPad 觸控或電腦鍵盤輸入答案！
+        </p>
+    </footer>
+
+    <!-- ======================= 彈出視窗：抽題作答 & 盲盒開獎 ======================= -->
+    <div id="box-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+        
+        <!-- 視窗主體 -->
+        <div class="bg-[#FFFDF9] border-4 border-pink-300 rounded-[2rem] max-w-2xl w-full p-4 sm:p-6 shadow-2xl relative animate-pop my-auto">
+            
+            <!-- 右上角關閉按鈕 -->
+            <button onclick="closeModal()" class="btn-3d absolute top-3.5 right-3.5 w-10 h-10 rounded-2xl bg-rose-100 hover:bg-rose-200 border-2 border-rose-300 text-rose-700 font-black text-lg flex items-center justify-center shadow-[0_3px_0_#FDA4AF] z-20" title="返回禮物盒">
+                ✕
+            </button>
+
+            <!-- ================= 狀態 A：答題介面 ================= -->
+            <div id="modal-question-view" class="flex flex-col gap-3.5">
+                
+                <!-- 禮物盒編號標籤 -->
+                <div class="flex items-center justify-center">
+                    <div id="modal-box-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-100 border-2 border-pink-300 text-pink-800 font-black text-sm sm:text-base shadow-sm">
+                        <span>🎁</span>
+                        <span id="modal-box-title">第 1 號神秘禮物盒</span>
+                    </div>
+                </div>
+
+                <!-- 大字體算式顯示卡 -->
+                <div id="equation-card" class="bg-white border-4 border-sky-200 rounded-3xl p-4 sm:p-5 shadow-inner flex items-center justify-center gap-2 sm:gap-4 my-1">
+                    <div id="q-num-a" class="font-num text-4xl sm:text-6xl font-bold text-slate-800 bg-sky-50 border-2 border-sky-200 px-3.5 sm:px-5 py-2 rounded-2xl">
+                        14
+                    </div>
+                    <span class="font-num text-3xl sm:text-5xl font-black text-pink-400">×</span>
+                    <div id="q-num-b" class="font-num text-4xl sm:text-6xl font-bold text-slate-800 bg-pink-50 border-2 border-pink-200 px-3.5 sm:px-5 py-2 rounded-2xl">
+                        16
+                    </div>
+                    <span class="font-num text-3xl sm:text-5xl font-black text-slate-400">=</span>
+                    <div id="q-answer-box" class="font-num text-4xl sm:text-6xl font-bold min-w-[95px] sm:min-w-[130px] h-[64px] sm:h-[84px] px-3 rounded-2xl border-4 border-dashed border-amber-400 bg-amber-50 flex items-center justify-center text-amber-800 transition-all">
+                        <span id="q-answer-text">?</span>
+                    </div>
+                </div>
+
+                <!-- 溫馨指導提示區 (答錯時或點擊小貼士時溫馨顯示，絕不劇透最終答案) -->
+                <div id="warm-guide-card" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-3.5 sm:p-4 text-left shadow-sm">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div id="warm-guide-header" class="font-black text-amber-900 text-sm sm:text-base flex items-center gap-1.5">
+                            <span>🥰</span>
+                            <span>差少少咋！跟住魔法小貼士再試一次啦 💪✨</span>
+                        </div>
+                        <span id="warm-guide-tag" class="text-[11px] font-black bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full">
+                            心算小貼士
+                        </span>
+                    </div>
+                    <div id="warm-guide-steps" class="text-xs sm:text-sm text-slate-700 space-y-1.5 font-medium leading-relaxed">
+                        <!-- 由 JS 根據題目動態生成不劇透答案的步驟 -->
+                    </div>
+                </div>
+
+                <!-- 觸控大數字鍵盤 -->
+                <div class="bg-purple-50/70 border-2 border-purple-200 rounded-3xl p-3 sm:p-4">
+                    <div class="grid grid-cols-3 gap-2 sm:gap-2.5">
+                        <button onclick="pressKey('7')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">7</button>
+                        <button onclick="pressKey('8')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">8</button>
+                        <button onclick="pressKey('9')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">9</button>
+
+                        <button onclick="pressKey('4')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">4</button>
+                        <button onclick="pressKey('5')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">5</button>
+                        <button onclick="pressKey('6')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">6</button>
+
+                        <button onclick="pressKey('1')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">1</button>
+                        <button onclick="pressKey('2')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">2</button>
+                        <button onclick="pressKey('3')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">3</button>
+
+                        <button onclick="pressKey('clear')" class="btn-3d bg-pink-100 hover:bg-pink-200 border-2 border-pink-300 text-pink-900 h-12 sm:h-14 rounded-2xl text-sm sm:text-base font-black shadow-[0_4px_0_#F497AA]">清除</button>
+                        <button onclick="pressKey('0')" class="btn-3d bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-700 h-12 sm:h-14 rounded-2xl font-num text-2xl sm:text-3xl font-bold shadow-[0_4px_0_#CBD5E1]">0</button>
+                        <button onclick="pressKey('back')" class="btn-3d bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 text-amber-900 h-12 sm:h-14 rounded-2xl text-sm sm:text-base font-black shadow-[0_4px_0_#FBBF24]">⬅️ 退格</button>
+                    </div>
+
+                    <!-- 確定提交答案按鈕 -->
+                    <button onclick="submitAnswer()" class="btn-3d bg-emerald-200 hover:bg-emerald-300 border-2 border-emerald-400 text-emerald-950 w-full h-13 sm:h-14 py-3 rounded-2xl text-lg sm:text-xl font-black mt-2.5 shadow-[0_5px_0_#34D399] flex items-center justify-center gap-2">
+                        <span>✨ 確定答案 (開盲盒！)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= 狀態 B：答啱開盲盒大獎展示介面 ================= -->
+            <div id="modal-prize-view" class="hidden flex-col items-center text-center py-2">
+                
+                <div class="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-amber-100 border-2 border-amber-300 text-amber-800 font-black text-xs sm:text-sm mb-2">
+                    <span>🎊</span>
+                    <span id="prize-modal-badge">恭喜答啱！成功打開神秘盲盒</span>
+                    <span>🎊</span>
+                </div>
+
+                <!-- 答對的算式展示 -->
+                <div id="prize-solved-eq" class="font-num text-2xl sm:text-3xl font-black text-emerald-600 bg-emerald-50 border-2 border-emerald-200 px-5 py-1.5 rounded-2xl mb-3">
+                    14 × 16 = 224
+                </div>
+
+                <!-- 閃耀背景光環與精緻 SVG 公仔/獎品 -->
+                <div class="relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center my-1">
+                    <!-- 旋轉柔和光芒 -->
+                    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-200/70 via-amber-100/80 to-sky-200/70 animate-spin-slow border-4 border-dashed border-amber-300"></div>
+                    <!-- 內部白色圓底 -->
+                    <div class="absolute inset-3 rounded-full bg-white shadow-inner flex items-center justify-center"></div>
+                    <!-- 獎品 SVG 容器 -->
+                    <div id="prize-svg-container" class="relative z-10 w-32 h-32 sm:w-36 sm:h-36 animate-prize-float flex items-center justify-center">
+                        <!-- 由 JS 注入可愛 SVG -->
+                    </div>
+                </div>
+
+                <!-- 獎品名稱與讚賞語句 -->
+                <div class="mt-2 mb-5">
+                    <span class="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200" id="prize-rarity-tag">
+                        🌟 超人氣大獎 🌟
+                    </span>
+                    <h3 id="prize-name" class="text-2xl sm:text-3xl font-black text-slate-800 mt-1.5">
+                        ☁️ 玉桂捲耳小狗
+                    </h3>
+                    <p id="prize-desc" class="text-xs sm:text-sm font-bold text-slate-500 mt-1 max-w-md mx-auto">
+                        軟綿綿嘅長耳小狗公仔為你拍手掌！你嘅心算超準確呀！
+                    </p>
+                </div>
+
+                <!-- 收下獎品按鈕 -->
+                <button onclick="closeModal()" class="btn-3d bg-gradient-to-r from-pink-300 via-amber-200 to-sky-300 hover:opacity-95 border-3 border-pink-400 text-slate-800 w-full max-w-xs py-3.5 rounded-2xl font-black text-lg sm:text-xl shadow-[0_5px_0_#F497AA] flex items-center justify-center gap-2">
+                    <span>🎁 收下獎品！</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ======================= 16款超受學生歡迎嘅可愛盲盒獎品池 =======================
+        // 每款均配備度身訂造嘅高質素 Kawaii 矢量 SVG 圖案
+        const PRIZE_POOL = [
+            {
+                id: 'cinnapup',
+                name: '玉桂捲耳小狗',
+                tag: '🐾 超人氣萌寵公仔',
+                desc: '軟綿綿嘅白雪雪長耳小狗飛過嚟送俾你！你嘅心算超準確呀！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 捲捲大長耳 -->
+                    <path d="M26 52 C6 48, 4 78, 22 82 C34 84, 36 66, 32 58 Z" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <path d="M94 52 C114 48, 116 78, 98 82 C86 84, 84 66, 88 58 Z" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- 身體與小手 -->
+                    <rect x="42" y="72" width="36" height="30" rx="15" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="60" cy="86" r="9" fill="#E0F2FE"/>
+                    <!-- 圓碌碌頭仔 -->
+                    <ellipse cx="60" cy="54" rx="30" ry="24" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 頭頂粉藍蝴蝶結 -->
+                    <path d="M48 30 L60 36 L48 42 Z" fill="#7DD3FC" stroke="#5E5061" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M72 30 L60 36 L72 42 Z" fill="#7DD3FC" stroke="#5E5061" stroke-width="2.5" stroke-linejoin="round"/>
+                    <circle cx="60" cy="36" r="4" fill="#BAE6FD" stroke="#5E5061" stroke-width="2.5"/>
+                    <!-- 藍眼睛與粉紅面珠 -->
+                    <circle cx="47" cy="54" r="3.8" fill="#38BDF8"/>
+                    <circle cx="73" cy="54" r="3.8" fill="#38BDF8"/>
+                    <ellipse cx="40" cy="59" rx="5" ry="3" fill="#FDA4AF" opacity="0.7"/>
+                    <ellipse cx="80" cy="59" rx="5" ry="3" fill="#FDA4AF" opacity="0.7"/>
+                    <!-- ω 嘴仔 -->
+                    <path d="M55 58 Q57.5 62 60 58 Q62.5 62 65 58" fill="none" stroke="#5E5061" stroke-width="2.8" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'pastelbunny',
+                name: '櫻花草莓小兔',
+                tag: '🌸 夢幻森林公仔',
+                desc: '戴住小黃花嘅粉紅草莓兔兔跳出嚟為你歡呼！計得好快呀！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 兔耳 -->
+                    <ellipse cx="46" cy="28" rx="9" ry="22" transform="rotate(-8 46 28)" fill="#FFE4E6" stroke="#5E5061" stroke-width="3.5"/>
+                    <ellipse cx="46" cy="29" rx="4.5" ry="14" transform="rotate(-8 46 29)" fill="#FDA4AF"/>
+                    <ellipse cx="74" cy="28" rx="9" ry="22" transform="rotate(8 74 28)" fill="#FFE4E6" stroke="#5E5061" stroke-width="3.5"/>
+                    <ellipse cx="74" cy="29" rx="4.5" ry="14" transform="rotate(8 74 29)" fill="#FDA4AF"/>
+                    <!-- 身體 -->
+                    <rect x="40" y="72" width="40" height="32" rx="18" fill="#FFE4E6" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 頭仔 -->
+                    <ellipse cx="60" cy="58" rx="28" ry="23" fill="#FFE4E6" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 耳邊小花 -->
+                    <circle cx="82" cy="40" r="8" fill="#FEF08A" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="82" cy="40" r="3.5" fill="#F59E0B"/>
+                    <!-- 表情 -->
+                    <circle cx="48" cy="57" r="3.8" fill="#5E5061"/>
+                    <circle cx="72" cy="57" r="3.8" fill="#5E5061"/>
+                    <circle cx="46.5" cy="55.5" r="1.3" fill="#FFFFFF"/>
+                    <circle cx="70.5" cy="55.5" r="1.3" fill="#FFFFFF"/>
+                    <ellipse cx="40" cy="62" rx="5" ry="2.8" fill="#FB7185" opacity="0.65"/>
+                    <ellipse cx="80" cy="62" rx="5" ry="2.8" fill="#FB7185" opacity="0.65"/>
+                    <path d="M56 62 Q60 66 64 62" fill="none" stroke="#5E5061" stroke-width="2.8" stroke-linecap="round"/>
+                    <!-- 心心抱枕 -->
+                    <path d="M60 94 C60 94 48 86 48 79 C48 75 54 73 60 78 C66 73 72 75 72 79 C72 86 60 94 60 94 Z" fill="#FB7185" stroke="#5E5061" stroke-width="2.5"/>
+                </svg>`
+            },
+            {
+                id: 'puddingdog',
+                name: '軟綿綿布甸狗',
+                tag: '🍮 甜點系人氣王',
+                desc: '戴住焦糖貝雷帽嘅布甸小狗搖住尾巴讚你叻叻！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 垂耳 -->
+                    <ellipse cx="28" cy="62" rx="9" ry="18" transform="rotate(20 28 62)" fill="#FEF08A" stroke="#5E5061" stroke-width="3.5"/>
+                    <ellipse cx="92" cy="62" rx="9" ry="18" transform="rotate(-20 92 62)" fill="#FEF08A" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 肥嘟嘟身體 -->
+                    <ellipse cx="60" cy="68" rx="31" ry="29" fill="#FEF08A" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 焦糖貝雷帽 -->
+                    <ellipse cx="60" cy="40" rx="22" ry="9" fill="#92400E" stroke="#5E5061" stroke-width="3.5"/>
+                    <path d="M58 31 L62 25" stroke="#5E5061" stroke-width="3.5" stroke-linecap="round"/>
+                    <!-- 眼睛與面珠 -->
+                    <circle cx="48" cy="58" r="3.5" fill="#5E5061"/>
+                    <circle cx="72" cy="58" r="3.5" fill="#5E5061"/>
+                    <ellipse cx="40" cy="63" rx="5" ry="2.8" fill="#FCA5A5" opacity="0.8"/>
+                    <ellipse cx="80" cy="63" rx="5" ry="2.8" fill="#FCA5A5" opacity="0.8"/>
+                    <!-- 鼻仔與嘴 -->
+                    <ellipse cx="60" cy="61" rx="3" ry="2.2" fill="#78350F"/>
+                    <path d="M54 65 Q57 69 60 64 Q63 69 66 65" fill="none" stroke="#5E5061" stroke-width="2.6" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'unicorn',
+                name: '夢幻星空獨角獸',
+                tag: '🦄 傳說級閃耀神獸',
+                desc: '擁有彩虹鬃毛同閃亮金角嘅獨角獸賜你滿滿智慧魔法！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 彩虹鬃毛 -->
+                    <circle cx="36" cy="45" r="11" fill="#F9A8D4" stroke="#5E5061" stroke-width="3"/>
+                    <circle cx="32" cy="60" r="11" fill="#93C5FD" stroke="#5E5061" stroke-width="3"/>
+                    <circle cx="38" cy="74" r="10" fill="#FDE047" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 身體與頭 -->
+                    <ellipse cx="64" cy="82" rx="22" ry="18" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <ellipse cx="62" cy="54" rx="25" ry="22" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 金色魔法角 -->
+                    <polygon points="62,14 54,36 70,36" fill="#FDE047" stroke="#5E5061" stroke-width="3.2" stroke-linejoin="round"/>
+                    <!-- 閃亮眼睛 -->
+                    <circle cx="52" cy="54" r="4" fill="#5E5061"/>
+                    <circle cx="74" cy="54" r="4" fill="#5E5061"/>
+                    <circle cx="50.5" cy="52.5" r="1.5" fill="#FFF"/>
+                    <circle cx="72.5" cy="52.5" r="1.5" fill="#FFF"/>
+                    <ellipse cx="45" cy="60" rx="4.5" ry="2.5" fill="#F472B6" opacity="0.7"/>
+                    <ellipse cx="81" cy="60" rx="4.5" ry="2.5" fill="#F472B6" opacity="0.7"/>
+                    <path d="M59 61 Q63 65 67 61" fill="none" stroke="#5E5061" stroke-width="2.8" stroke-linecap="round"/>
+                    <!-- 星星裝飾 -->
+                    <polygon points="74,80 76,85 81,85 77,88 78,93 74,90 70,93 71,88 67,85 72,85" fill="#FBBF24"/>
+                </svg>`
+            },
+            {
+                id: 'hamster',
+                name: '葵花籽小倉鼠',
+                tag: '🐹 圓滾滾萌寵系列',
+                desc: '面珠墩塞滿零食嘅小倉鼠捧住大大粒葵花籽送俾你！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 圓耳仔 -->
+                    <circle cx="36" cy="36" r="10" fill="#FDBA74" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="36" cy="36" r="5" fill="#FECDD3"/>
+                    <circle cx="84" cy="36" r="10" fill="#FDBA74" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="84" cy="36" r="5" fill="#FECDD3"/>
+                    <!-- 肥嘟嘟倉鼠身 -->
+                    <path d="M30 68 C26 40, 94 40, 90 68 C94 94, 26 94, 30 68 Z" fill="#FED7AA" stroke="#5E5061" stroke-width="3.5"/>
+                    <ellipse cx="60" cy="74" rx="20" ry="18" fill="#FFFFFF"/>
+                    <!-- 脹卜卜紅面珠 -->
+                    <circle cx="38" cy="64" r="7" fill="#FDA4AF" opacity="0.75"/>
+                    <circle cx="82" cy="64" r="7" fill="#FDA4AF" opacity="0.75"/>
+                    <!-- 眼睛與門牙 -->
+                    <circle cx="48" cy="55" r="3.8" fill="#5E5061"/>
+                    <circle cx="72" cy="55" r="3.8" fill="#5E5061"/>
+                    <circle cx="46.5" cy="53.5" r="1.4" fill="#FFF"/>
+                    <circle cx="70.5" cy="53.5" r="1.4" fill="#FFF"/>
+                    <path d="M56 61 Q60 64 64 61" fill="none" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 抱住葵花籽 -->
+                    <path d="M60 70 C68 70, 70 86, 60 90 C50 86, 52 70, 60 70 Z" fill="#78350F" stroke="#5E5061" stroke-width="2.5"/>
+                    <line x1="60" y1="73" x2="60" y2="87" stroke="#FDE68A" stroke-width="2" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'luckykitty',
+                name: '幸運招財小喵',
+                tag: '🐱 好運連連公仔',
+                desc: '戴住金鈴噹嘅招財貓喵喵叫，祝你數學次次滿分！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 貓耳 -->
+                    <polygon points="32,48 34,24 54,38" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon points="36,44 37,30 49,39" fill="#FDA4AF"/>
+                    <polygon points="88,48 86,24 66,38" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon points="84,44 83,30 71,39" fill="#FDA4AF"/>
+                    <!-- 身體與舉高招財手 -->
+                    <rect x="38" y="70" width="44" height="30" rx="16" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <ellipse cx="32" cy="64" rx="8" ry="13" transform="rotate(-15 32 64)" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 頭仔 -->
+                    <ellipse cx="60" cy="56" rx="28" ry="22" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 紅頸圈與金鈴噹 -->
+                    <rect x="42" y="73" width="36" height="6" rx="3" fill="#F43F5E" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="60" cy="78" r="6.5" fill="#FACC15" stroke="#5E5061" stroke-width="2.5"/>
+                    <!-- 表情與貓鬚 -->
+                    <circle cx="48" cy="55" r="3.8" fill="#5E5061"/>
+                    <circle cx="72" cy="55" r="3.8" fill="#5E5061"/>
+                    <polygon points="60,60 57,57 63,57" fill="#FB7185"/>
+                    <line x1="26" y1="56" x2="35" y2="57" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="26" y1="62" x2="35" y2="61" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="94" y1="56" x2="85" y2="57" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="94" y1="62" x2="85" y2="61" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'spacebear',
+                name: '太空探險小熊',
+                tag: '🧸 星際宇航員系列',
+                desc: '着住太空衣嘅泰迪小熊帶你飛向宇宙！頭腦超級靈活！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 太空頭盔外框 -->
+                    <circle cx="60" cy="54" r="34" fill="#E0F2FE" stroke="#38BDF8" stroke-width="4" opacity="0.85"/>
+                    <!-- 熊耳 -->
+                    <circle cx="38" cy="36" r="9" fill="#D97706" stroke="#5E5061" stroke-width="3"/>
+                    <circle cx="82" cy="36" r="9" fill="#D97706" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 熊頭 -->
+                    <circle cx="60" cy="55" r="23" fill="#F59E0B" stroke="#5E5061" stroke-width="3.2"/>
+                    <ellipse cx="60" cy="60" rx="9" ry="7" fill="#FEF3C7"/>
+                    <circle cx="49" cy="51" r="3.5" fill="#5E5061"/>
+                    <circle cx="71" cy="51" r="3.5" fill="#5E5061"/>
+                    <circle cx="60" cy="58" r="3" fill="#5E5061"/>
+                    <!-- 太空衣身體 -->
+                    <rect x="38" y="82" width="44" height="24" rx="10" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.5"/>
+                    <rect x="50" y="88" width="20" height="12" rx="3" fill="#BAE6FD" stroke="#5E5061" stroke-width="2.2"/>
+                    <!-- 頭盔玻璃反光 -->
+                    <path d="M36 38 Q45 28 58 28" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'clawmachine',
+                name: '迷你夾公仔機',
+                tag: '🕹️ 夢幻遊樂場玩具',
+                desc: '百發百中嘅粉紅夾公仔機玩具！今日你係神射手兼心算王！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 機頂與底座 -->
+                    <path d="M26 28 Q60 16 94 28 L90 40 L30 40 Z" fill="#F472B6" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <rect x="30" y="38" width="60" height="44" fill="#F0F9FF" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 爪子 -->
+                    <line x1="60" y1="38" x2="60" y2="52" stroke="#5E5061" stroke-width="3"/>
+                    <path d="M50 58 Q60 48 70 58" fill="none" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                    <!-- 機內小公仔球 -->
+                    <circle cx="44" cy="72" r="8" fill="#FDE047" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="60" cy="70" r="9" fill="#FDA4AF" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="76" cy="72" r="8" fill="#A7F3D0" stroke="#5E5061" stroke-width="2.5"/>
+                    <!-- 控制台與搖桿 -->
+                    <rect x="26" y="80" width="68" height="24" rx="8" fill="#F9A8D4" stroke="#5E5061" stroke-width="3.5"/>
+                    <line x1="48" y1="80" x2="48" y2="72" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="48" cy="70" r="5" fill="#EF4444" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="72" cy="90" r="5" fill="#FEF08A" stroke="#5E5061" stroke-width="2.5"/>
+                </svg>`
+            },
+            {
+                id: 'galaxyslime',
+                name: '銀河水晶史萊姆',
+                tag: '🌈 潮流解壓精品',
+                desc: '閃閃發光、混入星星亮片嘅夢幻彩虹史萊姆玻璃樽！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 玻璃樽身 -->
+                    <rect x="32" y="36" width="56" height="66" rx="16" fill="#FAF5FF" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 彩虹史萊姆分層 -->
+                    <path d="M35 78 Q60 72 85 78 L85 88 Q85 99 72 99 L48 99 Q35 99 35 88 Z" fill="#C084FC"/>
+                    <path d="M35 60 Q60 68 85 60 L85 80 Q60 74 35 80 Z" fill="#F472B6"/>
+                    <path d="M35 46 Q60 40 85 46 L85 62 Q60 70 35 62 Z" fill="#67E8F9"/>
+                    <!-- 軟木塞樽蓋 -->
+                    <rect x="42" y="20" width="36" height="16" rx="5" fill="#FBBF24" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 樽身可愛表情與閃星 -->
+                    <circle cx="50" cy="68" r="3.5" fill="#5E5061"/>
+                    <circle cx="70" cy="68" r="3.5" fill="#5E5061"/>
+                    <path d="M56 73 Q60 77 64 73" fill="none" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                    <polygon points="75,48 77,52 81,52 78,55 79,59 75,56 71,59 72,55 69,52 73,52" fill="#FEF08A"/>
+                </svg>`
+            },
+            {
+                id: 'magicwand',
+                name: '星光閃耀魔法棒',
+                tag: '🪄 小魔女夢幻法寶',
+                desc: '揮一揮星光魔法棒，所有複雜嘅乘法都會變成簡單心算！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 魔法棒手柄 -->
+                    <line x1="30" y1="96" x2="62" y2="56" stroke="#F472B6" stroke-width="10" stroke-linecap="round"/>
+                    <line x1="30" y1="96" x2="62" y2="56" stroke="#5E5061" stroke-width="3.5" stroke-linecap="round"/>
+                    <!-- 夢幻雙翼 -->
+                    <path d="M44 48 C18 32, 16 58, 46 62 Z" fill="#FFFFFF" stroke="#5E5061" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M84 48 C110 32, 112 58, 82 62 Z" fill="#FFFFFF" stroke="#5E5061" stroke-width="3" stroke-linejoin="round"/>
+                    <!-- 大星星主體 -->
+                    <polygon points="64,16 73,34 93,36 78,50 82,70 64,60 46,70 50,50 35,36 55,34" fill="#FDE047" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- 中心紅寶石 -->
+                    <circle cx="64" cy="46" r="8" fill="#FB7185" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="61" cy="43" r="2.5" fill="#FFFFFF"/>
+                </svg>`
+            },
+            {
+                id: 'gashapon',
+                name: '夢幻驚喜扭蛋球',
+                tag: '🔮 隱藏版特賞扭蛋',
+                desc: '咔嚓一聲轉出金色特賞扭蛋球！入面裝住滿滿嘅幸運星！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 扭蛋下半球 -->
+                    <path d="M24 62 A36 36 0 0 0 96 62 Z" fill="#F472B6" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 扭蛋透明上半球 -->
+                    <path d="M24 62 A36 36 0 0 1 96 62 Z" fill="#E0F2FE" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 內部驚喜小星星 -->
+                    <polygon points="60,30 66,42 79,44 69,53 72,66 60,59 48,66 51,53 41,44 54,42" fill="#FACC15" stroke="#5E5061" stroke-width="2.5" stroke-linejoin="round"/>
+                    <!-- 中間開合腰帶與按鈕 -->
+                    <rect x="22" y="57" width="76" height="10" rx="5" fill="#FFFFFF" stroke="#5E5061" stroke-width="3.2"/>
+                    <circle cx="60" cy="62" r="9" fill="#FEF08A" stroke="#5E5061" stroke-width="3.2"/>
+                </svg>`
+            },
+            {
+                id: 'racecar',
+                name: '閃電迷你跑車',
+                tag: '🏎️ 極速遙控模型',
+                desc: 'Vroom Vroom！你計數嘅速度就好似呢架閃電小跑車咁快！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 車頂與玻璃窗 -->
+                    <path d="M34 62 L46 38 L82 38 L94 62 Z" fill="#BAE6FD" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- 流線型車身 -->
+                    <rect x="16" y="58" width="90" height="26" rx="12" fill="#38BDF8" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 閃電貼紙 -->
+                    <polygon points="64,62 52,72 62,72 56,82 74,70 63,70" fill="#FACC15"/>
+                    <!-- 前後車輪 -->
+                    <circle cx="38" cy="84" r="13" fill="#334155" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="38" cy="84" r="6" fill="#E2E8F0"/>
+                    <circle cx="84" cy="84" r="13" fill="#334155" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="84" cy="84" r="6" fill="#E2E8F0"/>
+                    <!-- 車頭大燈 -->
+                    <ellipse cx="102" cy="68" rx="4" ry="6" fill="#FEF08A" stroke="#5E5061" stroke-width="2.5"/>
+                </svg>`
+            },
+            {
+                id: 'superrobot',
+                name: '超合金小機械人',
+                tag: '🤖 未來科技模型',
+                desc: '滴嘟滴嘟！超合金智能小機械人認證你擁有超級電腦腦袋！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 天線 -->
+                    <line x1="60" y1="16" x2="60" y2="30" stroke="#5E5061" stroke-width="4"/>
+                    <circle cx="60" cy="14" r="6" fill="#F43F5E" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 機械頭 -->
+                    <rect x="32" y="28" width="56" height="40" rx="12" fill="#93C5FD" stroke="#5E5061" stroke-width="3.5"/>
+                    <rect x="40" y="36" width="40" height="24" rx="6" fill="#1E293B"/>
+                    <!-- 發光電子眼與微笑 -->
+                    <circle cx="50" cy="46" r="4.5" fill="#34D399"/>
+                    <circle cx="70" cy="46" r="4.5" fill="#34D399"/>
+                    <path d="M54 53 Q60 57 66 53" fill="none" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 機械身體與能量核心 -->
+                    <rect x="36" y="70" width="48" height="34" rx="8" fill="#60A5FA" stroke="#5E5061" stroke-width="3.5"/>
+                    <circle cx="60" cy="87" r="9" fill="#FEF08A" stroke="#5E5061" stroke-width="3"/>
+                </svg>`
+            },
+            {
+                id: 'shortcake',
+                name: '雙層士多啤梨蛋糕',
+                tag: '🍰 皇家甜品大賞',
+                desc: '鋪滿新鮮忌廉同紅卜卜士多啤梨嘅雙層蛋糕，獎勵努力嘅你！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 蛋糕碟 -->
+                    <ellipse cx="60" cy="98" rx="44" ry="8" fill="#E2E8F0" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 下層蛋糕 -->
+                    <rect x="26" y="66" width="68" height="28" rx="6" fill="#FEF3C7" stroke="#5E5061" stroke-width="3.5"/>
+                    <path d="M26 72 Q35 80 44 72 Q53 80 62 72 Q71 80 80 72 Q88 80 94 72 L94 66 L26 66 Z" fill="#FFFFFF" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 上層蛋糕 -->
+                    <rect x="36" y="42" width="48" height="24" rx="6" fill="#FDE68A" stroke="#5E5061" stroke-width="3.5"/>
+                    <path d="M36 48 Q48 56 60 48 Q72 56 84 48 L84 42 L36 42 Z" fill="#FFFFFF" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 頂部大士多啤梨 -->
+                    <path d="M60 20 C50 20, 48 38, 60 42 C72 38, 70 20, 60 20 Z" fill="#F43F5E" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 蛋糕微笑 -->
+                    <circle cx="50" cy="83" r="3" fill="#5E5061"/>
+                    <circle cx="70" cy="83" r="3" fill="#5E5061"/>
+                    <path d="M56 86 Q60 90 64 86" fill="none" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'bobatea',
+                name: '黑糖珍珠奶茶大獎',
+                tag: '🧋 人氣手搖飲品王',
+                desc: '煙韌黑糖珍珠配香濃鮮奶茶！飲一啖即刻充滿數學能量！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 粗飲管 -->
+                    <rect x="64" y="14" width="11" height="40" rx="3" transform="rotate(12 64 14)" fill="#F472B6" stroke="#5E5061" stroke-width="3.2"/>
+                    <!-- 弧形杯蓋 -->
+                    <path d="M32 44 A28 22 0 0 1 88 44 Z" fill="#E0F2FE" stroke="#5E5061" stroke-width="3.5"/>
+                    <!-- 奶茶杯身 -->
+                    <polygon points="32,44 88,44 80,102 40,102" fill="#FDE68A" stroke="#5E5061" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- 可愛表情 -->
+                    <circle cx="50" cy="66" r="3.5" fill="#5E5061"/>
+                    <circle cx="70" cy="66" r="3.5" fill="#5E5061"/>
+                    <ellipse cx="43" cy="70" rx="4" ry="2.2" fill="#FB7185" opacity="0.7"/>
+                    <ellipse cx="77" cy="70" rx="4" ry="2.2" fill="#FB7185" opacity="0.7"/>
+                    <path d="M56 70 Q60 74 64 70" fill="none" stroke="#5E5061" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 黑糖珍珠粒粒 -->
+                    <circle cx="47" cy="92" r="5" fill="#451A03"/>
+                    <circle cx="59" cy="94" r="5" fill="#451A03"/>
+                    <circle cx="71" cy="92" r="5" fill="#451A03"/>
+                    <circle cx="53" cy="84" r="4.5" fill="#451A03"/>
+                    <circle cx="66" cy="85" r="4.5" fill="#451A03"/>
+                </svg>`
+            },
+            {
+                id: 'royalcrown',
+                name: '超級閃耀榮譽皇冠',
+                tag: '👑 殿堂級最高榮譽',
+                desc: '鑲滿彩色寶石嘅純金榮譽皇冠！你係當之無愧嘅馬基乘法小國王/小女王！',
+                svg: `<svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- 皇冠主體 -->
+                    <polygon points="20,84 26,38 48,58 60,26 72,58 94,38 100,84" fill="#FACC15" stroke="#5E5061" stroke-width="3.8" stroke-linejoin="round"/>
+                    <rect x="20" y="80" width="80" height="14" rx="5" fill="#F59E0B" stroke="#5E5061" stroke-width="3.8"/>
+                    <!-- 尖端圓珠 -->
+                    <circle cx="25" cy="34" r="5" fill="#FEF08A" stroke="#5E5061" stroke-width="3"/>
+                    <circle cx="60" cy="22" r="6" fill="#FEF08A" stroke="#5E5061" stroke-width="3"/>
+                    <circle cx="95" cy="34" r="5" fill="#FEF08A" stroke="#5E5061" stroke-width="3"/>
+                    <!-- 寶石裝飾 -->
+                    <circle cx="60" cy="66" r="7" fill="#F43F5E" stroke="#5E5061" stroke-width="2.8"/>
+                    <circle cx="38" cy="70" r="5" fill="#38BDF8" stroke="#5E5061" stroke-width="2.5"/>
+                    <circle cx="82" cy="70" r="5" fill="#34D399" stroke="#5E5061" stroke-width="2.5"/>
+                </svg>`
+            }
+        ];
+
+        // 8 種馬卡龍禮物盒配色主題
+        const BOX_THEMES = [
+            { bg: 'bg-[#FFD6E0]', border: 'border-[#F497AA]', shadow: 'shadow-[0_6px_0_#F497AA]', ribbon: '#FF8FAB', badge: 'bg-pink-500' },
+            { bg: 'bg-[#C8E7FF]', border: 'border-[#74B9FF]', shadow: 'shadow-[0_6px_0_#74B9FF]', ribbon: '#54A0FF', badge: 'bg-sky-500' },
+            { bg: 'bg-[#D0F4DE]', border: 'border-[#68C3A3]', shadow: 'shadow-[0_6px_0_#68C3A3]', ribbon: '#38B2AC', badge: 'bg-emerald-500' },
+            { bg: 'bg-[#FFF3B0]', border: 'border-[#F6D155]', shadow: 'shadow-[0_6px_0_#EAB308]', ribbon: '#F59E0B', badge: 'bg-amber-500' },
+            { bg: 'bg-[#E8DAEF]', border: 'border-[#B39CD0]', shadow: 'shadow-[0_6px_0_#B39CD0]', ribbon: '#9B59B6', badge: 'bg-purple-500' },
+            { bg: 'bg-[#FFDAB9]', border: 'border-[#F5A67E]', shadow: 'shadow-[0_6px_0_#F5A67E]', ribbon: '#FF7F50', badge: 'bg-orange-500' },
+            { bg: 'bg-[#CCFBF1]', border: 'border-[#5EEAD4]', shadow: 'shadow-[0_6px_0_#2DD4BF]', ribbon: '#14B8A6', badge: 'bg-teal-500' },
+            { bg: 'bg-[#FFE4E6]', border: 'border-[#FDA4AF]', shadow: 'shadow-[0_6px_0_#FB7185]', ribbon: '#F43F5E', badge: 'bg-rose-500' }
+        ];
+
+        // ======================= 應用程式狀態 =======================
+        const state = {
+            boxes: [],              // 16 個禮物盒資料
+            activeBoxIndex: null,   // 目前開啟的禮物盒索引 (0-15)
+            currentInput: '',       // 學生目前輸入的數字字串
+            soundEnabled: true
+        };
+
+        // ======================= Web Audio API 原生合成音效 =======================
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, type, duration, startTimeOffset = 0, vol = 0.14) {
+            if (!state.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime + startTimeOffset;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(vol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (e) {}
+        }
+
+        function playSound(effect) {
+            if (!state.soundEnabled) return;
+            if (effect === 'click') {
+                playTone(587.33, 'sine', 0.08, 0, 0.12);
+            } else if (effect === 'openBox') {
+                playTone(440, 'triangle', 0.1, 0, 0.14);
+                playTone(554.37, 'triangle', 0.12, 0.07, 0.14);
+                playTone(659.25, 'triangle', 0.16, 0.14, 0.15);
+            } else if (effect === 'gentleHint') {
+                playTone(392, 'sine', 0.15, 0, 0.12);
+                playTone(349.23, 'sine', 0.22, 0.12, 0.12);
+            } else if (effect === 'winPrize') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, idx) => playTone(n, 'triangle', 0.22, idx * 0.09, 0.18));
+            } else if (effect === 'grandSlam') {
+                const fanfare = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+                const times = [0, 0.1, 0.2, 0.32, 0.48, 0.62];
+                fanfare.forEach((n, idx) => playTone(n, 'triangle', 0.28, times[idx], 0.2));
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+            document.getElementById('sound-text').textContent = state.soundEnabled ? '音效開' : '音效關';
+            if (state.soundEnabled) playSound('click');
+        }
+
+        // ======================= 初始化新一輪 16 個禮物盒 =======================
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function initNewRound(playEffect = false) {
+            if (playEffect) playSound('openBox');
+
+            // 1. 生成 16 道不重複的 6-19 × 6-19 隨機乘法題目
+            const usedPairs = new Set();
+            const questions = [];
+            while (questions.length < 16) {
+                const a = Math.floor(Math.random() * 14) + 6; // 6 至 19
+                const b = Math.floor(Math.random() * 14) + 6; // 6 至 19
+                const key = `${a}x${b}`;
+                if (!usedPairs.has(key)) {
+                    usedPairs.add(key);
+                    questions.push({ a, b, answer: a * b });
+                }
+            }
+
+            // 2. 隨機洗牌 16 個可愛獎品分配到 16 個禮物盒
+            const shuffledPrizes = shuffleArray(PRIZE_POOL);
+
+            // 3. 組裝 16 個禮物盒狀態
+            state.boxes = questions.map((q, idx) => ({
+                index: idx,
+                boxNumber: idx + 1,
+                a: q.a,
+                b: q.b,
+                answer: q.answer,
+                prize: shuffledPrizes[idx],
+                theme: BOX_THEMES[idx % BOX_THEMES.length],
+                opened: false
+            }));
+
+            closeModal();
+            updateProgressUI();
+            renderGiftGrid();
+        }
+
+        // ======================= 渲染 4x4 禮物盒與進度 =======================
+        function updateProgressUI() {
+            const solvedCount = state.boxes.filter(b => b.opened).length;
+            document.getElementById('progress-text').textContent = `${solvedCount} / 16`;
+            document.getElementById('progress-bar').style.width = `${(solvedCount / 16) * 100}%`;
+
+            const banner = document.getElementById('grand-slam-banner');
+            if (solvedCount === 16) {
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            } else {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
+        }
+
+        function renderGiftGrid() {
+            const grid = document.getElementById('gift-grid');
+            grid.innerHTML = state.boxes.map((box, idx) => {
+                const t = box.theme;
+                if (!box.opened) {
+                    // 未拆開的立體馬卡龍禮物盒
+                    return `
+                        <button onclick="handleBoxClick(${idx})" 
+                            style="animation-delay: ${(idx % 4) * 0.2}s"
+                            class="btn-3d gift-unopened gift-float ${t.bg} ${t.border} ${t.shadow} border-4 rounded-3xl p-3 sm:p-4 flex flex-col items-center justify-between min-h-[148px] sm:min-h-[175px] relative overflow-hidden group cursor-pointer">
+                            
+                            <!-- 頂部編號徽章 -->
+                            <div class="w-full flex items-center justify-between z-10">
+                                <span class="font-num text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-full bg-white/90 text-slate-700 border border-slate-200 shadow-sm">
+                                    #${box.boxNumber}
+                                </span>
+                                <span class="text-xs font-black text-slate-600/80 bg-white/60 px-2 py-0.5 rounded-full">
+                                    點我抽題 ✨
+                                </span>
+                            </div>
+
+                            <!-- 精緻 SVG 禮物盒與蝴蝶結 -->
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 my-1 transition-transform group-hover:scale-110">
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow">
+                                    <!-- 蝴蝶結絲帶 -->
+                                    <path d="M50 28 C30 8, 16 28, 44 34 Z" fill="${t.ribbon}" stroke="#4A4056" stroke-width="3" stroke-linejoin="round"/>
+                                    <path d="M50 28 C70 8, 84 28, 56 34 Z" fill="${t.ribbon}" stroke="#4A4056" stroke-width="3" stroke-linejoin="round"/>
+                                    <!-- 盒身 -->
+                                    <rect x="20" y="42" width="60" height="46" rx="8" fill="#FFFFFF" stroke="#4A4056" stroke-width="3.2"/>
+                                    <!-- 垂直絲帶 -->
+                                    <rect x="43" y="42" width="14" height="46" fill="${t.ribbon}" stroke="#4A4056" stroke-width="3"/>
+                                    <!-- 盒蓋 -->
+                                    <rect x="15" y="28" width="70" height="16" rx="6" fill="#FFFFFF" stroke="#4A4056" stroke-width="3.2"/>
+                                    <rect x="43" y="28" width="14" height="16" fill="${t.ribbon}" stroke="#4A4056" stroke-width="3"/>
+                                    <!-- 禮物盒笑臉 -->
+                                    <circle cx="33" cy="64" r="3" fill="#4A4056"/>
+                                    <circle cx="67" cy="64" r="3" fill="#4A4056"/>
+                                    <circle cx="29" cy="68" r="3.5" fill="#FDA4AF" opacity="0.75"/>
+                                    <circle cx="71" cy="68" r="3.5" fill="#FDA4AF" opacity="0.75"/>
+                                </svg>
+                            </div>
+
+                            <!-- 底部文字 -->
+                            <div class="w-full text-center z-10">
+                                <span class="inline-block w-full py-1 rounded-xl bg-white/85 font-black text-xs sm:text-sm text-slate-700 shadow-sm">
+                                    🎁 第 ${box.boxNumber} 號禮物盒
+                                </span>
+                            </div>
+                        </button>
+                    `;
+                } else {
+                    // 已拆開並獲得獎品的展示格
+                    return `
+                        <button onclick="handleBoxClick(${idx})" 
+                            class="btn-3d bg-white border-4 border-amber-300 shadow-[0_6px_0_#FCD34D] rounded-3xl p-2.5 sm:p-3.5 flex flex-col items-center justify-between min-h-[148px] sm:min-h-[175px] relative overflow-hidden group cursor-pointer">
+                            
+                            <!-- 頂部編號與已獲獎標記 -->
+                            <div class="w-full flex items-center justify-between z-10">
+                                <span class="font-num text-xs font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                    #${box.boxNumber}
+                                </span>
+                                <span class="font-num text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300">
+                                    ${box.a} × ${box.b} = ${box.answer}
+                                </span>
+                            </div>
+
+                            <!-- 抽中的可愛獎品 SVG -->
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 my-0.5 transition-transform group-hover:scale-110">
+                                ${box.prize.svg}
+                            </div>
+
+                            <!-- 獎品名稱標籤 -->
+                            <div class="w-full text-center z-10">
+                                <span class="inline-block w-full py-1 px-1.5 rounded-xl bg-gradient-to-r from-pink-100 via-amber-100 to-sky-100 border border-pink-200 font-black text-xs sm:text-sm text-slate-800 truncate">
+                                    ✨ ${box.prize.name}
+                                </span>
+                            </div>
+                        </button>
+                    `;
+                }
+            }).join('');
+        }
+
+        // ======================= 點擊禮物盒與答題邏輯 =======================
+        function handleBoxClick(idx) {
+            state.activeBoxIndex = idx;
+            const box = state.boxes[idx];
+
+            const modal = document.getElementById('box-modal');
+            const qView = document.getElementById('modal-question-view');
+            const pView = document.getElementById('modal-prize-view');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (box.opened) {
+                // 如果已經拆開過，直接重溫獲得嘅可愛獎品同算式
+                playSound('click');
+                qView.classList.add('hidden');
+                pView.classList.remove('hidden');
+                pView.classList.add('flex');
+                populatePrizeModal(box, true);
+            } else {
+                // 未拆開：進入答題畫面
+                playSound('openBox');
+                pView.classList.add('hidden');
+                pView.classList.remove('flex');
+                qView.classList.remove('hidden');
+
+                state.currentInput = '';
+                document.getElementById('modal-box-title').textContent = `第 ${box.boxNumber} 號神秘禮物盒`;
+                document.getElementById('q-num-a').textContent = box.a;
+                document.getElementById('q-num-b').textContent = box.b;
+                updateAnswerBoxUI();
+
+                // 預設隱藏答錯指導卡
+                document.getElementById('warm-guide-card').classList.add('hidden');
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('box-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            state.activeBoxIndex = null;
+        }
+
+        function pressKey(key) {
+            if (state.activeBoxIndex === null) return;
+            const box = state.boxes[state.activeBoxIndex];
+            if (box.opened) return;
+
+            playSound('click');
+
+            if (key === 'clear') {
+                state.currentInput = '';
+            } else if (key === 'back') {
+                state.currentInput = state.currentInput.slice(0, -1);
+            } else {
+                if (state.currentInput.length < 3) {
+                    state.currentInput += key;
+                }
+            }
+            updateAnswerBoxUI();
+        }
+
+        function updateAnswerBoxUI() {
+            const ansText = document.getElementById('q-answer-text');
+            const ansBox = document.getElementById('q-answer-box');
+            ansText.textContent = state.currentInput === '' ? '?' : state.currentInput;
+            ansBox.className = 'font-num text-4xl sm:text-6xl font-bold min-w-[95px] sm:min-w-[130px] h-[64px] sm:h-[84px] px-3 rounded-2xl border-4 border-dashed border-amber-400 bg-amber-50 flex items-center justify-center text-amber-800 transition-all';
+        }
+
+        function submitAnswer() {
+            if (state.activeBoxIndex === null) return;
+            const box = state.boxes[state.activeBoxIndex];
+            if (box.opened) return;
+
+            if (state.currentInput === '') {
+                playSound('gentleHint');
+                const ansBox = document.getElementById('q-answer-box');
+                ansBox.classList.remove('animate-gentle-nudge');
+                void ansBox.offsetWidth;
+                ansBox.classList.add('animate-gentle-nudge');
+                return;
+            }
+
+            const userVal = parseInt(state.currentInput, 10);
+
+            if (userVal === box.answer) {
+                // 答啱！標記禮物盒已拆開並展示盲盒大獎
+                box.opened = true;
+                renderGiftGrid();
+                updateProgressUI();
+
+                const solvedCount = state.boxes.filter(b => b.opened).length;
+                if (solvedCount === 16) {
+                    playSound('grandSlam');
+                    spawnConfetti(55);
+                } else {
+                    playSound('winPrize');
+                    spawnConfetti(32);
+                }
+
+                // 切換至盲盒開獎畫面
+                document.getElementById('modal-question-view').classList.add('hidden');
+                const pView = document.getElementById('modal-prize-view');
+                pView.classList.remove('hidden');
+                pView.classList.add('flex');
+                populatePrizeModal(box, false);
+
+            } else {
+                // 答錯：溫馨鼓勵 + 分步拆解提示（絕不直接劇透最終答案）
+                playSound('gentleHint');
+                showWarmGuidance(box.a, box.b, userVal);
+
+                // 自動清空輸入框方便學生即刻再試
+                state.currentInput = '';
+                updateAnswerBoxUI();
+
+                const eqCard = document.getElementById('equation-card');
+                eqCard.classList.remove('animate-gentle-nudge');
+                void eqCard.offsetWidth;
+                eqCard.classList.add('animate-gentle-nudge');
+            }
+        }
+
+        // ======================= 答錯溫馨指導生成器 (不劇透最終答案) =======================
+        function showWarmGuidance(a, b, wrongVal) {
+            const guideCard = document.getElementById('warm-guide-card');
+            const guideHeader = document.getElementById('warm-guide-header');
+            const guideTag = document.getElementById('warm-guide-tag');
+            const guideSteps = document.getElementById('warm-guide-steps');
+
+            const encouragements = [
+                `剛才輸入嘅 ${wrongVal} 差少少咋！跟住下面嘅魔法小貼士再試一次啦 💪✨`,
+                `唔緊要！${wrongVal} 已經好接近啦，試下用呢個拆數小魔法計計看 🌟`,
+                `加油加油！我哋一齊拆開個數慢慢計，一定開到呢個禮物盒 🎁`
+            ];
+            guideHeader.innerHTML = `<span>🥰</span><span>${encouragements[Math.floor(Math.random() * encouragements.length)]}</span>`;
+
+            let stepsHtml = '';
+
+            // 情況 A：兩邊都係 11–19 (印度速算魔法)
+            if (a >= 11 && b >= 11) {
+                guideTag.textContent = '💡 印度速算魔法小貼士';
+                const bOnes = b % 10;
+                const aOnes = a % 10;
+                const part1 = (a + bOnes) * 10;
+                const part2 = aOnes * bOnes;
+
+                stepsHtml = `
+                    <div class="bg-white/90 p-2.5 rounded-xl border border-amber-200 space-y-1">
+                        <div>① <b>第一步（前數加後尾，再乘以 10）</b>：👉 <span class="font-num font-bold text-pink-600">(${a} + ${bOnes}) × 10 = ${part1}</span></div>
+                        <div>② <b>第二步（個位乘個位）</b>：👉 <span class="font-num font-bold text-sky-600">${aOnes} × ${bOnes} = ${part2}</span></div>
+                        <div>③ <b>最後一步</b>：將 <span class="font-num font-bold text-emerald-700">${part1}</span> 同 <span class="font-num font-bold text-emerald-700">${part2}</span> 加埋係幾多呢？試下計埋最後一步輸入答案啦！</div>
+                    </div>
+                `;
+            } 
+            // 情況 B：一邊係 6–10，另一邊係 11–19 (拆數分配律)
+            else if (a >= 11 || b >= 11) {
+                guideTag.textContent = '💡 拆數魔法小貼士';
+                const single = Math.min(a, b);
+                const teen = Math.max(a, b);
+                const teenOnes = teen - 10;
+                const part1 = single * 10;
+                const part2 = single * teenOnes;
+
+                stepsHtml = `
+                    <div class="bg-white/90 p-2.5 rounded-xl border border-amber-200 space-y-1">
+                        <div>① <b>第一步</b>：將較大嘅 <span class="font-num font-bold text-pink-600">${teen}</span> 拆開做 <span class="font-num font-bold">10</span> 同 <span class="font-num font-bold">${teenOnes}</span></div>
+                        <div>② <b>第二步</b>：先計 <span class="font-num font-bold text-sky-600">${single} × 10 = ${part1}</span>，再計 <span class="font-num font-bold text-sky-600">${single} × ${teenOnes} = ${part2}</span></div>
+                        <div>③ <b>最後一步</b>：將 <span class="font-num font-bold text-emerald-700">${part1} + ${part2}</span> 加埋就係答案啦！</div>
+                    </div>
+                `;
+            } 
+            // 情況 C：兩邊都係 6–10 (溫馨九因歌拆數提示)
+            else {
+                guideTag.textContent = '💡 溫馨九因歌小貼士';
+                if (b === 10 || a === 10) {
+                    const other = a === 10 ? b : a;
+                    stepsHtml = `
+                        <div class="bg-white/90 p-2.5 rounded-xl border border-amber-200 space-y-1">
+                            <div>✨ 任何數乘以 <span class="font-num font-bold">10</span>，只需要喺 <span class="font-num font-bold text-pink-600">${other}</span> 後面加返個 <span class="font-num font-bold">0</span> 就得㗎啦！</div>
+                        </div>
+                    `;
+                } else {
+                    const rem = b - 5;
+                    const part1 = a * 5;
+                    const part2 = a * rem;
+                    stepsHtml = `
+                        <div class="bg-white/90 p-2.5 rounded-xl border border-amber-200 space-y-1">
+                            <div>① 先諗熟悉嘅 5 倍：<span class="font-num font-bold text-pink-600">${a} × 5 = ${part1}</span></div>
+                            <div>② 再加多 ${rem} 個 ${a}（即係 <span class="font-num font-bold text-sky-600">${a} × ${rem} = ${part2}</span>）</div>
+                            <div>③ 將 <span class="font-num font-bold text-emerald-700">${part1} + ${part2}</span> 加埋係幾多呢？試下計埋最後一步！</div>
+                        </div>
+                    `;
+                }
+            }
+
+            guideSteps.innerHTML = stepsHtml;
+            guideCard.classList.remove('hidden');
+        }
+
+        // ======================= 填充盲盒獲獎畫面 =======================
+        function populatePrizeModal(box, isReview) {
+            document.getElementById('prize-modal-badge').textContent = isReview 
+                ? `第 ${box.boxNumber} 號禮物盒 — 已收集大獎` 
+                : `恭喜答啱！成功打開第 ${box.boxNumber} 號神秘盲盒`;
+            document.getElementById('prize-solved-eq').textContent = `${box.a} × ${box.b} = ${box.answer}`;
+            document.getElementById('prize-svg-container').innerHTML = box.prize.svg;
+            document.getElementById('prize-rarity-tag').textContent = box.prize.tag;
+            document.getElementById('prize-name').textContent = box.prize.name;
+            document.getElementById('prize-desc').textContent = box.prize.desc;
+        }
+
+        // ======================= 滿天彩紙與星星慶祝特效 =======================
+        function spawnConfetti(count = 30) {
+            const symbols = ['⭐', '🌟', '✨', '🎉', '🍬', '💖', '🎊'];
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-piece text-xl sm:text-2xl';
+                el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = `${Math.random() * 96 + 2}vw`;
+                el.style.animationDuration = `${1.6 + Math.random() * 1.4}s`;
+                el.style.animationDelay = `${Math.random() * 0.35}s`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 3200);
+            }
+        }
+
+        // ======================= 支援電腦實體鍵盤輸入 =======================
+        window.addEventListener('keydown', (e) => {
+            if (state.activeBoxIndex === null) return;
+            const box = state.boxes[state.activeBoxIndex];
+
+            if (e.key === 'Escape') {
+                closeModal();
+                return;
+            }
+
+            if (box.opened) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    closeModal();
+                }
+                return;
+            }
+
+            if (e.key >= '0' && e.key <= '9') {
+                pressKey(e.key);
+            } else if (e.key === 'Backspace') {
+                pressKey('back');
+            } else if (e.key === 'Delete') {
+                pressKey('clear');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                submitAnswer();
+            }
+        });
+
+        // 啟動遊戲
+        window.onload = function () {
+            initNewRound(false);
+        };
+    </script>
+</body>
+</html>
